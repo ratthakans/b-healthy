@@ -10,6 +10,7 @@ window.PACKAGES = {
   "amphawa": {
     id: "amphawa",
     name: "Amphawa Mindful Escape",
+    category: "Corporate",
     kicker: "Mindful Escape",
     tagline: ["Reconnect", "Recharge", "Rebalance"],
     location: "ริมคลองอัมพวา · สมุทรสงคราม",
@@ -61,6 +62,7 @@ window.PACKAGES = {
   "golden-life": {
     id: "golden-life",
     name: "Golden Life Wellness Retreat",
+    category: "Retirement",
     kicker: "Golden Life",
     tagline: ["Live Well", "Age Well", "Retire Well"],
     location: "Anantara Hua Hin · ประจวบคีรีขันธ์",
@@ -127,6 +129,7 @@ window.PACKAGES = {
   "rebalance": {
     id: "rebalance",
     name: "Rebalance Retreat",
+    category: "Corporate",
     kicker: "Rebalance Retreat",
     tagline: ["Play Better", "Recover Faster", "Healthier Holiday"],
     location: "ริมน้ำแควน้อย · กาญจนบุรี",
@@ -179,6 +182,7 @@ window.PACKAGES = {
   "golf": {
     id: "golf",
     name: "Golf Recovery Retreat",
+    category: "Golf & Sport",
     kicker: "Golf Recovery",
     tagline: ["Play Better", "Recover Faster", "Healthier Holiday"],
     location: "Anantara Hua Hin + Black Mountain Golf Club",
