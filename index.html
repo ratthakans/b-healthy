@@ -23,10 +23,11 @@
       </a>
 
       <nav class="nav__links" id="navLinks">
-        <a href="program.html">Wellness Program</a>
-        <a href="#cases">Success Center</a>
-        <a href="membership.html">Membership</a>
+        <a href="#tourism">Wellness Tourism</a>
+        <a href="#workshop">Wellness Workshop</a>
+        <a href="membership.html">Wellness Membership</a>
         <a href="contact.html" class="nav__cta">Contact</a>
+        <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span class="on">TH</span><span class="sep">|</span><span>EN</span></button>
       </nav>
 
       <button class="nav__toggle" id="navToggle" aria-label="Menu">
@@ -37,7 +38,7 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero" id="top">
-    <img class="hero__bg" data-img="hero-beach" src="https://picsum.photos/seed/bhealthy-beach/1920/1080" alt="กลุ่มคนนั่งสมาธิริมทะเลยามพระอาทิตย์ตก" />
+    <img class="hero__bg" data-img="hero-beach" src="images/hero-beach.png" alt="กลุ่มคนนั่งสมาธิริมทะเลยามพระอาทิตย์ตก" />
     <div class="hero__overlay"></div>
     <div class="container hero__content">
       <p class="hero__eyebrow">B-HEALTHY&nbsp;·&nbsp;CORPORATE WELLNESS</p>
@@ -56,7 +57,7 @@
         <strong>เข้าถึงง่าย และ ยั่งยืน</strong> ออกแบบโปรแกรม Wellness ให้เหมาะกับวัฒนธรรมองค์กรของคุณ
         เพื่อสร้างสมดุลกาย–ใจ ลดความเครียด และเพิ่มพลังให้พนักงานอย่างยั่งยืน
       </p>
-      <a href="program.html" class="btn btn--primary">ดูแพ็กเกจ Wellness Program</a>
+      <a href="about.html" class="btn btn--primary">เกี่ยวกับเรา</a>
     </div>
   </section>
 
@@ -66,7 +67,7 @@
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
-      <button class="play-btn" aria-label="เล่นวิดีโอ">
+      <button class="play-btn" aria-label="เล่นวิดีโอ" data-video="16OPQtjBeCA2Rcv9bqpsOmis8HRVo7M1T">
         <svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
       </button>
       <span class="feature-hero__word">Tourism</span>
@@ -92,13 +93,16 @@
         </figure>
 
         <ul class="detail__list">
-          <li>Company Outing</li>
+          <li>Stay Wellness</li>
           <li class="is-accent">Trip &amp; Stay</li>
           <li>Holistic Activities</li>
+          <li>Health Assessment</li>
           <li>Personalized Program</li>
+          <li>Therapeutic Treatment</li>
           <li>Food as Medicine</li>
           <li>Sound Healing</li>
-          <li>Hono-Health</li>
+          <li>Horo-Health</li>
+          <li class="is-accent">Workshop Activities</li>
         </ul>
 
         <div class="detail__stack">
@@ -114,18 +118,18 @@
       </div>
 
       <div class="detail__cta">
-        <a href="#register" class="btn btn--primary">ออกแบบทริปให้องค์กรของคุณ</a>
+        <a href="program.html" class="btn btn--primary">ดูเพิ่มเติม</a>
       </div>
     </div>
   </section>
 
   <!-- ============ WELLNESS WORKSHOP — VIDEO ============ -->
-  <section class="feature-hero feature-hero--alt">
+  <section class="feature-hero feature-hero--alt" id="workshop">
     <img class="feature-hero__bg" data-img="workshop-video" src="https://picsum.photos/seed/bhealthy-workshop/1920/900" alt="เวิร์กชอปกลุ่มในองค์กร" />
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
-      <button class="play-btn" aria-label="เล่นวิดีโอ">
+      <button class="play-btn" aria-label="เล่นวิดีโอ" data-video="">
         <svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
       </button>
       <span class="feature-hero__word">Workshop</span>
@@ -155,14 +159,12 @@
         </div>
 
         <ul class="detail__list">
-          <li>Team Engagement</li>
           <li class="is-accent">Office Syndrome</li>
-          <li>Reduce Burnout</li>
-          <li>Stress Relief</li>
-          <li>Refresh Mind &amp; Body</li>
-          <li>Work-Life Balance</li>
-          <li>Boost Performance</li>
-          <li>Health Analysis</li>
+          <li>Sound Healing</li>
+          <li>Yoga &amp; Meditation</li>
+          <li>Elemental Aroma Oil</li>
+          <li>Personalized Herbal Tea</li>
+          <li>Flower Mandala</li>
         </ul>
 
         <figure class="detail__img detail__img--tall">
@@ -171,7 +173,7 @@
       </div>
 
       <div class="detail__cta">
-        <a href="#register" class="btn btn--primary">จัดเวิร์กชอปให้ทีมของคุณ</a>
+        <a href="program.html" class="btn btn--primary">ดูเพิ่มเติม</a>
       </div>
     </div>
   </section>
@@ -351,6 +353,15 @@
     </div>
     <div class="footer__bottom container">© 2026 B-Healthy. All rights reserved.</div>
   </footer>
+
+  <!-- ============ VIDEO MODAL ============ -->
+  <div class="vmodal" id="vmodal" hidden>
+    <div class="vmodal__backdrop" data-close></div>
+    <div class="vmodal__box">
+      <button class="vmodal__close" data-close aria-label="ปิด">&times;</button>
+      <div class="vmodal__frame"><iframe id="vmodalFrame" src="" title="B-Healthy video" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+    </div>
+  </div>
 
   <script src="js/main.js"></script>
 </body>

@@ -43,3 +43,36 @@ form.addEventListener('submit', e => {
   form.querySelector('button[type=submit]').textContent = 'SENT ✓';
   setTimeout(() => form.reset(), 400);
 });
+
+// --- Video modal (Google Drive embed) ---
+const vmodal = document.getElementById('vmodal');
+const vframe = document.getElementById('vmodalFrame');
+function openVideo(id) {
+  if (!id) return;
+  vframe.src = `https://drive.google.com/file/d/${id}/preview`;
+  vmodal.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+function closeVideo() {
+  vmodal.hidden = true;
+  vframe.src = '';
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.play-btn').forEach(btn =>
+  btn.addEventListener('click', () => openVideo(btn.dataset.video))
+);
+vmodal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeVideo));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !vmodal.hidden) closeVideo(); });
+
+// --- Language toggle (TH / EN) — UI scaffold ---
+window.initLangToggle = function () {
+  const btn = document.getElementById('navLang');
+  if (!btn) return;
+  const spans = btn.querySelectorAll('span:not(.sep)');
+  btn.addEventListener('click', () => {
+    spans.forEach(s => s.classList.toggle('on'));
+    const en = btn.querySelector('span:last-child').classList.contains('on');
+    document.documentElement.lang = en ? 'en' : 'th';
+  });
+};
+window.initLangToggle();
