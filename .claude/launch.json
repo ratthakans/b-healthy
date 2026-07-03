@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "b-healthy",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/ratthakan/Desktop/B-Healthy/server.js"],
+      "port": 4173
+    }
+  ]
+}
