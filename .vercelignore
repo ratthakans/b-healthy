@@ -1,0 +1,4 @@
+# Local preview only — not needed on Vercel (and its presence made Vercel
+# mis-detect the project as a Node app instead of a static site)
+server.js
+.claude/
