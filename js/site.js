@@ -18,17 +18,6 @@ if (toggle && links) {
   links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('is-open')));
 }
 
-// --- Language toggle (TH / EN) — UI scaffold ---
-(function () {
-  const btn = document.getElementById('navLang');
-  if (!btn) return;
-  const spans = btn.querySelectorAll('span:not(.sep)');
-  btn.addEventListener('click', () => {
-    spans.forEach(s => s.classList.toggle('on'));
-    const en = btn.querySelector('span:last-child').classList.contains('on');
-    document.documentElement.lang = en ? 'en' : 'th';
-  });
-})();
 
 // --- Shared footer ---
 const footer = document.getElementById('footer');
@@ -53,3 +42,6 @@ if (footer) {
     </div>
     <div class="footer__bottom container">© 2026 B-Healthy. All rights reserved.</div>`;
 }
+
+// Re-apply language to freshly injected footer
+if (window.bhApplyLang) window.bhApplyLang();

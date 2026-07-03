@@ -35,7 +35,7 @@
     <div class="container">
       <p class="prog-hero__script">Get in touch</p>
       <h1 class="prog-hero__title">CONTACT <span>US</span></h1>
-      <p class="prog-hero__sub">สนใจแพ็กเกจ Wellness Retreat, Membership หรือออกแบบโปรแกรมสำหรับองค์กร — กรอกแบบฟอร์มไว้ ทีมงาน B-Healthy จะติดต่อกลับโดยเร็วที่สุด</p>
+      <p class="prog-hero__sub" data-en="Interested in a Wellness Retreat package, Membership, or a custom corporate program? Leave your details and the B-Healthy team will get back to you as soon as possible.">สนใจแพ็กเกจ Wellness Retreat, Membership หรือออกแบบโปรแกรมสำหรับองค์กร — กรอกแบบฟอร์มไว้ ทีมงาน B-Healthy จะติดต่อกลับโดยเร็วที่สุด</p>
     </div>
   </section>
 
@@ -46,8 +46,8 @@
 
         <!-- Info -->
         <div class="contact__info">
-          <h2>ติดต่อเรา</h2>
-          <p>ทุกช่องทางพร้อมดูแลคุณ ในวันจันทร์–เสาร์ เวลา 09.00–18.00 น.</p>
+          <h2 data-en="Contact Us">ติดต่อเรา</h2>
+          <p data-en="All channels are here for you, Monday–Saturday, 09.00–18.00.">ทุกช่องทางพร้อมดูแลคุณ ในวันจันทร์–เสาร์ เวลา 09.00–18.00 น.</p>
           <ul class="contact__channels">
             <li>
               <span class="contact__ico"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 2C6.48 2 2 5.94 2 10.8c0 4.34 3.66 7.98 8.6 8.66.33.07.79.22.9.5.1.26.07.66.03.92l-.14.87c-.04.26-.2 1.02.9.56s5.96-3.51 8.13-6.01C21.53 14.5 22 12.72 22 10.8 22 5.94 17.52 2 12 2z"/></svg></span>
@@ -74,29 +74,29 @@
 
         <!-- Form -->
         <div class="contact__card">
-          <h3>ส่งข้อความถึงเรา</h3>
+          <h3 data-en="Send us a message">ส่งข้อความถึงเรา</h3>
           <form class="form" id="contactForm" novalidate>
-            <label class="form__full">เรื่องที่ติดต่อ
+            <label class="form__full"><span data-en="Subject">เรื่องที่ติดต่อ</span>
               <select name="subject" id="subject">
-                <option value="สอบถามทั่วไป">สอบถามทั่วไป</option>
-                <option value="แพ็กเกจ Wellness Retreat">แพ็กเกจ Wellness Retreat</option>
-                <option value="สมัคร Membership">สมัคร Membership</option>
-                <option value="โปรแกรมสำหรับองค์กร (Corporate)">โปรแกรมสำหรับองค์กร (Corporate)</option>
-                <option value="อื่นๆ">อื่นๆ</option>
+                <option value="สอบถามทั่วไป" data-en="General enquiry">สอบถามทั่วไป</option>
+                <option value="แพ็กเกจ Wellness Retreat" data-en="Wellness Retreat package">แพ็กเกจ Wellness Retreat</option>
+                <option value="สมัคร Membership" data-en="Membership sign-up">สมัคร Membership</option>
+                <option value="โปรแกรมสำหรับองค์กร (Corporate)" data-en="Corporate program">โปรแกรมสำหรับองค์กร (Corporate)</option>
+                <option value="อื่นๆ" data-en="Other">อื่นๆ</option>
               </select>
             </label>
             <div class="form__row">
-              <label>ชื่อผู้ติดต่อ <span>*</span><input type="text" name="contact" required placeholder="ชื่อ-นามสกุล" /></label>
-              <label>ชื่อบริษัท / องค์กร<input type="text" name="company" placeholder="ชื่อองค์กร (ถ้ามี)" /></label>
+              <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" required placeholder="ชื่อ-นามสกุล" data-en-ph="Full name" /></label>
+              <label><span data-en="Company / Organization">ชื่อบริษัท / องค์กร</span><input type="text" name="company" placeholder="ชื่อองค์กร (ถ้ามี)" data-en-ph="Organization (optional)" /></label>
             </div>
             <div class="form__row">
-              <label>เบอร์โทรศัพท์ <span>*</span><input type="tel" name="phone" required placeholder="08x-xxx-xxxx" /></label>
-              <label>อีเมล <span>*</span><input type="email" name="email" required placeholder="you@email.com" /></label>
+              <label><span data-en="Phone">เบอร์โทรศัพท์</span> <span>*</span><input type="tel" name="phone" required placeholder="08x-xxx-xxxx" /></label>
+              <label><span data-en="Email">อีเมล</span> <span>*</span><input type="email" name="email" required placeholder="you@email.com" /></label>
             </div>
-            <label class="form__full">ข้อความ<textarea name="message" rows="4" placeholder="เล่าให้เราฟังว่าเราจะช่วยอะไรคุณได้บ้าง"></textarea></label>
-            <label class="form__check"><input type="checkbox" name="consent" required /><span>ฉันยอมรับ <a href="#">นโยบายความเป็นส่วนตัว</a> และยินยอมให้ B-Healthy ติดต่อกลับ</span></label>
-            <button type="submit" class="btn btn--primary btn--block">ส่งข้อความ</button>
-            <p class="form__done" id="formDone" hidden>ขอบคุณค่ะ ทีมงาน B-Healthy จะติดต่อกลับโดยเร็วที่สุด 🌿</p>
+            <label class="form__full"><span data-en="Message">ข้อความ</span><textarea name="message" rows="4" placeholder="เล่าให้เราฟังว่าเราจะช่วยอะไรคุณได้บ้าง" data-en-ph="Tell us how we can help you"></textarea></label>
+            <label class="form__check"><input type="checkbox" name="consent" required /><span data-en="I accept the <a href='#'>Privacy Policy</a> and consent to be contacted by B-Healthy.">ฉันยอมรับ <a href="#">นโยบายความเป็นส่วนตัว</a> และยินยอมให้ B-Healthy ติดต่อกลับ</span></label>
+            <button type="submit" class="btn btn--primary btn--block" data-en="Send message">ส่งข้อความ</button>
+            <p class="form__done" id="formDone" hidden data-en="Thank you! The B-Healthy team will get back to you as soon as possible 🌿">ขอบคุณค่ะ ทีมงาน B-Healthy จะติดต่อกลับโดยเร็วที่สุด 🌿</p>
           </form>
         </div>
 
@@ -106,6 +106,7 @@
 
   <footer class="footer" id="footer"></footer>
 
+  <script src="js/i18n.js"></script>
   <script src="js/site.js"></script>
   <script src="js/contact.js"></script>
 </body>
