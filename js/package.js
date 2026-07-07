@@ -65,7 +65,8 @@
         <a class="pkg-back" href="program.html">← Wellness Program</a>
         <p class="pkg-hero__tags">${p.tagline.map(t => `<span>${t}</span>`).join('')}</p>
         <h1 class="pkg-hero__title">${p.name}</h1>
-        <p class="pkg-hero__meta"><span data-en="${en.duration || p.duration}">${p.duration}</span> &nbsp;·&nbsp; <span data-en="${en.group || p.group}">${p.group}</span></p>
+        <p class="pkg-hero__meta"><span data-en="${en.duration || p.duration}">${p.duration}</span></p>
+        <p class="pkg-hero__meta"><span data-en="${en.group || p.group}">${p.group}</span></p>
         <p class="pkg-hero__loc" data-en="${en.location || p.location}">${p.location}</p>
         <a href="#booking" class="btn btn--primary" data-en="Book this package">จองแพ็กเกจนี้</a>
       </div>

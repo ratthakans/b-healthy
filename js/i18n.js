@@ -6,9 +6,7 @@
 // ============================================================
 (function () {
   const KEY = 'bh-lang';
-  // English-only for now (TH/EN toggle disabled). Flip back to
-  // `localStorage.getItem(KEY) || 'th'` to re-enable bilingual switching.
-  const get = () => 'en';
+  const get = () => localStorage.getItem(KEY) || 'en';
 
   function apply(lang) {
     document.documentElement.lang = lang;

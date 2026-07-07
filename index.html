@@ -27,6 +27,7 @@
         <a href="#workshop">Wellness Workshop</a>
         <a href="membership.html">Wellness Membership</a>
         <a href="contact.html" class="nav__cta">Contact</a>
+        <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
 
       <button class="nav__toggle" id="navToggle" aria-label="Menu">
@@ -62,13 +63,13 @@
 
   <!-- ============ WELLNESS TOURISM — VIDEO ============ -->
   <section class="feature-hero" id="tourism">
-    <img class="feature-hero__bg" data-img="tourism-video" src="https://picsum.photos/seed/bhealthy-yoga/1920/900" alt="โยคะกลางธรรมชาติยามเช้า" />
+    <video class="feature-hero__bg" autoplay muted loop playsinline poster="https://picsum.photos/seed/bhealthy-yoga/1920/900">
+      <source src="images/tourism-video.mp4" type="video/mp4" />
+    </video>
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
-      <button class="play-btn" aria-label="เล่นวิดีโอ" data-video="16OPQtjBeCA2Rcv9bqpsOmis8HRVo7M1T">
-        <svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-      </button>
+      <span class="feature-hero__dot"></span>
       <span class="feature-hero__word">Tourism</span>
     </div>
   </section>
@@ -124,13 +125,13 @@
 
   <!-- ============ WELLNESS WORKSHOP — VIDEO ============ -->
   <section class="feature-hero feature-hero--alt" id="workshop">
-    <img class="feature-hero__bg" data-img="workshop-video" src="https://picsum.photos/seed/bhealthy-workshop/1920/900" alt="เวิร์กชอปกลุ่มในองค์กร" />
+    <video class="feature-hero__bg" autoplay muted loop playsinline poster="https://picsum.photos/seed/bhealthy-workshop/1920/900">
+      <source src="images/workshop-video.mp4" type="video/mp4" />
+    </video>
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
-      <button class="play-btn" aria-label="เล่นวิดีโอ" data-video="">
-        <svg viewBox="0 0 24 24" width="30" height="30"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-      </button>
+      <span class="feature-hero__dot"></span>
       <span class="feature-hero__word">Workshop</span>
     </div>
   </section>
