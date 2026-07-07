@@ -20,7 +20,7 @@
          <span class="pcard__price-unit" data-en="${en.priceUnit || p.priceUnit}">${p.priceUnit}</span>`;
 
     return `
-      <a class="pcard" href="package.html?id=${p.id}" data-category="${p.category || ''}" style="--pc:${p.theme.primary};--pa:${p.theme.accent}">
+      <a class="pcard" href="package.html?id=${p.id}" data-province="${p.province || ''}" data-category="${p.category || ''}" style="--pc:${p.theme.primary};--pa:${p.theme.accent}">
         <div class="pcard__media">
           <img src="${p.hero}" alt="${p.name}" loading="lazy" />
           <span class="pcard__badge" data-en="${en.duration || p.duration}">${p.duration}</span>
@@ -41,14 +41,9 @@
 
   const cards = [...grid.querySelectorAll('.pcard')];
 
-  // --- Filter pills (derived from categories, in first-seen order) ---
-  const cats = [];
-  window.PACKAGE_ORDER.forEach(id => {
-    const c = window.PACKAGES[id].category;
-    if (c && !cats.includes(c)) cats.push(c);
-  });
-
-  const pills = ['ทั้งหมด', ...cats];
+  // --- Filter pills (by location / province — fixed destination list) ---
+  const provinces = ['Hua Hin', 'Amphawa', 'Kanchanaburi', 'Krabi', 'Phuket', 'Chiang Mai'];
+  const pills = ['ทั้งหมด', ...provinces];
   filtersEl.innerHTML = pills.map((label, i) =>
     `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${i === 0 ? '*' : label}"${i === 0 ? ' data-en="All"' : ''}>${label}</button>`
   ).join('');
@@ -62,7 +57,7 @@
     const f = btn.dataset.filter;
     let shown = 0;
     cards.forEach(card => {
-      const match = f === '*' || card.dataset.category === f;
+      const match = f === '*' || card.dataset.province === f;
       card.classList.toggle('is-hidden', !match);
       if (match) shown++;
     });
