@@ -18,11 +18,14 @@
     select.value = q;
   }
 
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    await window.bhSubmit?.('contact', Object.fromEntries(new FormData(form)));
     done.hidden = false;
-    form.querySelector('button[type=submit]').textContent = 'ส่งแล้ว ✓';
+    btn.textContent = '✓';
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 })();

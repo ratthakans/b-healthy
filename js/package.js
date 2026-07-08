@@ -160,11 +160,14 @@
   // Booking form (front-end demo)
   const form = document.getElementById('bookForm');
   const done = document.getElementById('formDone');
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    await window.bhSubmit?.('booking', Object.fromEntries(new FormData(form)));
     done.hidden = false;
-    form.querySelector('button[type=submit]').textContent = '✓';
+    btn.textContent = '✓';
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 

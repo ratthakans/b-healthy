@@ -36,12 +36,15 @@ document.querySelectorAll('.acc').forEach(acc => {
 // --- Register form (front-end demo only) ---
 const form = document.getElementById('registerForm');
 const done = document.getElementById('formDone');
-form.addEventListener('submit', e => {
+form.addEventListener('submit', async e => {
   e.preventDefault();
   if (!form.checkValidity()) { form.reportValidity(); return; }
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  await window.bhSubmit?.('register', Object.fromEntries(new FormData(form)));
   done.hidden = false;
-  form.querySelector('button[type=submit]').textContent = 'SENT ✓';
-  setTimeout(() => form.reset(), 400);
+  btn.textContent = 'SENT ✓';
+  setTimeout(() => { form.reset(); btn.disabled = false; }, 600);
 });
 
 // --- Video modal (Google Drive embed) ---
