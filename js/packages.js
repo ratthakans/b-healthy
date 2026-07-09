@@ -21,7 +21,7 @@ window.PACKAGES = {
     priceOld: "10,900",
     priceUnit: "บาท / ท่าน",
     theme: { primary: "#1c7fb0", accent: "#2bb8d6", tint: "#e6f4f8" },
-    hero: "https://picsum.photos/seed/bh-amphawa-hero/1200/800",
+    hero: "images/photos/amphawa.jpg",
     intro:
       "สัมผัสประสบการณ์ Wellness Retreat ท่ามกลางธรรมชาติริมคลองอัมพวา " +
       "เรียนรู้การดูแลสุขภาพกายและใจอย่างสมดุล และกิจกรรมเชื่อมสัมพันธ์ในบรรยากาศอบอุ่น",
@@ -75,7 +75,7 @@ window.PACKAGES = {
     priceUnit: "บาท / ท่าน (พัก 2 ท่าน)",
     priceNote: "พัก 1 ท่าน 33,000 บาท / ท่าน",
     theme: { primary: "#1f4d3a", accent: "#c9a24b", tint: "#eef2ec" },
-    hero: "https://picsum.photos/seed/bh-golden-hero/1200/800",
+    hero: "images/photos/golden-life.jpg",
     intro:
       "โปรแกรมเตรียมความพร้อมสู่ชีวิตหลังเกษียณอย่างมีคุณภาพ ดูแลสุขภาพ เรียนรู้ วางแผนชีวิต " +
       "และเชื่อมต่อกับเพื่อนใหม่ ในรีสอร์ทระดับ 5 ดาวริมทะเลหัวหิน",
@@ -142,7 +142,7 @@ window.PACKAGES = {
     priceOld: "",
     priceUnit: "",
     theme: { primary: "#2094a8", accent: "#ef9ba7", tint: "#e7f4f5" },
-    hero: "https://picsum.photos/seed/bh-rebalance-hero/1200/800",
+    hero: "images/photos/rebalance.jpg",
     intro:
       "มาสัมผัสประสบการณ์เวลาท่ามกลางธรรมชาติริมน้ำแควน้อย จังหวัดกาญจนบุรี " +
       "โปรแกรมที่ออกแบบมาเพื่อส่งเสริมสุขภาวะบุคลากร ทั้งร่างกาย จิตใจ และกิจกรรม Wellness ที่ช่วยสร้างความสมดุลอย่างยั่งยืน",
@@ -197,7 +197,7 @@ window.PACKAGES = {
     priceUnit: "บาท / ท่าน (พัก 2 ท่าน)",
     priceNote: "พัก 1 ท่าน 37,000 บาท / ท่าน",
     theme: { primary: "#166b8c", accent: "#2bb8d6", tint: "#e6f2f6" },
-    hero: "https://picsum.photos/seed/bh-golf-hero/1200/800",
+    hero: "images/photos/golf.jpg",
     intro:
       "ประสบการณ์กอล์ฟเพื่อการฟื้นฟูร่างกายและจิตใจ ทำให้เล่นดีขึ้น ฟื้นตัวไวขึ้น และได้พักผ่อนอย่างมีคุณภาพ " +
       "Improve Mobility · Enhance Performance · Recover Faster · Sleep Better · Feel Healthier",
