@@ -895,7 +895,7 @@ video.feature-hero__bg { background: var(--navy); }
 /* ============================================================
    WELLNESS TOURISM PAGE (overview from profile)
    ============================================================ */
-.tour-intro { background: var(--grad-cool); padding: var(--section-y) 0; }
+.tour-intro { background: var(--grad-cool); padding: 44px 0 var(--section-y); }
 .tour-quote { max-width: 820px; margin: 0 auto 44px; text-align: center; color: var(--brand-blue); font-family: var(--font-display); font-weight: 400; font-size: clamp(1.1rem,2.2vw,1.4rem); line-height: 1.55; }
 .tour-quote strong { color: var(--coral); }
 .tfeats { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-bottom: 44px; }
