@@ -4,7 +4,7 @@
     {
       "name": "b-healthy",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["/Users/ratthakan/Desktop/B-Healthy/server.js"],
+      "runtimeArgs": ["/Users/ratthakans/Desktop/B-Healthy/server.js"],
       "port": 4173
     }
   ]

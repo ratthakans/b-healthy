@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Membership — B-Healthy</title>
-  <meta name="description" content="B-Healthy Corporate Wellness Membership — Platinum / Gold / Silver plans with credits, powered by the Company Wellness Portal and My Office App." />
+  <meta name="description" content="B-Healthy Corporate Wellness Membership — a simple credit-based journey powered by the Company Wellness Portal and My Office App. Fund employee wellness, let HR manage benefits, and measure real results." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&family=Albert+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260717e" />
 </head>
 <body>
 
@@ -20,10 +20,10 @@
         <span class="brand__name">B-Healthy</span>
       </a>
       <nav class="nav__links" id="navLinks">
-        <a href="index.html#tourism">Wellness Tourism</a>
-        <a href="workshops.html">Wellness Workshop</a>
-        <a href="membership.html" class="is-active">Wellness Membership</a>
-        <a href="contact.html" class="nav__cta">Contact</a>
+        <a href="index.html#tourism" data-en="Retreats">Retreats</a>
+        <a href="workshops.html" data-en="Workshops">Workshops</a>
+        <a href="membership.html" class="is-active" data-en="Membership">Membership</a>
+        <a href="contact.html" class="nav__cta" data-en="Contact">ติดต่อเรา</a>
         <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
       <button class="nav__toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -35,126 +35,81 @@
     <div class="container">
       <p class="prog-hero__script">Corporate Wellness</p>
       <h1 class="prog-hero__title">MEMBERSHIP <span>PROGRAM</span></h1>
-      <p class="prog-hero__sub">Flexible benefits, measurable results — fund employee wellness, let HR manage benefits efficiently, and improve wellbeing you can actually measure.</p>
+      <p class="prog-hero__sub" data-en="A corporate wellness membership that takes care of your people all year round — fund employee wellbeing, let HR manage benefits with ease, and measure results you can actually see.">ระบบสมาชิกดูแลสุขภาพองค์กรที่ดูแลพนักงานของคุณตลอดทั้งปี — สนับสนุนสุขภาพพนักงาน ให้ HR บริหารสวัสดิการได้ง่าย และวัดผลลัพธ์ได้จริง</p>
     </div>
   </section>
 
-  <!-- MEMBERSHIP PLANS -->
-  <section class="mem">
+  <!-- CUSTOMER JOURNEY (roadmap — the centerpiece) -->
+  <section class="about-sec">
     <div class="container">
-      <div class="pill-head"><span class="pill-head__script">Corporate</span><span class="pill-head__pill">MEMBERSHIP PLANS</span></div>
-
-      <div class="ctiers">
-        <!-- Platinum -->
-        <article class="ctier ctier--platinum">
-          <div class="ctier__head">
-            <p class="ctier__tier">Platinum</p>
-            <h3 class="ctier__name">Corporate</h3>
-            <span class="ctier__ic"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="#fff" d="M6 2h12l4 6-10 14L2 8z" opacity=".95"/></svg></span>
-          </div>
-          <div class="ctier__body">
-            <p class="ctier__price"><b>100,000</b><span>THB</span></p>
-            <p class="ctier__credits">Get <em>130,000 Credits</em></p>
-            <span class="ctier__bonus">BONUS +20%</span>
-            <ul class="ctier__list">
-              <li>Employee App Access</li>
-              <li>Experiences Access</li>
-              <li>Company Wellness Portal</li>
-              <li>Credit Management</li>
-              <li>Reporting Dashboard</li>
-            </ul>
-            <a href="contact.html?subject=Platinum%20Corporate%20Membership" class="btn btn--primary">Request Demo</a>
-          </div>
-        </article>
-
-        <!-- Gold -->
-        <article class="ctier ctier--gold">
-          <div class="ctier__head">
-            <p class="ctier__tier">Gold</p>
-            <h3 class="ctier__name">Corporate</h3>
-            <span class="ctier__ic"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="#fff" d="M12 2l2.9 6.3 6.9.7-5.1 4.7 1.4 6.8L12 17.7 5.9 20.5l1.4-6.8L2.2 9l6.9-.7z"/></svg></span>
-          </div>
-          <div class="ctier__body">
-            <p class="ctier__price"><b>50,000</b><span>THB</span></p>
-            <p class="ctier__credits">Get <em>60,000 Credits</em></p>
-            <span class="ctier__bonus">BONUS +20%</span>
-            <ul class="ctier__list">
-              <li>Employee App Access</li>
-              <li>Experiences Access</li>
-              <li>Company Wellness Portal</li>
-              <li>Credit Management</li>
-              <li>Reporting Dashboard</li>
-            </ul>
-            <a href="contact.html?subject=Gold%20Corporate%20Membership" class="btn btn--ghost">Request Demo</a>
-          </div>
-        </article>
-
-        <!-- Silver -->
-        <article class="ctier ctier--silver">
-          <div class="ctier__head">
-            <p class="ctier__tier">Silver</p>
-            <h3 class="ctier__name">Corporate</h3>
-            <span class="ctier__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="#fff" d="M12 2l8 3v6c0 5-3.5 8.6-8 11-4.5-2.4-8-6-8-11V5z"/></svg></span>
-          </div>
-          <div class="ctier__body">
-            <p class="ctier__price"><b>20,000</b><span>THB</span></p>
-            <p class="ctier__credits">Get <em>22,000 Credits</em></p>
-            <span class="ctier__bonus">BONUS +10%</span>
-            <ul class="ctier__list">
-              <li>Employee App Access</li>
-              <li>Experiences Access</li>
-              <li>Company Wellness Portal</li>
-              <li>Credit Management</li>
-              <li>Reporting Dashboard</li>
-            </ul>
-            <a href="contact.html?subject=Silver%20Corporate%20Membership" class="btn btn--ghost">Request Demo</a>
-          </div>
-        </article>
+      <div class="pill-head"><span class="pill-head__script">How it works</span><span class="pill-head__pill" data-en="CUSTOMER JOURNEY">เส้นทางการใช้งาน</span></div>
+      <p class="section__sub" style="text-align:center;max-width:640px;margin:0 auto 12px" data-en="From purchase to real results — four simple steps, all connected in one ecosystem.">ตั้งแต่ซื้อจนถึงผลลัพธ์จริง — เพียง 4 ขั้นตอน เชื่อมต่อกันในระบบเดียว</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step__n">1</div>
+          <h4 data-en="Company Purchases Credits">องค์กรซื้อเครดิต</h4>
+          <p data-en="The company buys a wellness credit package that fits the size and needs of its team.">องค์กรซื้อแพ็กเกจเครดิตสุขภาพที่เหมาะกับขนาดและความต้องการของทีม</p>
+        </div>
+        <div class="step">
+          <div class="step__n">2</div>
+          <h4 data-en="HR Creates &amp; Allocates">HR สร้างและจัดสรร</h4>
+          <p data-en="HR sets up employees and allocates credits and benefits by person or by group.">HR ตั้งค่าพนักงานและจัดสรรเครดิตและสิทธิ์ให้เป็นรายบุคคลหรือรายกลุ่ม</p>
+        </div>
+        <div class="step">
+          <div class="step__n">3</div>
+          <h4 data-en="Employees Use Services">พนักงานใช้บริการ</h4>
+          <p data-en="Staff choose and redeem wellness services they love through the My Office App.">พนักงานเลือกและใช้บริการสุขภาพที่ชอบผ่าน My Office App</p>
+        </div>
+        <div class="step">
+          <div class="step__n">4</div>
+          <h4 data-en="Connect to the Ecosystem">เชื่อมต่อสู่ Ecosystem</h4>
+          <p data-en="Everything links back to one portal — track usage, wellbeing, and results in real time.">ทุกอย่างเชื่อมกลับสู่พอร์ทัลเดียว ติดตามการใช้งาน สุขภาพ และผลลัพธ์แบบเรียลไทม์</p>
+        </div>
       </div>
-
-      <p class="mem__note">Every plan works instantly with the <strong>Company Wellness Portal</strong> and <strong>My Office App</strong> &nbsp;·&nbsp; Credits can be spent across 100+ wellness &amp; lifestyle experiences.</p>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
+  <!-- WHAT YOU GET (value first, no pricing) -->
   <section class="about-sec about-sec--tint">
     <div class="container">
-      <div class="pill-head"><span class="pill-head__pill">HOW IT WORKS</span></div>
-      <div class="steps">
-        <div class="step"><div class="step__n">1</div><h4>Company Purchases Credits</h4><p>Buy a credit package for the plan that fits your team.</p></div>
-        <div class="step"><div class="step__n">2</div><h4>HR Allocates Benefits</h4><p>Assign rights and budgets to employees or groups.</p></div>
-        <div class="step"><div class="step__n">3</div><h4>Employees Redeem Services</h4><p>Staff pick and use services through My Office App.</p></div>
-        <div class="step"><div class="step__n">4</div><h4>Company Tracks Results</h4><p>Monitor usage and outcomes with live reports.</p></div>
+      <div class="pill-head"><span class="pill-head__pill" data-en="WHAT YOUR TEAM GETS">สิ่งที่ทีมของคุณจะได้รับ</span></div>
+      <div class="why">
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 3v13h10V5zm5 15.2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></span><h4 data-en="Employee App Access">แอปสำหรับพนักงาน</h4><p data-en="Every employee explores and redeems benefits in one simple app.">พนักงานทุกคนเลือกและใช้สิทธิ์ได้ในแอปเดียว ใช้งานง่าย</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z"/></svg></span><h4 data-en="100+ Experiences">100+ ประสบการณ์สุขภาพ</h4><p data-en="Spa, fitness, health check-ups, travel, mental wellness and more.">สปา ฟิตเนส ตรวจสุขภาพ ท่องเที่ยว สุขภาพใจ และอื่นๆ อีกมากมาย</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h16V6z"/></svg></span><h4 data-en="Company Wellness Portal">พอร์ทัลสำหรับองค์กร</h4><p data-en="Manage budgets, rights, campaigns and analytics in one place.">บริหารงบประมาณ สิทธิ์ แคมเปญ และข้อมูลวิเคราะห์ในที่เดียว</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 19h16v2H4zM6 10h3v7H6zm5-5h3v12h-3zm5 8h3v4h-3z"/></svg></span><h4 data-en="Credit Management">จัดการเครดิต</h4><p data-en="Flexible credits your team can spend across every experience.">เครดิตที่ยืดหยุ่น ใช้ได้กับทุกประสบการณ์</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13 3a9 9 0 1 0 8 8h-8z"/><path fill="currentColor" d="M14 2v7h7a7 7 0 0 0-7-7z" opacity=".55"/></svg></span><h4 data-en="Reporting Dashboard">แดชบอร์ดรายงาน</h4><p data-en="Live dashboards for usage, wellbeing and ESG outcomes.">แดชบอร์ดเรียลไทม์ ดูการใช้งาน สุขภาพ และผลลัพธ์ ESG</p></div>
       </div>
+      <p class="mem__note" data-en="Plans are flexible and tailored to your team size. Contact us for a plan and pricing that fit your organization.">แพ็กเกจปรับได้ตามขนาดทีมของคุณ ติดต่อเราเพื่อรับแผนและราคาที่เหมาะกับองค์กร</p>
     </div>
   </section>
 
   <!-- ECOSYSTEM -->
   <section class="about-sec">
     <div class="container">
-      <div class="pill-head"><span class="pill-head__script">One</span><span class="pill-head__pill">CONNECTED ECOSYSTEM</span></div>
+      <div class="pill-head"><span class="pill-head__script">One</span><span class="pill-head__pill" data-en="CONNECTED ECOSYSTEM">ระบบที่เชื่อมต่อกัน</span></div>
       <div class="eco">
         <div class="eco__node">
           <span class="eco__ic" style="background:linear-gradient(135deg,#1ECAD3,#00A9F2)"><svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M3 4h18a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v9h16V6z"/></svg></span>
-          <h4>Company Wellness Portal</h4>
-          <p>Manage budgets, rights, campaigns and real-time analytics.</p>
+          <h4 data-en="Company Wellness Portal">Company Wellness Portal</h4>
+          <p data-en="Manage budgets, rights, campaigns and real-time analytics.">บริหารงบประมาณ สิทธิ์ แคมเปญ และข้อมูลวิเคราะห์แบบเรียลไทม์</p>
         </div>
         <div class="eco__arrow">→</div>
         <div class="eco__node">
           <span class="eco__ic" style="background:linear-gradient(135deg,#6F7AD3,#425CC7)"><svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 3v13h10V5zm5 15.2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg></span>
-          <h4>My Office App</h4>
-          <p>Employees explore and redeem benefits in one app.</p>
+          <h4 data-en="My Office App">My Office App</h4>
+          <p data-en="Employees explore and redeem benefits in one app.">พนักงานเลือกและใช้สิทธิ์ได้ในแอปเดียว</p>
         </div>
         <div class="eco__arrow">→</div>
         <div class="eco__node">
           <span class="eco__ic" style="background:linear-gradient(135deg,#F8A98C,#F8856E)"><svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z"/></svg></span>
-          <h4>100+ Experiences</h4>
-          <p>Wellness services and lifestyle privileges for your people.</p>
+          <h4 data-en="100+ Experiences">100+ ประสบการณ์</h4>
+          <p data-en="Wellness services and lifestyle privileges for your people.">บริการสุขภาพและสิทธิพิเศษไลฟ์สไตล์สำหรับพนักงานของคุณ</p>
         </div>
       </div>
       <div class="eco-exp">
-        <span>Wellness &amp; Spa</span><span>Food &amp; Beverage</span><span>Health Check-up</span><span>Fitness</span>
-        <span>Events &amp; Challenges</span><span>Travel &amp; Leisure</span><span>Mental Wellness</span><span>Personal Trainer</span><span>Yoga &amp; Meditation</span>
+        <span data-en="Wellness &amp; Spa">สุขภาพ &amp; สปา</span><span data-en="Food &amp; Beverage">อาหาร &amp; เครื่องดื่ม</span><span data-en="Health Check-up">ตรวจสุขภาพ</span><span data-en="Fitness">ฟิตเนส</span>
+        <span data-en="Events &amp; Challenges">อีเวนต์ &amp; ชาเลนจ์</span><span data-en="Travel &amp; Leisure">ท่องเที่ยว &amp; พักผ่อน</span><span data-en="Mental Wellness">สุขภาพใจ</span><span data-en="Personal Trainer">เทรนเนอร์ส่วนตัว</span><span data-en="Yoga &amp; Meditation">โยคะ &amp; สมาธิ</span>
       </div>
     </div>
   </section>
@@ -162,30 +117,30 @@
   <!-- WHY CHOOSE -->
   <section class="about-sec about-sec--tint">
     <div class="container">
-      <div class="pill-head"><span class="pill-head__pill">WHY ORGANIZATIONS CHOOSE US</span></div>
+      <div class="pill-head"><span class="pill-head__pill" data-en="WHY ORGANIZATIONS CHOOSE US">ทำไมองค์กรถึงเลือกเรา</span></div>
       <div class="why">
-        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg></span><h4>Reduce Admin Work</h4><p>Less paperwork and manual handling.</p></div>
-        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg></span><h4>Improve Engagement</h4><p>Boost participation &amp; wellbeing.</p></div>
-        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 19h16v2H4zM6 10h3v7H6zm5-5h3v12h-3zm5 8h3v4h-3z"/></svg></span><h4>Higher Utilization</h4><p>Employees actually use benefits.</p></div>
-        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13 3a9 9 0 1 0 8 8h-8z"/><path fill="currentColor" d="M14 2v7h7a7 7 0 0 0-7-7z" opacity=".55"/></svg></span><h4>Real-time Reporting</h4><p>Live dashboards &amp; reports.</p></div>
-        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2l3 3-7 7-3-3zm5 5l3 3c1 3-1 8-8 12 4-7 4-12 5-15z"/></svg></span><h4>Wellness &amp; ESG</h4><p>Track wellness and ESG clearly.</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg></span><h4 data-en="Reduce Admin Work">ลดงานเอกสาร</h4><p data-en="Less paperwork and manual handling.">ลดงานเอกสารและการจัดการด้วยมือ</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg></span><h4 data-en="Improve Engagement">เพิ่มการมีส่วนร่วม</h4><p data-en="Boost participation &amp; wellbeing.">เพิ่มการมีส่วนร่วมและสุขภาวะที่ดี</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 19h16v2H4zM6 10h3v7H6zm5-5h3v12h-3zm5 8h3v4h-3z"/></svg></span><h4 data-en="Higher Utilization">ใช้สิทธิ์ได้จริง</h4><p data-en="Employees actually use benefits.">พนักงานได้ใช้สวัสดิการจริง</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13 3a9 9 0 1 0 8 8h-8z"/><path fill="currentColor" d="M14 2v7h7a7 7 0 0 0-7-7z" opacity=".55"/></svg></span><h4 data-en="Real-time Reporting">รายงานเรียลไทม์</h4><p data-en="Live dashboards &amp; reports.">แดชบอร์ดและรายงานแบบเรียลไทม์</p></div>
+        <div class="why__item"><span class="why__ic"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2l3 3-7 7-3-3zm5 5l3 3c1 3-1 8-8 12 4-7 4-12 5-15z"/></svg></span><h4 data-en="Wellness &amp; ESG">สุขภาพ &amp; ESG</h4><p data-en="Track wellness and ESG clearly.">ติดตามผลสุขภาพและ ESG ได้ชัดเจน</p></div>
       </div>
     </div>
   </section>
 
   <!-- CTA -->
   <section class="about-cta">
-    <h2>Start building a healthier workplace today</h2>
-    <p>Raise your employee benefits with a Corporate Wellness Membership — powered by the Company Wellness Portal and My Office App.</p>
+    <h2 data-en="Start building a healthier workplace today">เริ่มสร้างที่ทำงานที่สุขภาพดีได้ตั้งแต่วันนี้</h2>
+    <p data-en="Raise your employee benefits with a Corporate Wellness Membership — powered by the Company Wellness Portal and My Office App.">ยกระดับสวัสดิการพนักงานด้วย Corporate Wellness Membership — ขับเคลื่อนด้วย Company Wellness Portal และ My Office App</p>
     <p style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:0">
-      <a href="contact.html?subject=Corporate%20Membership%20-%20Request%20Demo" class="btn btn--primary">Request Demo</a>
-      <a href="contact.html?subject=Corporate%20Membership%20-%20Contact%20Sales" class="btn btn--ghost" style="color:#fff;border-color:rgba(255,255,255,.5)">Contact Sales</a>
+      <a href="contact.html?subject=Corporate%20Membership%20-%20Request%20Demo" class="btn btn--primary" data-en="Request Demo">ขอชมเดโม</a>
+      <a href="contact.html?subject=Corporate%20Membership%20-%20Contact%20Sales" class="btn btn--ghost" style="color:#fff;border-color:rgba(255,255,255,.5)" data-en="Contact Sales">ติดต่อฝ่ายขาย</a>
     </p>
   </section>
 
   <footer class="footer" id="footer"></footer>
 
   <script src="js/i18n.js"></script>
-  <script src="js/site.js"></script>
+  <script src="js/site.js?v=20260717d"></script>
 </body>
 </html>

@@ -37,6 +37,43 @@ Submissions appear in Supabase → **Table Editor → submissions**.
 
 ---
 
+## Lead emails (Resend) — email the sales team on every submission
+
+Every "จองแพ็กเกจ / Book package" and contact-form submission is emailed to the
+team by the serverless function [`api/lead.js`](api/lead.js) via
+[Resend](https://resend.com). No build step, no npm install — it calls Resend's
+REST API with the built-in `fetch`.
+
+**Recipients (already hard-wired as defaults, override with env vars anytime):**
+
+| To  | `b-healthy@pzentsmart.com` |
+| CC  | `kalyarak@pzentsmart.com`, `marketing@pzentsmart.com` |
+
+The customer's own email is set as **Reply-To**, so the team can reply directly.
+
+**One-time setup (3 steps):**
+
+1. **Verify the sending domain** — Resend → **Domains** → Add `pzentsmart.com`,
+   then add the DNS records it shows (SPF/DKIM) at your domain registrar. Wait
+   for "Verified".
+2. **Create an API key** — Resend → **API Keys** → Create → copy it (`re_...`).
+3. **Add it to Vercel** — Vercel → Project → **Settings → Environment
+   Variables** → add `RESEND_API_KEY` = the key → **Redeploy**.
+
+That's it. Optional env-var overrides (Vercel → Environment Variables):
+
+```
+LEAD_TO     b-healthy@pzentsmart.com
+LEAD_CC     kalyarak@pzentsmart.com, marketing@pzentsmart.com
+LEAD_FROM   B-Healthy <no-reply@pzentsmart.com>   # domain must be verified in Resend
+```
+
+Until `RESEND_API_KEY` is set, the site still works (the thank-you still shows)
+— it just doesn't send the email yet. Supabase storage (below) is independent
+and optional; both run if configured.
+
+---
+
 ## Migrate to the client (Vercel `bh-ealthy` + client Supabase)
 
 1. **GitHub** — transfer the repo to the client's/agency's org (Settings →

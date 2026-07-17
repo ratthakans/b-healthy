@@ -66,3 +66,26 @@ document.querySelectorAll('.play-btn').forEach(btn =>
 );
 vmodal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeVideo));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !vmodal.hidden) closeVideo(); });
+
+// --- Wellness Tourism / Workshop: hover a list item to swap the featured image ---
+document.querySelectorAll('.detail').forEach(section => {
+  const heroImg = section.querySelector('.detail__img--tall img');
+  const items = section.querySelectorAll('.detail__list li[data-swap]');
+  if (!heroImg || !items.length) return;
+
+  items.forEach(li => { const pre = new Image(); pre.src = li.dataset.swap; }); // preload swaps
+
+  const swap = li => {
+    items.forEach(x => x.classList.toggle('is-active', x === li));
+    const src = li.dataset.swap;
+    if (heroImg.getAttribute('src') === src) return;
+    heroImg.style.opacity = '0';
+    setTimeout(() => { heroImg.setAttribute('src', src); heroImg.style.opacity = '1'; }, 150);
+  };
+
+  items.forEach(li => {
+    li.tabIndex = 0;
+    li.addEventListener('mouseenter', () => swap(li));
+    li.addEventListener('focus', () => swap(li));
+  });
+});

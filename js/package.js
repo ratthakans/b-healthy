@@ -88,19 +88,19 @@
       </div>
     </section>
 
-    <!-- EXPERIENCES -->
+    <!-- INCLUDES (moved up: value first, right under the price) -->
     <section class="pkg-sec pkg-sec--tint">
-      <div class="container">
-        <div class="pill-head"><span class="pill-head__script">Premium</span><span class="pill-head__pill">WELLNESS EXPERIENCES</span></div>
-        <div class="pxp__grid">${exp}</div>
-      </div>
-    </section>
-
-    <!-- INCLUDES -->
-    <section class="pkg-sec">
       <div class="container">
         <div class="pill-head"><span class="pill-head__pill">PACKAGE INCLUDES</span></div>
         <ul class="pkg-includes">${includes}</ul>
+      </div>
+    </section>
+
+    <!-- EXPERIENCES -->
+    <section class="pkg-sec">
+      <div class="container">
+        <div class="pill-head"><span class="pill-head__script">Premium</span><span class="pill-head__pill">WELLNESS EXPERIENCES</span></div>
+        <div class="pxp__grid">${exp}</div>
       </div>
     </section>
 

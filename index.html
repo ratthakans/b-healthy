@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>B-Healthy — Corporate Wellness Solutions</title>
-  <meta name="description" content="B-Healthy — Your Holistic Wellness Companion. โปรแกรม Corporate Wellness, Wellness Tourism และ Wellness Workshop สำหรับองค์กร" />
+  <meta name="description" content="B-Healthy — Your Holistic Wellness Companion. โปรแกรม Corporate Wellness, Retreats และ Workshops สำหรับองค์กร" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&family=Albert+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=20260717e" />
 </head>
 <body>
 
@@ -23,9 +23,9 @@
       </a>
 
       <nav class="nav__links" id="navLinks">
-        <a href="#tourism">Wellness Tourism</a>
-        <a href="#workshop">Wellness Workshop</a>
-        <a href="membership.html">Wellness Membership</a>
+        <a href="#tourism">Retreats</a>
+        <a href="#workshop">Workshops</a>
+        <a href="membership.html">Membership</a>
         <a href="contact.html" class="nav__cta">Contact</a>
         <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
@@ -61,16 +61,89 @@
     </div>
   </section>
 
+  <!-- ============ WHAT IS CORPORATE WELLNESS — 4 SERVICE PILLARS ============ -->
+  <!-- Placeholder art = CSS gradients. Swap each .pillar__img background for a real
+       photo later, e.g. style="background-image:url('images/photos/pillar-stay.jpg')" -->
+  <section class="pillars">
+    <div class="container">
+      <div class="section-head">
+        <p class="section__eyebrow" data-en="WHAT WE DO">บริการของเรา</p>
+        <h2 class="section__title">CORPORATE <span>WELLNESS</span></h2>
+        <p class="section__sub" data-en="More than a package — a complete wellness service for your organization, built from four core components that care for your people in body and mind.">
+          มากกว่าแพ็กเกจ — คือบริการดูแลสุขภาพองค์กรแบบครบวงจร ประกอบด้วย 4 องค์ประกอบหลัก
+          ที่ดูแลพนักงานของคุณทั้งกายและใจ
+        </p>
+      </div>
+
+      <div class="pillars__grid">
+        <!-- Stay -->
+        <article class="pillar" style="--pcol:#1ECAD3;--pcol2:#00A9F2">
+          <div class="pillar__art">
+            <span class="pillar__ic"><svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>
+          </div>
+          <div class="pillar__body">
+            <h3 data-en="Stay">ที่พัก</h3>
+            <p class="pillar__reveal" data-en="Curated stays across nature — mountain resorts, seaside, riverside (like Amphawa) and hot-spring retreats.">
+              ที่พักหลากหลายท่ามกลางธรรมชาติ — รีสอร์ตภูเขา ริมทะเล ริมแม่น้ำ (เช่น อัมพวา) และน้ำพุร้อน
+            </p>
+          </div>
+        </article>
+
+        <!-- Treatment -->
+        <article class="pillar" style="--pcol:#6F7AD3;--pcol2:#425CC7">
+          <div class="pillar__art">
+            <span class="pillar__ic"><svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M12 21s-7-4.5-9.3-9.2C1 8.5 2.7 5 6 5c2 0 3.2 1.2 4 2.3C10.8 6.2 12 5 14 5c3.3 0 5 3.5 3.3 6.8C19 16.5 12 21 12 21z"/></svg></span>
+          </div>
+          <div class="pillar__body">
+            <h3 data-en="Treatment">ตรวจรักษา</h3>
+            <p class="pillar__reveal" data-en="Health screening — body composition analysis and posture checks for office syndrome, to plan care that targets the real issue.">
+              ตรวจร่างกาย — วิเคราะห์องค์ประกอบร่างกาย (Body Composition) และตรวจท่าทางกลุ่มอาการออฟฟิศซินโดรม เพื่อวางแผนดูแลให้ตรงจุด
+            </p>
+          </div>
+        </article>
+
+        <!-- Food Medicine -->
+        <article class="pillar" style="--pcol:#F8A98C;--pcol2:#F8856E">
+          <div class="pillar__art">
+            <span class="pillar__ic"><svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M11 2v9a3 3 0 0 1-6 0V2h1.5v7H8V2h1.5v7H11zM17 2c-1.7 0-3 2.2-3 5 0 2.4 1 4.3 2.3 4.8V22H18V2z"/></svg></span>
+          </div>
+          <div class="pillar__body">
+            <h3 data-en="Food Medicine">อาหารเป็นยา</h3>
+            <p class="pillar__reveal" data-en="Not ordinary meals — medical-grade food designed together by doctors and chefs to nourish and heal.">
+              ไม่ใช่แค่อาหารทั่วไป — แต่เป็นอาหารเชิงการแพทย์ ออกแบบร่วมกันโดยแพทย์และเชฟ เพื่อบำรุงและฟื้นฟูร่างกาย
+            </p>
+          </div>
+        </article>
+
+        <!-- Workshop -->
+        <article class="pillar" style="--pcol:#AE85FD;--pcol2:#7C5CFC">
+          <div class="pillar__art">
+            <span class="pillar__ic"><svg viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg></span>
+          </div>
+          <div class="pillar__body">
+            <h3 data-en="Workshop">เวิร์กชอป</h3>
+            <p class="pillar__reveal" data-en="In-house workshops in three tracks — fix office syndrome, reduce burnout, and build stronger teams.">
+              เวิร์กชอปในองค์กร 3 กลุ่ม — แก้ออฟฟิศซินโดรม ลดภาวะหมดไฟ และสร้างทีมที่แข็งแรง
+            </p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ WELLNESS TOURISM — VIDEO ============ -->
   <section class="feature-hero" id="tourism">
     <div class="feature-hero__yt" aria-hidden="true">
+      <!-- Wanted video 7ku8NTUkChU ("Presentation BHealthy Review") but it has embedding
+           DISABLED (YouTube Error 153). Re-enable embedding in YouTube Studio to switch,
+           or replace this iframe with a self-hosted <video> loop. Using the working clip for now. -->
       <iframe src="https://www.youtube-nocookie.com/embed/Suue3MVyzr0?autoplay=1&mute=1&loop=1&playlist=Suue3MVyzr0&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3" title="Wellness Tourism" allow="autoplay; encrypted-media" frameborder="0"></iframe>
     </div>
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
       <span class="feature-hero__dot"></span>
-      <span class="feature-hero__word">Tourism</span>
+      <span class="feature-hero__word">Retreats</span>
     </div>
   </section>
 
@@ -79,7 +152,7 @@
     <div class="container">
       <div class="section-head">
         <p class="section__eyebrow">WELLNESS EXPERIENCE</p>
-        <h2 class="section__title">WELLNESS <span>TOURISM</span></h2>
+        <h2 class="section__title">WELLNESS <span>RETREATS</span></h2>
         <p class="section__sub" data-en="Blend relaxation with wellness — take your team out to recharge in nature through holistic activities designed for your organization, with experts guiding the whole trip.">
           ผสานการพักผ่อนกับการดูแลสุขภาพ ยกทีมออกไปเติมพลังในสถานที่ธรรมชาติ
           ผ่านกิจกรรมองค์รวมที่ออกแบบเฉพาะองค์กรของคุณ พร้อมผู้เชี่ยวชาญดูแลตลอดทริป
@@ -93,15 +166,15 @@
         </figure>
 
         <ul class="detail__list">
-          <li>Stay Wellness</li>
-          <li class="is-accent">Trip &amp; Stay</li>
-          <li>Holistic Activities</li>
-          <li>Health Assessment</li>
-          <li>Therapeutic Treatment</li>
-          <li>Food as Medicine</li>
-          <li>Sound Healing</li>
-          <li>Horo-Health</li>
-          <li class="is-accent">Workshop Activities</li>
+          <li data-swap="images/photos/h-resort.jpg">Stay Wellness</li>
+          <li class="is-accent" data-swap="images/photos/t-homestay.jpg">Trip &amp; Stay</li>
+          <li data-swap="images/photos/t-local.jpg">Holistic Activities</li>
+          <li data-swap="images/photos/t-body.jpg">Health Assessment</li>
+          <li data-swap="images/photos/t-mind.jpg">Therapeutic Treatment</li>
+          <li data-swap="images/photos/t-food.jpg">Food as Medicine</li>
+          <li data-swap="images/photos/t-mind.jpg">Sound Healing</li>
+          <li data-swap="images/photos/h-mountain.jpg">Horo-Health</li>
+          <li class="is-accent" data-swap="images/photos/h-camping.jpg">Workshop Activities</li>
         </ul>
 
         <div class="detail__stack">
@@ -156,12 +229,12 @@
         </div>
 
         <ul class="detail__list">
-          <li class="is-accent">Office Syndrome</li>
-          <li>Sound Healing</li>
-          <li>Yoga &amp; Meditation</li>
-          <li>Elemental Aroma Oil</li>
-          <li>Personalized Herbal Tea</li>
-          <li>Flower Mandala</li>
+          <li class="is-accent" data-swap="images/photos/h-workshop1.jpg">Office Syndrome</li>
+          <li data-swap="images/photos/h-workshop2.jpg">Sound Healing</li>
+          <li data-swap="images/photos/h-workshop3.jpg">Yoga &amp; Meditation</li>
+          <li data-swap="images/photos/h-workshop1.jpg">Elemental Aroma Oil</li>
+          <li data-swap="images/photos/h-workshop2.jpg">Personalized Herbal Tea</li>
+          <li data-swap="images/photos/h-workshop3.jpg">Flower Mandala</li>
         </ul>
 
         <figure class="detail__img detail__img--tall">
@@ -259,7 +332,7 @@
       <div class="accordion">
         <div class="acc">
           <button class="acc__head"><span data-en="What is B-Healthy's Corporate Wellness program?">โปรแกรม Corporate Wellness ของ B-Healthy คืออะไร?</span><span class="acc__icon">+</span></button>
-          <div class="acc__body"><p data-en="A holistic employee wellness program covering both Wellness Tourism and Wellness Workshop, tailored to your organization's goals and culture.">เป็นโปรแกรมดูแลสุขภาพองค์รวมสำหรับพนักงาน ครอบคลุมทั้ง Wellness Tourism และ Wellness Workshop ออกแบบเฉพาะตามเป้าหมายและวัฒนธรรมขององค์กร</p></div>
+          <div class="acc__body"><p data-en="A holistic employee wellness program covering both Retreats and Workshops, tailored to your organization's goals and culture.">เป็นโปรแกรมดูแลสุขภาพองค์รวมสำหรับพนักงาน ครอบคลุมทั้ง Retreats และ Workshops ออกแบบเฉพาะตามเป้าหมายและวัฒนธรรมขององค์กร</p></div>
         </div>
         <div class="acc">
           <button class="acc__head"><span data-en="Can small organizations join?">องค์กรขนาดเล็กสามารถเข้าร่วมได้ไหม?</span><span class="acc__icon">+</span></button>
@@ -360,9 +433,9 @@
     </div>
   </div>
 
-  <script src="js/config.js"></script>
-  <script src="js/submit.js"></script>
+  <script src="js/config.js?v=20260717d"></script>
+  <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=20260717d"></script>
 </body>
 </html>

@@ -24,7 +24,6 @@
         <div class="pcard__media">
           <img src="${p.hero}" alt="${p.name}" loading="lazy" />
           <span class="pcard__badge" data-en="${en.duration || p.duration}">${p.duration}</span>
-          ${p.category ? `<span class="pcard__cat">${p.category}</span>` : ''}
         </div>
         <div class="pcard__body">
           <p class="pcard__kicker">${p.tagline.join(' · ')}</p>
