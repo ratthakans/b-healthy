@@ -89,3 +89,46 @@ document.querySelectorAll('.detail').forEach(section => {
     li.addEventListener('focus', () => swap(li));
   });
 });
+
+// --- Wellness Retreats: hover a topic → gallery of 3–5 random photos for that topic ---
+(function () {
+  const gallery = document.getElementById('rtourGallery');
+  if (!gallery) return;
+  const items = document.querySelectorAll('.rtour__list li[data-topic]');
+  if (!items.length) return;
+
+  // How many photos exist per topic under images/tourism/<topic>/<topic>-N.jpg
+  const COUNTS = {
+    'stay-wellness': 6, 'local-route': 4, 'workshop-activities': 4, 'health-assessment': 6,
+    'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6
+  };
+
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  const render = topic => {
+    const total = COUNTS[topic] || 4;
+    const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
+    let show = Math.min(total, 3 + Math.floor(Math.random() * 3)); // 3–5
+    if (total < 3) show = total;
+    const pick = order.slice(0, show);
+    gallery.classList.add('is-fading');
+    setTimeout(() => {
+      gallery.dataset.count = show;
+      gallery.innerHTML = pick.map(i =>
+        `<figure class="rtour__tile"><img src="images/tourism/${topic}/${topic}-${i}.jpg" alt="" loading="lazy" /></figure>`
+      ).join('');
+      gallery.classList.remove('is-fading');
+    }, 170);
+  };
+
+  const setActive = li => items.forEach(x => x.classList.toggle('is-active', x === li));
+
+  items.forEach(li => {
+    li.tabIndex = 0;
+    const go = () => { setActive(li); render(li.dataset.topic); };
+    li.addEventListener('mouseenter', go);
+    li.addEventListener('focus', go);
+  });
+
+  render(items[0].dataset.topic); // initial set
+})();
