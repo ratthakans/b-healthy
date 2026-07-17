@@ -1009,15 +1009,19 @@ video.feature-hero__bg { background: var(--navy); }
 .detail__list li.is-active { color: var(--coral); }
 .detail__img--tall img { transition: opacity .22s var(--ease), transform .6s var(--ease); }
 
-/* Wellness Retreats — original layout (hero left · list center · stack right); hover a topic to swap in random photos */
-.rtour__list li { cursor: pointer; }
-/* Fixed-aspect frames so swapping photos never resizes the row (no bounce) — images cover-fill. */
+/* Wellness Retreats — original layout (hero left · list center · stack right); hover a topic to swap in random photos.
+   Photos are absolute-positioned so swapping them never changes the row height — the row follows the centre
+   list (= original tall proportions) and nothing bounces. */
 .rtour { align-items: stretch; }
-.rtour__hero { aspect-ratio: 3 / 4; height: auto; }
-.rtour__hero img { width: 100%; height: 100%; object-fit: cover; }
+.rtour__list li { cursor: pointer; }
+.rtour__hero img,
+.rtour__stack .detail__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .rtour__stack { display: flex; flex-direction: column; gap: 22px; }
-.rtour__stack .detail__img { flex: 1 1 0; min-height: 0; }
-.rtour__stack .detail__img img { width: 100%; height: 100%; object-fit: cover; }
+.rtour__stack .detail__img { flex: 1 1 0; }
+@media (max-width: 780px) {
+  .rtour__hero { min-height: 340px; }
+  .rtour__stack .detail__img { min-height: 200px; }
+}
 
 /* ===== Smooth anchor scrolling + offset so headings clear the fixed navbar ===== */
 html { scroll-behavior: smooth; }
