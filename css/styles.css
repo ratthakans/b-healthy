@@ -993,6 +993,16 @@ video.feature-hero__bg { background: var(--navy); }
 .detail__list li.is-active { color: var(--coral); font-weight: 500; }
 .detail__img--tall img { transition: opacity .22s var(--ease), transform .6s var(--ease); }
 
+/* ===== Smooth anchor scrolling + offset so headings clear the fixed navbar ===== */
+html { scroll-behavior: smooth; }
+[id] { scroll-margin-top: 88px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* ===== Scroll reveal — sections fade + slide up on entry (class added by reveal.js) ===== */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
 /* ===== About "What we do" — photo cards that crossfade to a 2nd image on hover ===== */
 .vcard { padding: 0; overflow: hidden; }
 .vcard:hover { box-shadow: 0 26px 44px -22px rgba(18,40,76,.4); }
