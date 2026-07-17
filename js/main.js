@@ -108,29 +108,29 @@ document.querySelectorAll('.detail').forEach(section => {
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const url = (topic, i) => `images/tourism/${topic}/${topic}-${i}.jpg`;
 
+  // Preload every topic photo up front so swaps are instant (no flash, no reflow).
+  Object.keys(COUNTS).forEach(t => { for (let i = 1; i <= COUNTS[t]; i++) { const im = new Image(); im.src = url(t, i); } });
+
   const render = topic => {
     const total = COUNTS[topic] || 4;
     const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
-    // Fixed count (1 hero + 2 stack) so the layout never shifts — only the photos change.
-    const show = Math.min(total, 3);
-    const pick = order.slice(0, show);
-    hero.style.opacity = '0';
-    stack.style.opacity = '0';
-    setTimeout(() => {
-      heroImg.src = url(topic, pick[0]);               // left: 1 big photo
-      stack.innerHTML = pick.slice(1).map(i =>          // right: the rest, stacked
-        `<figure class="detail__img"><img src="${url(topic, i)}" alt="" loading="lazy" /></figure>`
-      ).join('');
-      hero.style.opacity = '1';
-      stack.style.opacity = '1';
-    }, 170);
+    const pick = order.slice(0, Math.min(total, 3)); // fixed: 1 hero + 2 stack
+    heroImg.src = url(topic, pick[0]);
+    stack.innerHTML = pick.slice(1).map(i =>
+      `<figure class="detail__img"><img src="${url(topic, i)}" alt="" /></figure>`
+    ).join('');
   };
 
   const setActive = li => items.forEach(x => x.classList.toggle('is-active', x === li));
 
+  let hoverTimer = null;
   items.forEach(li => {
     li.tabIndex = 0;
-    const go = () => { setActive(li); render(li.dataset.topic); };
+    const go = () => {
+      setActive(li);
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => render(li.dataset.topic), 70); // debounce pass-through
+    };
     li.addEventListener('mouseenter', go);
     li.addEventListener('focus', go);
   });
