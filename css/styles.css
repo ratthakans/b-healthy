@@ -1005,7 +1005,8 @@ video.feature-hero__bg { background: var(--navy); }
 
 /* ===== Tourism / Workshop — hover a list item to swap the featured image ===== */
 .detail__list li[data-swap] { cursor: pointer; }
-.detail__list li.is-active { color: var(--coral); font-weight: 500; }
+/* Active = colour only (no weight change) so the list never reflows / bounces */
+.detail__list li.is-active { color: var(--coral); }
 .detail__img--tall img { transition: opacity .22s var(--ease), transform .6s var(--ease); }
 
 /* Wellness Retreats — original layout (hero left · list center · stack right); hover a topic to swap in random photos */
