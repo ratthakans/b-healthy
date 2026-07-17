@@ -18,7 +18,7 @@
   <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
   <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="css/styles.css?v=20260717k" />
+  <link rel="stylesheet" href="css/styles.css?v=20260717l" />
 </head>
 <body>
 
@@ -167,8 +167,10 @@
         </p>
       </div>
 
-      <!-- Hover a topic → gallery shows 3–5 random photos for that topic (js/main.js) -->
-      <div class="rtour">
+      <!-- Hover a topic → left hero + right stack swap to random photos of that topic (js/main.js) -->
+      <div class="detail__grid rtour">
+        <figure class="detail__img detail__img--tall rtour__hero" id="rtourHero"><img src="images/tourism/stay-wellness/stay-wellness-1.jpg" alt="" /></figure>
+
         <ul class="detail__list rtour__list">
           <li data-topic="stay-wellness" class="is-active">Stay Wellness</li>
           <li class="is-accent" data-topic="local-route">Trip &amp; Stay</li>
@@ -180,7 +182,8 @@
           <li data-topic="horo-health">Horo-Health</li>
           <li class="is-accent" data-topic="workshop-activities">Workshop Activities</li>
         </ul>
-        <div class="rtour__gallery" id="rtourGallery" aria-live="polite"></div>
+
+        <div class="detail__stack rtour__stack" id="rtourStack" aria-live="polite"></div>
       </div>
 
       <div class="detail__cta">
@@ -432,7 +435,7 @@
   <script src="js/config.js?v=20260717d"></script>
   <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/main.js?v=20260717k"></script>
+  <script src="js/main.js?v=20260717l"></script>
   <script src="js/reveal.js?v=20260717g"></script>
 </body>
 </html>

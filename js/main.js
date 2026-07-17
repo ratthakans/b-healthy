@@ -90,10 +90,12 @@ document.querySelectorAll('.detail').forEach(section => {
   });
 });
 
-// --- Wellness Retreats: hover a topic → gallery of 3–5 random photos for that topic ---
+// --- Wellness Retreats: hover a topic → left hero + right stack show random photos of that topic ---
 (function () {
-  const gallery = document.getElementById('rtourGallery');
-  if (!gallery) return;
+  const hero = document.getElementById('rtourHero');
+  const stack = document.getElementById('rtourStack');
+  if (!hero || !stack) return;
+  const heroImg = hero.querySelector('img');
   const items = document.querySelectorAll('.rtour__list li[data-topic]');
   if (!items.length) return;
 
@@ -104,20 +106,23 @@ document.querySelectorAll('.detail').forEach(section => {
   };
 
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const url = (topic, i) => `images/tourism/${topic}/${topic}-${i}.jpg`;
 
   const render = topic => {
     const total = COUNTS[topic] || 4;
     const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
-    let show = Math.min(total, 3 + Math.floor(Math.random() * 3)); // 3–5
+    let show = Math.min(total, 3 + Math.floor(Math.random() * 3)); // 3–5 total
     if (total < 3) show = total;
     const pick = order.slice(0, show);
-    gallery.classList.add('is-fading');
+    hero.style.opacity = '0';
+    stack.style.opacity = '0';
     setTimeout(() => {
-      gallery.dataset.count = show;
-      gallery.innerHTML = pick.map(i =>
-        `<figure class="rtour__tile"><img src="images/tourism/${topic}/${topic}-${i}.jpg" alt="" loading="lazy" /></figure>`
+      heroImg.src = url(topic, pick[0]);               // left: 1 big photo
+      stack.innerHTML = pick.slice(1).map(i =>          // right: the rest, stacked
+        `<figure class="detail__img"><img src="${url(topic, i)}" alt="" loading="lazy" /></figure>`
       ).join('');
-      gallery.classList.remove('is-fading');
+      hero.style.opacity = '1';
+      stack.style.opacity = '1';
     }, 170);
   };
 

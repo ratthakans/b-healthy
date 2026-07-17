@@ -1008,17 +1008,9 @@ video.feature-hero__bg { background: var(--navy); }
 .detail__list li.is-active { color: var(--coral); font-weight: 500; }
 .detail__img--tall img { transition: opacity .22s var(--ease), transform .6s var(--ease); }
 
-/* Wellness Retreats — hover a topic to reveal a gallery of that topic's photos */
-.rtour { display: grid; grid-template-columns: 280px 1fr; gap: 44px; align-items: start; }
-.rtour__list { padding-top: 4px; }
+/* Wellness Retreats — original layout (hero left · list center · stack right); hover a topic to swap in random photos */
 .rtour__list li { cursor: pointer; }
-.rtour__gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; transition: opacity .2s var(--ease); min-height: 260px; }
-.rtour__gallery.is-fading { opacity: 0; }
-.rtour__tile { margin: 0; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 5; box-shadow: var(--shadow-sm); }
-.rtour__tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s var(--ease); }
-.rtour__tile:hover img { transform: scale(1.05); }
-@media (max-width: 820px) { .rtour { grid-template-columns: 1fr; gap: 24px; } }
-@media (max-width: 520px) { .rtour__gallery { grid-template-columns: repeat(2, 1fr); } }
+.rtour__hero, .rtour__stack { transition: opacity .2s var(--ease); }
 
 /* ===== Smooth anchor scrolling + offset so headings clear the fixed navbar ===== */
 html { scroll-behavior: smooth; }
