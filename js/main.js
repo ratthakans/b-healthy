@@ -111,8 +111,8 @@ document.querySelectorAll('.detail').forEach(section => {
   const render = topic => {
     const total = COUNTS[topic] || 4;
     const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
-    let show = Math.min(total, 3 + Math.floor(Math.random() * 3)); // 3–5 total
-    if (total < 3) show = total;
+    // Fixed count (1 hero + 2 stack) so the layout never shifts — only the photos change.
+    const show = Math.min(total, 3);
     const pick = order.slice(0, show);
     hero.style.opacity = '0';
     stack.style.opacity = '0';
