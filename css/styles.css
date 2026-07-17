@@ -505,8 +505,8 @@ video.feature-hero__bg { background: var(--navy); }
 .nav__links a.is-active { color: var(--brand-cyan); font-weight: 600; }
 
 /* Pill section header (script word + gradient pill) */
-.pill-head { display: flex; align-items: center; justify-content: center; gap: 0; margin: 0 0 40px; position: relative; }
-.pill-head__script { font-family: "Dancing Script", cursive; font-size: 2rem; color: var(--script); margin-right: -14px; transform: translateY(-10px); z-index: 2; }
+.pill-head { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 0 40px; position: relative; }
+.pill-head__script { font-family: "Dancing Script", cursive; font-size: 1.75rem; color: var(--script); line-height: 1.05; }
 .pill-head__pill { background: var(--pill-grad); color: #fff; font-family: var(--font-en); font-weight: 600; letter-spacing: .12em; font-size: .95rem; padding: 12px 34px; border-radius: 999px; box-shadow: 0 12px 26px -14px rgba(90,110,210,.8); }
 
 /* ============================================================
