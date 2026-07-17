@@ -67,54 +67,26 @@ document.querySelectorAll('.play-btn').forEach(btn =>
 vmodal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeVideo));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !vmodal.hidden) closeVideo(); });
 
-// --- Wellness Tourism / Workshop: hover a list item to swap the featured image ---
-document.querySelectorAll('.detail').forEach(section => {
-  const heroImg = section.querySelector('.detail__img--tall img');
-  const items = section.querySelectorAll('.detail__list li[data-swap]');
-  if (!heroImg || !items.length) return;
-
-  items.forEach(li => { const pre = new Image(); pre.src = li.dataset.swap; }); // preload swaps
-
-  const swap = li => {
-    items.forEach(x => x.classList.toggle('is-active', x === li));
-    const src = li.dataset.swap;
-    if (heroImg.getAttribute('src') === src) return;
-    heroImg.style.opacity = '0';
-    setTimeout(() => { heroImg.setAttribute('src', src); heroImg.style.opacity = '1'; }, 150);
-  };
-
-  items.forEach(li => {
-    li.tabIndex = 0;
-    li.addEventListener('mouseenter', () => swap(li));
-    li.addEventListener('focus', () => swap(li));
-  });
-});
-
-// --- Wellness Retreats: hover a topic → left hero + right stack show random photos of that topic ---
-(function () {
-  const hero = document.getElementById('rtourHero');
-  const stack = document.getElementById('rtourStack');
+// --- Wellness Retreats / Workshop: hover a topic → hero + stack show random photos of that topic ---
+function initTopicGallery(opts) {
+  const hero = document.getElementById(opts.heroId);
+  const stack = document.getElementById(opts.stackId);
   if (!hero || !stack) return;
   const heroImg = hero.querySelector('img');
-  const items = document.querySelectorAll('.rtour__list li[data-topic]');
+  const items = document.querySelectorAll(opts.listSel + ' li[data-topic]');
   if (!items.length) return;
 
-  // How many photos exist per topic under images/tourism/<topic>/<topic>-N.jpg
-  const COUNTS = {
-    'stay-wellness': 6, 'local-route': 4, 'workshop-activities': 4, 'health-assessment': 6,
-    'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6
-  };
-
+  const COUNTS = opts.counts;
   const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const url = (topic, i) => `images/tourism/${topic}/${topic}-${i}.jpg`;
+  const url = (topic, i) => `${opts.base}/${topic}/${topic}-${i}.jpg`;
 
-  // Preload every topic photo up front so swaps are instant (no flash, no reflow).
+  // Preload every topic photo so swaps are instant (no flash / no reflow).
   Object.keys(COUNTS).forEach(t => { for (let i = 1; i <= COUNTS[t]; i++) { const im = new Image(); im.src = url(t, i); } });
 
   const render = topic => {
     const total = COUNTS[topic] || 4;
     const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
-    const pick = order.slice(0, Math.min(total, 3)); // fixed: 1 hero + 2 stack
+    const pick = order.slice(0, Math.min(total, 3)); // fixed: 1 hero + 2 stack, so the row never resizes
     heroImg.src = url(topic, pick[0]);
     stack.innerHTML = pick.slice(1).map(i =>
       `<figure class="detail__img"><img src="${url(topic, i)}" alt="" /></figure>`
@@ -136,4 +108,13 @@ document.querySelectorAll('.detail').forEach(section => {
   });
 
   render(items[0].dataset.topic); // initial set
-})();
+}
+
+initTopicGallery({
+  heroId: 'rtourHero', stackId: 'rtourStack', listSel: '.detail--tourism .rtour__list', base: 'images/tourism',
+  counts: { 'stay-wellness': 6, 'local-route': 4, 'workshop-activities': 4, 'health-assessment': 6, 'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6 }
+});
+initTopicGallery({
+  heroId: 'wkHero', stackId: 'wkStack', listSel: '.detail--workshop .rtour__list', base: 'images/workshop',
+  counts: { 'office-syndrome': 14, 'sound-healing': 7, 'yoga-meditation': 8, 'elemental-aroma-oil': 12, 'personalized-herbal-tea': 14, 'flower-mandala': 3 }
+});

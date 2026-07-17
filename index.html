@@ -145,28 +145,20 @@
         </p>
       </div>
 
-      <div class="detail__grid detail__grid--reverse">
-        <div class="detail__stack">
-          <figure class="detail__img">
-            <img data-img="workshop-1" src="images/photos/h-workshop1.jpg" alt="กิจกรรมทีม" />
-          </figure>
-          <figure class="detail__img">
-            <img data-img="workshop-2" src="images/photos/h-workshop2.jpg" alt="โยคะในออฟฟิศ" />
-          </figure>
-        </div>
+      <!-- Hover a topic → stack (left) + hero (right) swap to random photos of that topic (js/main.js) -->
+      <div class="detail__grid detail__grid--reverse rtour">
+        <div class="detail__stack rtour__stack" id="wkStack" aria-live="polite"></div>
 
-        <ul class="detail__list">
-          <li class="is-accent" data-swap="images/photos/h-workshop1.jpg">Office Syndrome</li>
-          <li data-swap="images/photos/h-workshop2.jpg">Sound Healing</li>
-          <li data-swap="images/photos/h-workshop3.jpg">Yoga &amp; Meditation</li>
-          <li data-swap="images/photos/h-workshop1.jpg">Elemental Aroma Oil</li>
-          <li data-swap="images/photos/h-workshop2.jpg">Personalized Herbal Tea</li>
-          <li data-swap="images/photos/h-workshop3.jpg">Flower Mandala</li>
+        <ul class="detail__list rtour__list">
+          <li class="is-accent is-active" data-topic="office-syndrome">Office Syndrome</li>
+          <li data-topic="sound-healing">Sound Healing</li>
+          <li data-topic="yoga-meditation">Yoga &amp; Meditation</li>
+          <li data-topic="elemental-aroma-oil">Elemental Aroma Oil</li>
+          <li data-topic="personalized-herbal-tea">Personalized Herbal Tea</li>
+          <li data-topic="flower-mandala">Flower Mandala</li>
         </ul>
 
-        <figure class="detail__img detail__img--tall">
-          <img data-img="workshop-3" src="images/photos/h-workshop3.jpg" alt="เวิร์กชอปสุขภาพ" />
-        </figure>
+        <figure class="detail__img detail__img--tall rtour__hero" id="wkHero"><img src="images/workshop/office-syndrome/office-syndrome-1.jpg" alt="" /></figure>
       </div>
 
       <div class="detail__cta">
@@ -365,7 +357,7 @@
   <script src="js/config.js?v=20260717d"></script>
   <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/main.js?v=20260717n"></script>
+  <script src="js/main.js?v=20260717o"></script>
   <script src="js/reveal.js?v=20260717g"></script>
 </body>
 </html>
