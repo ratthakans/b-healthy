@@ -454,7 +454,8 @@ video.feature-hero__bg { background: var(--navy); }
 .footer__qr img { width: 92px; height: auto; border-radius: 10px; margin-bottom: 6px; display: block; }
 .footer__qr span { font-size: .72rem; color: rgba(255,255,255,.6); }
 .footer__bottom { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.12); font-size: .8rem; color: rgba(255,255,255,.5); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.footer__dbd img { display: block; height: 44px; width: auto; border-radius: 6px; }
+.footer__dbd { display: inline-flex; background: #fff; padding: 6px 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.footer__dbd img { display: block; height: 40px; width: auto; }
 @media (max-width: 640px) { .footer__bottom { flex-direction: column; text-align: center; } }
 
 /* ============================================================
