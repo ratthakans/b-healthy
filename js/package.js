@@ -88,11 +88,17 @@
       </div>
     </section>
 
-    <!-- INCLUDES (moved up: value first, right under the price) -->
+    <!-- VENUE (right after overview) -->
     <section class="pkg-sec pkg-sec--tint">
       <div class="container">
-        <div class="pill-head"><span class="pill-head__pill">PACKAGE INCLUDES</span></div>
-        <ul class="pkg-includes">${includes}</ul>
+        <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
+        <div class="pkg-venue">
+          <div class="pkg-venue__text">
+            <h3>${p.venue.name}</h3>
+            <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
+          </div>
+          <div class="pkg-venue__imgs">${venueImgs}</div>
+        </div>
       </div>
     </section>
 
@@ -112,17 +118,11 @@
       </div>
     </section>
 
-    <!-- VENUE -->
+    <!-- INCLUDES (right before Book package) -->
     <section class="pkg-sec">
       <div class="container">
-        <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
-        <div class="pkg-venue">
-          <div class="pkg-venue__text">
-            <h3>${p.venue.name}</h3>
-            <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
-          </div>
-          <div class="pkg-venue__imgs">${venueImgs}</div>
-        </div>
+        <div class="pill-head"><span class="pill-head__pill">PACKAGE INCLUDES</span></div>
+        <ul class="pkg-includes">${includes}</ul>
       </div>
     </section>
 
