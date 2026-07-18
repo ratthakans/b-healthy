@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Package Manager — B-Healthy</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#12284c;--blue:#425cc7;--teal:#1ecad3;--ink:#2b3a52;--muted:#6f7d90;
+      --line:rgba(18,40,76,.12);--bg:#f4f7fb;--card:#fff;--ok:#1a9e6a;--warn:#c9820e;--danger:#d8443a;
+      --radius:14px;--font:"Albert Sans","Kanit",sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+    a{color:var(--blue)}
+    .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
+    /* topbar */
+    .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 20px;background:var(--navy);color:#fff;position:sticky;top:0;z-index:10}
+    .top__brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem}
+    .top__brand img{width:26px;height:26px}
+    .top__brand small{font-weight:400;opacity:.7;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+    .top__sp{flex:1}
+    .top .btn{margin-left:0}
+    .who{font-size:.82rem;opacity:.85}
+    /* buttons */
+    .btn{font-family:var(--font);font-weight:600;font-size:.86rem;border:0;border-radius:999px;padding:9px 18px;cursor:pointer;background:var(--blue);color:#fff;transition:filter .15s,transform .15s;white-space:nowrap}
+    .btn:hover{filter:brightness(1.08)}
+    .btn:active{transform:translateY(1px)}
+    .btn--ghost{background:rgba(255,255,255,.14);color:#fff}
+    .btn--soft{background:#eef1f7;color:var(--ink)}
+    .btn--ok{background:var(--ok)}
+    .btn--warn{background:var(--warn)}
+    .btn--danger{background:var(--danger)}
+    .btn--sm{padding:6px 13px;font-size:.78rem}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    /* login */
+    .login{max-width:380px;margin:9vh auto 0;background:var(--card);border-radius:20px;box-shadow:0 20px 50px -24px rgba(18,40,76,.4);padding:38px 34px}
+    .login h1{font-size:1.3rem;color:var(--navy);margin-bottom:4px}
+    .login p{color:var(--muted);font-size:.9rem;margin-bottom:22px}
+    .login .logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--navy);margin-bottom:20px;font-size:1.15rem}
+    .login .logo img{width:30px;height:30px}
+    label{display:block;font-size:.8rem;font-weight:600;color:var(--ink);margin:14px 0 5px}
+    input,select,textarea{width:100%;font-family:var(--font);font-size:.92rem;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
+    textarea{resize:vertical;min-height:74px;line-height:1.5;font-size:.85rem}
+    textarea.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem}
+    .msg{font-size:.85rem;margin-top:14px;padding:10px 12px;border-radius:8px;display:none}
+    .msg.show{display:block}
+    .msg--err{background:#fdecea;color:var(--danger)}
+    .msg--ok{background:#e7f6ef;color:var(--ok)}
+    .hide{display:none!important}
+    /* list */
+    .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 16px}
+    .bar h2{font-size:1.15rem;color:var(--navy)}
+    .bar .sp{flex:1}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+    .row__thumb{width:54px;height:40px;border-radius:8px;object-fit:cover;background:#e7ecf3;flex:none}
+    .row__main{flex:1;min-width:0}
+    .row__name{font-weight:600;color:var(--navy);font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .row__meta{font-size:.76rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+    .tag{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+    .tag--retreat{background:#e6f0fb;color:var(--blue)}
+    .tag--workshop{background:#e3f7f8;color:#0f9ba3}
+    .tag--published{background:#e7f6ef;color:var(--ok)}
+    .tag--draft{background:#fbf0dd;color:var(--warn)}
+    .row__acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    /* editor */
+    .editor{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px clamp(18px,3vw,30px);margin-top:8px}
+    .editor h2{font-size:1.2rem;color:var(--navy);margin-bottom:4px}
+    .editor .hint{color:var(--muted);font-size:.84rem;margin-bottom:18px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+    .grid .full{grid-column:1 / -1}
+    .colors{display:flex;gap:10px}
+    .colors label{flex:1}
+    .colors input[type=color]{height:42px;padding:4px}
+    .foot{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+    .foot .sp{flex:1}
+    details{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:0 14px}
+    details summary{cursor:pointer;font-weight:600;font-size:.86rem;color:var(--navy);padding:12px 0}
+    details[open]{padding-bottom:14px}
+    .empty{text-align:center;color:var(--muted);padding:50px 20px;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius)}
+    @media(max-width:640px){
+      .grid{grid-template-columns:1fr}
+      .row{flex-wrap:wrap}
+      .row__acts{width:100%;justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="loginView">
+    <div class="login">
+      <div class="logo"><img src="images/logo.svg" alt="" /> B-Healthy</div>
+      <h1>Package Manager</h1>
+      <p>Sign in to manage retreats &amp; workshops.</p>
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="username" required />
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" required />
+        <div style="margin-top:20px"><button class="btn" style="width:100%" type="submit" id="loginBtn">Sign in</button></div>
+        <div class="msg msg--err" id="loginMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appView" class="hide">
+    <div class="top">
+      <div class="top__brand"><img src="images/logo.svg" alt="" /> B-Healthy <small>Package Manager</small></div>
+      <div class="top__sp"></div>
+      <span class="who" id="whoami"></span>
+      <button class="btn btn--ghost btn--sm" id="signOut">Sign out</button>
+    </div>
+
+    <div class="wrap">
+      <!-- LIST -->
+      <div id="listView">
+        <div class="bar">
+          <h2>Packages</h2>
+          <div class="sp"></div>
+          <button class="btn btn--soft btn--sm" id="importBtn" title="Load the packages currently hard-coded on the site into the database">↧ Import current packages</button>
+          <button class="btn btn--sm" id="newBtn">+ New package</button>
+        </div>
+        <div class="msg" id="listMsg"></div>
+        <div class="list" id="list"></div>
+      </div>
+
+      <!-- EDITOR -->
+      <div id="editorView" class="hide">
+        <div class="editor">
+          <h2 id="editorTitle">New package</h2>
+          <p class="hint">Fields marked with JSON accept raw JSON — leave <code>venue</code>/<code>itinerary</code> empty for workshops.</p>
+          <form id="editorForm">
+            <div class="grid">
+              <label class="" >Slug / ID<input id="f_id" placeholder="e.g. amphawa" required /></label>
+              <label>Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
+              <label>Type
+                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option></select>
+              </label>
+              <label>Status
+                <select id="f_status"><option value="published">Published (live)</option><option value="draft">Draft (hidden)</option></select>
+              </label>
+              <label>Sort order<input id="f_sort" type="number" value="0" /></label>
+              <label>Category<input id="f_category" placeholder="Corporate" /></label>
+              <label>Province (retreat filter)<input id="f_province" placeholder="Amphawa" /></label>
+              <label>Kicker<input id="f_kicker" placeholder="Mindful Escape" /></label>
+              <label class="full">Tagline (comma-separated)<input id="f_tagline" placeholder="Reconnect, Recharge, Rebalance" /></label>
+              <label class="full">Location<input id="f_location" placeholder="ริมคลองอัมพวา · สมุทรสงคราม" /></label>
+              <label>Duration<input id="f_duration" placeholder="2 วัน 1 คืน" /></label>
+              <label>Group<input id="f_group" placeholder="สำหรับกลุ่ม 10–12 ท่าน" /></label>
+              <label>Price now<input id="f_priceNow" placeholder="6,500 หรือ ติดต่อสอบถาม" /></label>
+              <label>Price old (strike)<input id="f_priceOld" placeholder="10,900" /></label>
+              <label>Price unit<input id="f_priceUnit" placeholder="บาท / ท่าน" /></label>
+              <label>Price note<input id="f_priceNote" placeholder="พัก 1 ท่าน ..." /></label>
+              <label class="full">Hero image URL<input id="f_hero" placeholder="images/photos/amphawa.jpg" /></label>
+              <div class="full colors">
+                <label>Theme primary<input type="color" id="f_theme_primary" value="#1ecad3" /></label>
+                <label>Accent<input type="color" id="f_theme_accent" value="#425cc7" /></label>
+                <label>Tint<input type="color" id="f_theme_tint" value="#e6f4f8" /></label>
+              </div>
+              <label class="full">Intro (overview paragraph)<textarea id="f_intro"></textarea></label>
+              <label class="full">Includes (one per line)<textarea id="f_includes" placeholder="ที่พัก 1 คืน&#10;อาหารสุขภาพ 2 มื้อ"></textarea></label>
+            </div>
+
+            <details>
+              <summary>Experiences / agenda (JSON array)</summary>
+              <textarea id="f_experiences" class="code" placeholder='[{"title":"Yoga","th":"โยคะ","desc":"...","img":"..."}]'></textarea>
+            </details>
+            <details>
+              <summary>Venue (JSON object — retreats only)</summary>
+              <textarea id="f_venue" class="code" placeholder='{"name":"...","desc":"...","images":["..."]}'></textarea>
+            </details>
+            <details>
+              <summary>Itinerary (JSON array — retreats only)</summary>
+              <textarea id="f_itinerary" class="code" placeholder='[{"day":"Day 1","title":"...","items":[{"time":"13.00","text":"..."}]}]'></textarea>
+            </details>
+            <details>
+              <summary>English overrides (JSON object)</summary>
+              <textarea id="f_en" class="code" placeholder='{"duration":"2 Days 1 Night","includes":["..."]}'></textarea>
+            </details>
+
+            <div class="msg msg--err" id="editorMsg"></div>
+            <div class="foot">
+              <button type="button" class="btn btn--soft" id="cancelBtn">← Back</button>
+              <span class="sp"></span>
+              <a class="btn btn--soft" id="previewBtn" target="_blank" rel="noopener">Preview ↗</a>
+              <button type="submit" class="btn btn--ok" id="saveBtn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=20260717d"></script>
+  <script src="js/packages.js?v=20260717u"></script>
+  <script src="js/workshops-data.js?v=20260718a"></script>
+  <script src="js/admin.js?v=20260718f"></script>
+</body>
+</html>

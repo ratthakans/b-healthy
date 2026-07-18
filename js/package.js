@@ -4,8 +4,10 @@
 // ============================================================
 (function () {
   const root = document.getElementById('pkg');
-  if (!root || !window.PACKAGES) return;
+  if (!root) return;
 
+  function render() {
+  if (!window.PACKAGES) return;
   const id = new URLSearchParams(location.search).get('id');
   const p = window.PACKAGES[id];
   const en = (window.PACKAGES_EN || {})[id] || {};
@@ -189,4 +191,8 @@
 
   // apply current language to freshly rendered content
   if (window.bhApplyLang) window.bhApplyLang();
+  }
+
+  render();
+  document.addEventListener('bh:packages-ready', render);
 })();

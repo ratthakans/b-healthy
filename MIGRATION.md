@@ -74,14 +74,44 @@ and optional; both run if configured.
 
 ---
 
+## Package management (back-office) — add / edit / publish packages
+
+By default the retreats & workshops are read from the built-in files
+(`js/packages.js`, `js/workshops-data.js`). To manage them from a **web
+admin** instead — no code edits — turn on the Supabase package store:
+
+1. **Create the table** — Supabase → SQL Editor → paste
+   [`supabase-packages.sql`](supabase-packages.sql) → **Run**.
+2. **Add the keys** — put the project **URL** + **anon public** key in
+   [`js/config.js`](js/config.js) (same 2 values as the forms — one config
+   powers both), then `git commit && git push`.
+3. **Create a staff login** — Supabase → **Authentication → Users → Add user**
+   → enter the team's email + password (tick *Auto Confirm User*).
+4. **Open the admin** — go to `/admin.html`, sign in, and click
+   **"Import current packages"** once to load everything currently on the site
+   into the database. From then on, edit/add/publish there.
+
+How it behaves:
+
+- The public site reads **published** packages live from the DB. Drafts stay
+  hidden. Reorder with the **sort** field (low number = shown first).
+- If Supabase is **not** configured, or the table is empty, or unreachable, the
+  site silently falls back to the built-in files — **it never breaks**.
+- Security: the anon key is safe in the browser (Row Level Security lets the
+  public *read published only*; all writes require a signed-in staff user).
+  `/admin.html` is `noindex` + disallowed in `robots.txt`.
+
+---
+
 ## Migrate to the client (Vercel `bh-ealthy` + client Supabase)
 
 1. **GitHub** — transfer the repo to the client's/agency's org (Settings →
    Transfer ownership), or invite them as a collaborator.
 2. **Vercel (bh-ealthy)** — Add New → **Import Git Repository** → pick the repo
    → **Deploy**. (Static site, no build settings.) Auto-deploy from then on.
-3. **Supabase (client)** — repeat the 3 "Turn ON the forms" steps in the
-   client's Supabase project (run the SQL, swap the 2 keys in `js/config.js`).
+3. **Supabase (client)** — in the client's Supabase project, run both
+   `supabase-setup.sql` (forms) and `supabase-packages.sql` (package manager),
+   then swap the 2 keys in `js/config.js`. Add a staff user for `/admin.html`.
 4. **Domain** — add `b-healthy.co` under the client's Vercel project → Domains.
 
 No code changes are required for any of the above.

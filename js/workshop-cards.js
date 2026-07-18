@@ -7,8 +7,10 @@
   const grid = document.getElementById('wkGrid');
   const filtersEl = document.getElementById('wkFilters');
   const emptyEl = document.getElementById('wkEmpty');
-  if (!grid || !window.WORKSHOPS) return;
+  if (!grid) return;
 
+  function render() {
+  if (!window.WORKSHOPS || !window.WORKSHOP_ORDER) return;
   const EN = window.WORKSHOPS_EN || {};
 
   // --- Cards (identical markup to retreat .pcard) ---
@@ -40,8 +42,6 @@
       </a>`;
   }).join('');
 
-  const cards = [...grid.querySelectorAll('.pcard')];
-
   // --- Filter pills (by focus: Body / Mind) ---
   if (filtersEl) {
     const cats = [...new Set(window.WORKSHOP_ORDER.map(id => window.WORKSHOPS[id].category))];
@@ -50,7 +50,13 @@
     filtersEl.innerHTML = pills.map((p, i) =>
       `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${p.f}" data-en="${p.en}">${p.th}</button>`
     ).join('');
+  }
 
+  if (window.bhApplyLang) window.bhApplyLang();
+  }
+
+  // Filter clicks — bound once via delegation (cards re-queried live)
+  if (filtersEl) {
     filtersEl.addEventListener('click', e => {
       const btn = e.target.closest('.prog__filter');
       if (!btn) return;
@@ -58,7 +64,7 @@
       btn.classList.add('is-active');
       const f = btn.dataset.filter;
       let shown = 0;
-      cards.forEach(card => {
+      grid.querySelectorAll('.pcard').forEach(card => {
         const match = f === '*' || card.dataset.category === f;
         card.classList.toggle('is-hidden', !match);
         if (match) shown++;
@@ -67,5 +73,6 @@
     });
   }
 
-  if (window.bhApplyLang) window.bhApplyLang();
+  render();
+  document.addEventListener('bh:packages-ready', render);
 })();

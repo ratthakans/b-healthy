@@ -1,0 +1,235 @@
+// ============================================================
+// B-Healthy — Package Manager (admin.html)
+// Auth + CRUD against the Supabase `packages` table.
+// Account-agnostic: reads keys from js/config.js (BH_CONFIG).
+// ============================================================
+(function () {
+  const $ = id => document.getElementById(id);
+  const cfg = window.BH_CONFIG || {};
+  const url = (cfg.SUPABASE_URL || '').replace(/\/$/, '');
+  const key = cfg.SUPABASE_ANON_KEY || '';
+
+  const loginView = $('loginView'), appView = $('appView');
+  const listView = $('listView'), editorView = $('editorView');
+
+  // ---- Not configured yet ----
+  if (!url || !key || !window.supabase) {
+    showMsg('loginMsg', 'err',
+      'Supabase is not connected yet. Add SUPABASE_URL + SUPABASE_ANON_KEY to js/config.js (see MIGRATION.md), then reload.');
+    $('loginForm').querySelectorAll('input,button').forEach(el => el.disabled = true);
+    return;
+  }
+
+  const sb = window.supabase.createClient(url, key);
+  let rowsCache = [];
+
+  // ---------- helpers ----------
+  function showMsg(elId, kind, text) {
+    const el = $(elId); if (!el) return;
+    el.textContent = text;
+    el.className = 'msg ' + (kind === 'ok' ? 'msg--ok' : 'msg--err') + ' show';
+  }
+  function clearMsg(elId) { const el = $(elId); if (el) el.className = 'msg'; }
+  const splitComma = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
+  const linesToArr = s => (s || '').split('\n').map(x => x.trim()).filter(Boolean);
+  function parseJSONField(val, fallback, label) {
+    const t = (val || '').trim();
+    if (!t) return fallback;
+    try { return JSON.parse(t); }
+    catch (e) { throw new Error(`Invalid JSON in "${label}": ${e.message}`); }
+  }
+  const esc = s => String(s == null ? '' : s);
+
+  // ---------- views ----------
+  function showLogin() { loginView.classList.remove('hide'); appView.classList.add('hide'); }
+  function showApp(email) {
+    loginView.classList.add('hide'); appView.classList.remove('hide');
+    $('whoami').textContent = email || '';
+    showList();
+  }
+  function showList() { editorView.classList.add('hide'); listView.classList.remove('hide'); loadList(); }
+  function showEditor() { listView.classList.add('hide'); editorView.classList.remove('hide'); }
+
+  // ---------- auth ----------
+  sb.auth.getSession().then(({ data }) => {
+    if (data.session) showApp(data.session.user.email); else showLogin();
+  });
+
+  $('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    clearMsg('loginMsg');
+    const btn = $('loginBtn'); btn.disabled = true; btn.textContent = 'Signing in…';
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: $('email').value.trim(), password: $('password').value
+    });
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (error) { showMsg('loginMsg', 'err', error.message); return; }
+    showApp(data.user.email);
+  });
+
+  $('signOut').addEventListener('click', async () => { await sb.auth.signOut(); showLogin(); });
+
+  // ---------- list ----------
+  async function loadList() {
+    clearMsg('listMsg');
+    $('list').innerHTML = '<div class="empty">Loading…</div>';
+    const { data, error } = await sb.from('packages')
+      .select('id,type,status,sort,name,data,en').order('type').order('sort');
+    if (error) { $('list').innerHTML = ''; showMsg('listMsg', 'err', error.message); return; }
+    rowsCache = data || [];
+    if (!rowsCache.length) {
+      $('list').innerHTML = '<div class="empty">No packages yet.<br>Click “Import current packages” to load what’s on the site now, or “+ New package”.</div>';
+      return;
+    }
+    $('list').innerHTML = rowsCache.map(r => {
+      const hero = (r.data && r.data.hero) || '';
+      return `<div class="row" data-id="${esc(r.id)}">
+        <img class="row__thumb" src="${esc(hero)}" alt="" onerror="this.style.visibility='hidden'" />
+        <div class="row__main">
+          <div class="row__name">${esc(r.name || r.id)}</div>
+          <div class="row__meta">
+            <span class="tag tag--${r.type === 'workshop' ? 'workshop' : 'retreat'}">${r.type}</span>
+            <span class="tag tag--${r.status === 'published' ? 'published' : 'draft'}">${r.status}</span>
+            <span>sort ${r.sort}</span><span>·</span><span>${esc(r.id)}</span>
+          </div>
+        </div>
+        <div class="row__acts">
+          <button class="btn btn--soft btn--sm" data-act="edit">Edit</button>
+          <button class="btn btn--sm ${r.status === 'published' ? 'btn--warn' : 'btn--ok'}" data-act="toggle">${r.status === 'published' ? 'Unpublish' : 'Publish'}</button>
+          <button class="btn btn--danger btn--sm" data-act="del">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  $('list').addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-act]'); if (!btn) return;
+    const id = e.target.closest('.row').dataset.id;
+    const row = rowsCache.find(r => r.id === id); if (!row) return;
+    const act = btn.dataset.act;
+    if (act === 'edit') { openEditor(row); }
+    else if (act === 'toggle') {
+      const next = row.status === 'published' ? 'draft' : 'published';
+      btn.disabled = true;
+      const { error } = await sb.from('packages').update({ status: next }).eq('id', id);
+      if (error) showMsg('listMsg', 'err', error.message); else loadList();
+    }
+    else if (act === 'del') {
+      if (!confirm(`Delete "${row.name || id}"? This cannot be undone.`)) return;
+      const { error } = await sb.from('packages').delete().eq('id', id);
+      if (error) showMsg('listMsg', 'err', error.message); else loadList();
+    }
+  });
+
+  // ---------- import current (seed) ----------
+  $('importBtn').addEventListener('click', async () => {
+    const rows = [];
+    (window.PACKAGE_ORDER || []).forEach((id, i) => {
+      const o = window.PACKAGES[id]; if (o) rows.push({ id, type: 'retreat', status: 'published', sort: i, name: o.name, data: o, en: (window.PACKAGES_EN || {})[id] || {} });
+    });
+    (window.WORKSHOP_ORDER || []).forEach((id, i) => {
+      const o = (window.WORKSHOPS || {})[id] || window.PACKAGES[id]; if (o) rows.push({ id, type: 'workshop', status: 'published', sort: i, name: o.name, data: o, en: (window.PACKAGES_EN || {})[id] || {} });
+    });
+    if (!rows.length) { showMsg('listMsg', 'err', 'No hard-coded packages found to import.'); return; }
+    if (!confirm(`Import ${rows.length} packages from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
+    const btn = $('importBtn'); btn.disabled = true; btn.textContent = 'Importing…';
+    const { error } = await sb.from('packages').upsert(rows, { onConflict: 'id' });
+    btn.disabled = false; btn.textContent = '↧ Import current packages';
+    if (error) showMsg('listMsg', 'err', error.message);
+    else { showMsg('listMsg', 'ok', `Imported ${rows.length} packages.`); loadList(); }
+  });
+
+  // ---------- editor ----------
+  $('newBtn').addEventListener('click', () => openEditor(null));
+  $('cancelBtn').addEventListener('click', showList);
+  $('f_id').addEventListener('input', updatePreview);
+
+  function updatePreview() {
+    $('previewBtn').href = 'package.html?id=' + encodeURIComponent($('f_id').value.trim());
+  }
+
+  function openEditor(row) {
+    clearMsg('editorMsg');
+    const d = (row && row.data) || {};
+    $('editorTitle').textContent = row ? `Edit — ${row.name || row.id}` : 'New package';
+    $('f_id').value = row ? row.id : '';
+    $('f_id').readOnly = !!row;
+    $('f_type').value = (row && row.type) || d.type || 'retreat';
+    $('f_status').value = (row && row.status) || 'published';
+    $('f_sort').value = row ? row.sort : 0;
+    $('f_name').value = d.name || '';
+    $('f_category').value = d.category || '';
+    $('f_province').value = d.province || '';
+    $('f_kicker').value = d.kicker || '';
+    $('f_tagline').value = (d.tagline || []).join(', ');
+    $('f_location').value = d.location || '';
+    $('f_duration').value = d.duration || '';
+    $('f_group').value = d.group || '';
+    $('f_priceNow').value = d.priceNow || '';
+    $('f_priceOld').value = d.priceOld || '';
+    $('f_priceUnit').value = d.priceUnit || '';
+    $('f_priceNote').value = d.priceNote || '';
+    $('f_hero').value = d.hero || '';
+    $('f_theme_primary').value = toHex((d.theme || {}).primary, '#1ecad3');
+    $('f_theme_accent').value = toHex((d.theme || {}).accent, '#425cc7');
+    $('f_theme_tint').value = toHex((d.theme || {}).tint, '#e6f4f8');
+    $('f_intro').value = d.intro || '';
+    $('f_includes').value = (d.includes || []).join('\n');
+    $('f_experiences').value = d.experiences ? JSON.stringify(d.experiences, null, 2) : '';
+    $('f_venue').value = d.venue ? JSON.stringify(d.venue, null, 2) : '';
+    $('f_itinerary').value = d.itinerary ? JSON.stringify(d.itinerary, null, 2) : '';
+    $('f_en').value = (row && row.en && Object.keys(row.en).length) ? JSON.stringify(row.en, null, 2) : '';
+    updatePreview();
+    showEditor();
+    window.scrollTo(0, 0);
+  }
+
+  function toHex(v, fallback) {
+    return (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)) ? v : fallback;
+  }
+
+  $('editorForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    clearMsg('editorMsg');
+    const id = $('f_id').value.trim();
+    if (!id) { showMsg('editorMsg', 'err', 'Slug / ID is required.'); return; }
+    const type = $('f_type').value;
+    let experiences, venue, itinerary, en;
+    try {
+      experiences = parseJSONField($('f_experiences').value, [], 'Experiences');
+      venue = parseJSONField($('f_venue').value, undefined, 'Venue');
+      itinerary = parseJSONField($('f_itinerary').value, undefined, 'Itinerary');
+      en = parseJSONField($('f_en').value, {}, 'English overrides');
+    } catch (err) { showMsg('editorMsg', 'err', err.message); return; }
+
+    const data = {
+      id, type,
+      name: $('f_name').value.trim(),
+      category: $('f_category').value.trim() || undefined,
+      province: $('f_province').value.trim() || undefined,
+      kicker: $('f_kicker').value.trim() || undefined,
+      tagline: splitComma($('f_tagline').value),
+      location: $('f_location').value.trim(),
+      duration: $('f_duration').value.trim(),
+      group: $('f_group').value.trim(),
+      priceNow: $('f_priceNow').value.trim(),
+      priceOld: $('f_priceOld').value.trim(),
+      priceUnit: $('f_priceUnit').value.trim(),
+      priceNote: $('f_priceNote').value.trim() || undefined,
+      theme: { primary: $('f_theme_primary').value, accent: $('f_theme_accent').value, tint: $('f_theme_tint').value },
+      hero: $('f_hero').value.trim(),
+      intro: $('f_intro').value.trim(),
+      experiences: Array.isArray(experiences) ? experiences : [],
+      includes: linesToArr($('f_includes').value),
+    };
+    if (venue !== undefined) data.venue = venue;
+    if (itinerary !== undefined) data.itinerary = itinerary;
+
+    const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: data.name || id, data, en };
+    const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+    const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
+    btn.disabled = false; btn.textContent = 'Save';
+    if (error) { showMsg('editorMsg', 'err', error.message); return; }
+    showList();
+  });
+})();

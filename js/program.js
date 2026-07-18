@@ -5,8 +5,10 @@
   const grid = document.getElementById('progGrid');
   const filtersEl = document.getElementById('progFilters');
   const emptyEl = document.getElementById('progEmpty');
-  if (!grid || !window.PACKAGES) return;
+  if (!grid) return;
 
+  function render() {
+  if (!window.PACKAGES || !window.PACKAGE_ORDER) return;
   const EN = window.PACKAGES_EN || {};
 
   // --- Cards ---
@@ -38,8 +40,6 @@
       </a>`;
   }).join('');
 
-  const cards = [...grid.querySelectorAll('.pcard')];
-
   // --- Filter pills (by location / province — fixed destination list) ---
   const provinces = ['Hua Hin', 'Amphawa', 'Kanchanaburi', 'Krabi', 'Phuket', 'Chiang Mai'];
   const pills = ['ทั้งหมด', ...provinces];
@@ -47,15 +47,19 @@
     `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${i === 0 ? '*' : label}"${i === 0 ? ' data-en="All"' : ''}>${label}</button>`
   ).join('');
 
+  // apply current language to freshly rendered cards/filters
+  if (window.bhApplyLang) window.bhApplyLang();
+  }
+
+  // Filter clicks — bound once via delegation (cards re-queried live)
   filtersEl.addEventListener('click', e => {
     const btn = e.target.closest('.prog__filter');
     if (!btn) return;
     filtersEl.querySelectorAll('.prog__filter').forEach(b => b.classList.remove('is-active'));
     btn.classList.add('is-active');
-
     const f = btn.dataset.filter;
     let shown = 0;
-    cards.forEach(card => {
+    grid.querySelectorAll('.pcard').forEach(card => {
       const match = f === '*' || card.dataset.province === f;
       card.classList.toggle('is-hidden', !match);
       if (match) shown++;
@@ -63,6 +67,6 @@
     if (emptyEl) emptyEl.hidden = shown > 0;
   });
 
-  // apply current language to freshly rendered cards/filters
-  if (window.bhApplyLang) window.bhApplyLang();
+  render();
+  document.addEventListener('bh:packages-ready', render);
 })();
