@@ -75,7 +75,7 @@ window.PACKAGES = {
     priceUnit: "บาท / ท่าน (พัก 2 ท่าน)",
     priceNote: "พัก 1 ท่าน 33,000 บาท / ท่าน",
     theme: { primary: "#1f4d3a", accent: "#c9a24b", tint: "#eef2ec" },
-    hero: "images/photos/golden-life.jpg",
+    hero: "images/photos/golden-life.jpg?v=2",
     intro:
       "โปรแกรมเตรียมความพร้อมสู่ชีวิตหลังเกษียณอย่างมีคุณภาพ ดูแลสุขภาพ เรียนรู้ วางแผนชีวิต " +
       "และเชื่อมต่อกับเพื่อนใหม่ ในรีสอร์ทระดับ 5 ดาวริมทะเลหัวหิน",
