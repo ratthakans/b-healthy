@@ -1058,3 +1058,14 @@ html { scroll-behavior: smooth; }
 .vcard:hover .vcard__img--alt { opacity: 1; }
 .vcard:hover .vcard__img { transform: scale(1.04); }
 .vcard__body { padding: 22px 26px 28px; }
+
+/* ===== Consistent line spacing across all main headings ===== */
+.hero__title,
+.intro__title,
+.section__title,
+.prog-hero__title,
+.pkg-hero__title,
+.pkg-h2,
+.prof-head__t,
+.faq__title,
+.about-cta h2 { line-height: 1.18; }
