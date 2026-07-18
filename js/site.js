@@ -36,7 +36,9 @@ if (footer) {
         <p><span>Tel</span> +66 (0) 62 225 6692</p>
       </div>
       <div class="footer__qr">
-        <img src="https://picsum.photos/seed/bhealthy-qr/120/120" alt="QR Code" />
+        <a href="https://line.me/R/ti/p/@bhealthyme" target="_blank" rel="noopener">
+          <img src="images/line-qr.jpg?v=20260718a" alt="LINE @bhealthyme QR code" width="120" height="169" loading="lazy" />
+        </a>
         <span>Scan for Line</span>
       </div>
     </div>

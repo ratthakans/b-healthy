@@ -451,7 +451,7 @@ video.feature-hero__bg { background: var(--navy); }
 .footer__contact p { font-size: .9rem; margin-bottom: 4px; }
 .footer__contact span { display: inline-block; width: 76px; color: var(--sky); }
 .footer__qr { text-align: center; }
-.footer__qr img { width: 92px; height: 92px; border-radius: 10px; margin-bottom: 6px; }
+.footer__qr img { width: 92px; height: auto; border-radius: 10px; margin-bottom: 6px; display: block; }
 .footer__qr span { font-size: .72rem; color: rgba(255,255,255,.6); }
 .footer__bottom { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.12); font-size: .8rem; color: rgba(255,255,255,.5); text-align: center; }
 
