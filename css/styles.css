@@ -741,6 +741,13 @@ video.feature-hero__bg { background: var(--navy); }
 .contact__card { background: #fff; border-radius: 22px; box-shadow: var(--shadow); padding: 40px clamp(24px,4vw,44px); }
 .contact__card h3 { font-family: var(--font-display); font-weight: 600; color: var(--brand-blue); font-size: 1.4rem; margin-bottom: 22px; }
 .contact__card .form select { color: var(--ink); }
+.contact__qr { display: flex; gap: 18px; align-items: center; margin-top: 28px; padding: 18px; border-radius: 18px; background: var(--grad-cool); border: 1px solid var(--line); }
+.contact__qr img { width: 132px; height: auto; border-radius: 12px; background: #fff; padding: 6px; box-shadow: var(--shadow-sm); flex-shrink: 0; }
+.contact__qr-text { display: flex; flex-direction: column; gap: 4px; }
+.contact__qr-id { font-family: var(--font-en); font-weight: 700; color: var(--brand-blue); font-size: 1.1rem; }
+.contact__qr-text p { color: var(--muted); font-weight: 300; font-size: .9rem; margin: 2px 0 10px; }
+.btn--sm { padding: 9px 18px; font-size: .85rem; align-self: flex-start; }
+@media (max-width: 460px) { .contact__qr { flex-direction: column; text-align: center; } .contact__qr-text { align-items: center; } .btn--sm { align-self: center; } }
 
 @media (max-width: 900px) {
   .mem__grid { grid-template-columns: 1fr; max-width: 440px; }
