@@ -5,6 +5,6 @@
 // Leave blank to keep the forms in front-end demo mode.
 // ============================================================
 window.BH_CONFIG = {
-  SUPABASE_URL: "",       // e.g. https://abcdxyz.supabase.co
-  SUPABASE_ANON_KEY: ""   // the "anon public" API key
+  SUPABASE_URL: "https://gngibdrjcnshyqkomkjs.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_8JnUdebfbaiZmmBEKu2LkQ_4U_x3OKk"  // publishable key — safe to expose (RLS-protected)
 };
