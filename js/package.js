@@ -38,7 +38,11 @@
   const includes = p.includes.map((it, i) =>
     `<li${en.includes && en.includes[i] ? ` data-en="${en.includes[i]}"` : ''}>${it}</li>`).join('');
 
-  const itinerary = p.itinerary.map((d, idx) => {
+  const isWorkshop = p.type === 'workshop';
+  const backHref = isWorkshop ? 'workshops.html' : 'program.html';
+  const backLabel = isWorkshop ? 'Wellness Workshop' : 'Wellness Program';
+
+  const itinerary = (p.itinerary || []).map((d, idx) => {
     const den = (en.itinerary && en.itinerary[idx]) || {};
     return `
     <div class="tl">
@@ -50,7 +54,35 @@
     </div>`;
   }).join('');
 
-  const venueImgs = p.venue.images.map(src => `<img src="${src}" alt="${p.venue.name}" loading="lazy" />`).join('');
+  // --- Optional sections (retreats have venue + itinerary; workshops don't) ---
+  const venueSection = p.venue ? `
+    <section class="pkg-sec pkg-sec--tint">
+      <div class="container">
+        <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
+        <div class="pkg-venue">
+          <div class="pkg-venue__text">
+            <h3>${p.venue.name}</h3>
+            <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
+          </div>
+          <div class="pkg-venue__imgs">${p.venue.images.map(src => `<img src="${src}" alt="${p.venue.name}" loading="lazy" />`).join('')}</div>
+        </div>
+      </div>
+    </section>` : '';
+
+  const itinerarySection = (p.itinerary && p.itinerary.length) ? `
+    <section class="pkg-sec pkg-sec--tint">
+      <div class="container">
+        <div class="pill-head"><span class="pill-head__pill">PROGRAM HIGHLIGHTS</span></div>
+        <div class="tl__wrap">${itinerary}</div>
+      </div>
+    </section>` : '';
+
+  const expHead = isWorkshop
+    ? `<span class="pill-head__script">Inside</span><span class="pill-head__pill" data-en="WORKSHOP AGENDA">WORKSHOP AGENDA</span>`
+    : `<span class="pill-head__script">Premium</span><span class="pill-head__pill">WELLNESS EXPERIENCES</span>`;
+  const inclHead = isWorkshop
+    ? `<span class="pill-head__pill" data-en="WHAT YOU GET">WHAT YOU GET</span>`
+    : `<span class="pill-head__pill">PACKAGE INCLUDES</span>`;
 
   root.style.setProperty('--pc', p.theme.primary);
   root.style.setProperty('--pa', p.theme.accent);
@@ -62,7 +94,7 @@
       <img class="pkg-hero__bg" src="${p.hero}" alt="${p.name}" />
       <div class="pkg-hero__overlay"></div>
       <div class="container pkg-hero__inner">
-        <a class="pkg-back" href="program.html">← Wellness Program</a>
+        <a class="pkg-back" href="${backHref}">← ${backLabel}</a>
         <p class="pkg-hero__tags">${p.tagline.map(t => `<span>${t}</span>`).join('')}</p>
         <h1 class="pkg-hero__title">${p.name}</h1>
         <p class="pkg-hero__meta"><span data-en="${en.duration || p.duration}">${p.duration}</span></p>
@@ -88,40 +120,24 @@
       </div>
     </section>
 
-    <!-- VENUE (right after overview) -->
-    <section class="pkg-sec pkg-sec--tint">
-      <div class="container">
-        <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
-        <div class="pkg-venue">
-          <div class="pkg-venue__text">
-            <h3>${p.venue.name}</h3>
-            <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
-          </div>
-          <div class="pkg-venue__imgs">${venueImgs}</div>
-        </div>
-      </div>
-    </section>
+    <!-- VENUE (retreats only, right after overview) -->
+    ${venueSection}
 
-    <!-- EXPERIENCES -->
-    <section class="pkg-sec">
+    <!-- EXPERIENCES / WORKSHOP AGENDA -->
+    <section class="pkg-sec${isWorkshop ? ' pkg-sec--tint' : ''}">
       <div class="container">
-        <div class="pill-head"><span class="pill-head__script">Premium</span><span class="pill-head__pill">WELLNESS EXPERIENCES</span></div>
+        <div class="pill-head">${expHead}</div>
         <div class="pxp__grid">${exp}</div>
       </div>
     </section>
 
-    <!-- ITINERARY -->
-    <section class="pkg-sec pkg-sec--tint">
-      <div class="container">
-        <div class="pill-head"><span class="pill-head__pill">PROGRAM HIGHLIGHTS</span></div>
-        <div class="tl__wrap">${itinerary}</div>
-      </div>
-    </section>
+    <!-- ITINERARY (retreats only) -->
+    ${itinerarySection}
 
-    <!-- INCLUDES (right before Book package) -->
+    <!-- INCLUDES / WHAT YOU GET (right before Book) -->
     <section class="pkg-sec">
       <div class="container">
-        <div class="pill-head"><span class="pill-head__pill">PACKAGE INCLUDES</span></div>
+        <div class="pill-head">${inclHead}</div>
         <ul class="pkg-includes">${includes}</ul>
       </div>
     </section>
