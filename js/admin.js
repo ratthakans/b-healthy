@@ -139,6 +139,57 @@
     else { showMsg('listMsg', 'ok', `Imported ${rows.length} packages.`); loadList(); }
   });
 
+  // ---------- image uploads (Supabase Storage) ----------
+  const BUCKET = 'package-images';
+  let galleryImgs = [];
+
+  async function uploadFile(file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const slug = ($('f_id').value.trim() || 'pkg').replace(/[^a-z0-9-]/gi, '').toLowerCase() || 'pkg';
+    const path = `${slug}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || undefined });
+    if (error) throw error;
+    return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  }
+
+  function setHeroPreview(url) {
+    $('heroPreview').style.backgroundImage = url ? `url("${url}")` : '';
+  }
+
+  // Hero upload
+  $('heroUploadBtn').addEventListener('click', () => $('heroFile').click());
+  $('f_hero').addEventListener('input', () => setHeroPreview($('f_hero').value.trim()));
+  $('heroFile').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    const st = $('heroStatus'); st.textContent = 'Uploading…';
+    try { const url = await uploadFile(file); $('f_hero').value = url; setHeroPreview(url); st.textContent = 'Uploaded ✓'; }
+    catch (err) { st.textContent = 'Upload failed: ' + err.message; }
+    e.target.value = '';
+  });
+
+  // Gallery
+  function renderGallery() {
+    $('galleryGrid').innerHTML = galleryImgs.map((url, i) =>
+      `<div class="gal__item"><img src="${esc(url)}" alt="" /><button type="button" class="gal__del" data-i="${i}" title="Remove">×</button></div>`
+    ).join('');
+  }
+  $('galleryGrid').addEventListener('click', e => {
+    const del = e.target.closest('.gal__del'); if (!del) return;
+    galleryImgs.splice(+del.dataset.i, 1); renderGallery();
+  });
+  $('galleryAddBtn').addEventListener('click', () => $('galleryFile').click());
+  $('galleryFile').addEventListener('change', async e => {
+    const files = [...e.target.files]; if (!files.length) return;
+    const st = $('galleryStatus'); let done = 0;
+    for (const file of files) {
+      st.textContent = `Uploading ${done + 1}/${files.length}…`;
+      try { const url = await uploadFile(file); galleryImgs.push(url); renderGallery(); done++; }
+      catch (err) { st.textContent = 'Upload failed: ' + err.message; e.target.value = ''; return; }
+    }
+    st.textContent = `Uploaded ${done} image${done > 1 ? 's' : ''} ✓`;
+    e.target.value = '';
+  });
+
   // ---------- editor ----------
   $('newBtn').addEventListener('click', () => openEditor(null));
   $('cancelBtn').addEventListener('click', showList);
@@ -170,6 +221,10 @@
     $('f_priceUnit').value = d.priceUnit || '';
     $('f_priceNote').value = d.priceNote || '';
     $('f_hero').value = d.hero || '';
+    setHeroPreview(d.hero || '');
+    galleryImgs = Array.isArray(d.gallery) ? d.gallery.slice() : [];
+    renderGallery();
+    $('heroStatus').textContent = ''; $('galleryStatus').textContent = '';
     $('f_theme_primary').value = toHex((d.theme || {}).primary, '#1ecad3');
     $('f_theme_accent').value = toHex((d.theme || {}).accent, '#425cc7');
     $('f_theme_tint').value = toHex((d.theme || {}).tint, '#e6f4f8');
@@ -224,6 +279,7 @@
     };
     if (venue !== undefined) data.venue = venue;
     if (itinerary !== undefined) data.itinerary = itinerary;
+    if (galleryImgs.length) data.gallery = galleryImgs.slice();
 
     const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: data.name || id, data, en };
     const btn = $('saveBtn'); btn.disabled = true; btn.textContent = 'Saving…';

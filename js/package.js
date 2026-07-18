@@ -79,6 +79,15 @@
       </div>
     </section>` : '';
 
+  const gallery = Array.isArray(p.gallery) ? p.gallery : [];
+  const gallerySection = gallery.length ? `
+    <section class="pkg-sec">
+      <div class="container">
+        <div class="pill-head"><span class="pill-head__pill" data-en="GALLERY">GALLERY</span></div>
+        <div class="pkg-gallery">${gallery.map(src => `<a class="pkg-gallery__item" href="${src}" target="_blank" rel="noopener"><img src="${src}" alt="${p.name}" loading="lazy" /></a>`).join('')}</div>
+      </div>
+    </section>` : '';
+
   const expHead = isWorkshop
     ? `<span class="pill-head__script">Inside</span><span class="pill-head__pill" data-en="WORKSHOP AGENDA">WORKSHOP AGENDA</span>`
     : `<span class="pill-head__script">Premium</span><span class="pill-head__pill">WELLNESS EXPERIENCES</span>`;
@@ -135,6 +144,9 @@
 
     <!-- ITINERARY (retreats only) -->
     ${itinerarySection}
+
+    <!-- GALLERY (optional) -->
+    ${gallerySection}
 
     <!-- INCLUDES / WHAT YOU GET (right before Book) -->
     <section class="pkg-sec">
