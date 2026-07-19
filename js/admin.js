@@ -81,14 +81,13 @@
       $('list').innerHTML = '<div class="empty">No packages yet.<br>Click “Import current packages” to load what’s on the site now, or “+ New package”.</div>';
       return;
     }
-    $('list').innerHTML = rowsCache.map(r => {
+    const rowHtml = r => {
       const hero = (r.data && r.data.hero) || '';
       return `<div class="row" data-id="${esc(r.id)}">
         <img class="row__thumb" src="${esc(hero)}" alt="" onerror="this.style.visibility='hidden'" />
         <div class="row__main">
           <div class="row__name">${esc(r.name || r.id)}</div>
           <div class="row__meta">
-            <span class="tag tag--${r.type}">${r.type}</span>
             <span class="tag tag--${r.status === 'published' ? 'published' : 'draft'}">${r.status}</span>
             <span>sort ${r.sort}</span><span>·</span><span>${esc(r.id)}</span>
           </div>
@@ -99,7 +98,25 @@
           <button class="btn btn--danger btn--sm" data-act="del">Delete</button>
         </div>
       </div>`;
+    };
+    const GROUPS = [
+      { type: 'retreat', label: 'Retreats' },
+      { type: 'workshop', label: 'Workshops' },
+      { type: 'membership', label: 'Membership tiers' }
+    ];
+    let html = GROUPS.map(g => {
+      const rows = rowsCache.filter(r => r.type === g.type);
+      if (!rows.length) return '';
+      return `<section class="group">
+        <div class="group__head"><span class="tag tag--${g.type}">${g.label}</span><span class="group__count">${rows.length}</span></div>
+        ${rows.map(rowHtml).join('')}
+      </section>`;
     }).join('');
+    const others = rowsCache.filter(r => !GROUPS.some(g => g.type === r.type));
+    if (others.length) {
+      html += `<section class="group"><div class="group__head"><span class="tag">Other</span><span class="group__count">${others.length}</span></div>${others.map(rowHtml).join('')}</section>`;
+    }
+    $('list').innerHTML = html;
   }
 
   $('list').addEventListener('click', async e => {
