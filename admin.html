@@ -53,6 +53,10 @@
     .msg--err{background:#fdecea;color:var(--danger)}
     .msg--ok{background:#e7f6ef;color:var(--ok)}
     .hide{display:none!important}
+    /* editor field visibility by package type */
+    .role-mem{display:none}
+    #editorForm[data-mode="membership"] .role-pkg{display:none}
+    #editorForm[data-mode="membership"] .role-mem{display:block}
     /* list */
     .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 16px}
     .bar h2{font-size:1.15rem;color:var(--navy)}
@@ -66,6 +70,7 @@
     .tag{font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
     .tag--retreat{background:#e6f0fb;color:var(--blue)}
     .tag--workshop{background:#e3f7f8;color:#0f9ba3}
+    .tag--membership{background:#efe9fb;color:#7c5cd0}
     .tag--published{background:#e7f6ef;color:var(--ok)}
     .tag--draft{background:#fbf0dd;color:var(--warn)}
     .row__acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -155,24 +160,34 @@
               <label class="" >Slug / ID<input id="f_id" placeholder="e.g. amphawa" required /></label>
               <label>Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
               <label>Type
-                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option></select>
+                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option></select>
               </label>
               <label>Status
                 <select id="f_status"><option value="published">Published (live)</option><option value="draft">Draft (hidden)</option></select>
               </label>
               <label>Sort order<input id="f_sort" type="number" value="0" /></label>
-              <label>Category<input id="f_category" placeholder="Corporate" /></label>
-              <label>Province (retreat filter)<input id="f_province" placeholder="Amphawa" /></label>
-              <label>Kicker<input id="f_kicker" placeholder="Mindful Escape" /></label>
-              <label class="full">Tagline (comma-separated)<input id="f_tagline" placeholder="Reconnect, Recharge, Rebalance" /></label>
-              <label class="full">Location<input id="f_location" placeholder="ริมคลองอัมพวา · สมุทรสงคราม" /></label>
-              <label>Duration<input id="f_duration" placeholder="2 วัน 1 คืน" /></label>
-              <label>Group<input id="f_group" placeholder="สำหรับกลุ่ม 10–12 ท่าน" /></label>
-              <label>Price now<input id="f_priceNow" placeholder="6,500 หรือ ติดต่อสอบถาม" /></label>
-              <label>Price old (strike)<input id="f_priceOld" placeholder="10,900" /></label>
-              <label>Price unit<input id="f_priceUnit" placeholder="บาท / ท่าน" /></label>
-              <label>Price note<input id="f_priceNote" placeholder="พัก 1 ท่าน ..." /></label>
-              <div class="full">
+              <!-- Membership-only -->
+              <label class="role-mem">Price (THB)<input id="f_mem_price" placeholder="100,000" /></label>
+              <label class="role-mem">Credits received<input id="f_mem_credits" placeholder="130,000" /></label>
+              <label class="role-mem">Bonus badge<input id="f_mem_bonus" placeholder="BONUS +30%" /></label>
+              <label class="role-mem">Tier style
+                <select id="f_mem_style"><option value="platinum">Platinum (navy)</option><option value="gold">Gold</option><option value="silver">Silver</option></select>
+              </label>
+              <label class="full role-mem">Features (one per line)<textarea id="f_mem_features" placeholder="Employee App Access&#10;Redeem Wellness Service&#10;Company Portal&#10;Credit Management"></textarea></label>
+
+              <!-- Retreat / workshop only -->
+              <label class="role-pkg">Category<input id="f_category" placeholder="Corporate" /></label>
+              <label class="role-pkg">Province (retreat filter)<input id="f_province" placeholder="Amphawa" /></label>
+              <label class="role-pkg">Kicker<input id="f_kicker" placeholder="Mindful Escape" /></label>
+              <label class="full role-pkg">Tagline (comma-separated)<input id="f_tagline" placeholder="Reconnect, Recharge, Rebalance" /></label>
+              <label class="full role-pkg">Location<input id="f_location" placeholder="ริมคลองอัมพวา · สมุทรสงคราม" /></label>
+              <label class="role-pkg">Duration<input id="f_duration" placeholder="2 วัน 1 คืน" /></label>
+              <label class="role-pkg">Group<input id="f_group" placeholder="สำหรับกลุ่ม 10–12 ท่าน" /></label>
+              <label class="role-pkg">Price now<input id="f_priceNow" placeholder="6,500 หรือ ติดต่อสอบถาม" /></label>
+              <label class="role-pkg">Price old (strike)<input id="f_priceOld" placeholder="10,900" /></label>
+              <label class="role-pkg">Price unit<input id="f_priceUnit" placeholder="บาท / ท่าน" /></label>
+              <label class="role-pkg">Price note<input id="f_priceNote" placeholder="พัก 1 ท่าน ..." /></label>
+              <div class="full role-pkg">
                 <label>Hero image</label>
                 <div class="up-hero">
                   <div class="up-hero__preview" id="heroPreview"></div>
@@ -186,14 +201,14 @@
                   </div>
                 </div>
               </div>
-              <div class="full colors">
+              <div class="full colors role-pkg">
                 <label>Theme primary<input type="color" id="f_theme_primary" value="#1ecad3" /></label>
                 <label>Accent<input type="color" id="f_theme_accent" value="#425cc7" /></label>
                 <label>Tint<input type="color" id="f_theme_tint" value="#e6f4f8" /></label>
               </div>
-              <label class="full">Intro (overview paragraph)<textarea id="f_intro"></textarea></label>
-              <label class="full">Includes (one per line)<textarea id="f_includes" placeholder="ที่พัก 1 คืน&#10;อาหารสุขภาพ 2 มื้อ"></textarea></label>
-              <div class="full">
+              <label class="full role-pkg">Intro (overview paragraph)<textarea id="f_intro"></textarea></label>
+              <label class="full role-pkg">Includes (one per line)<textarea id="f_includes" placeholder="ที่พัก 1 คืน&#10;อาหารสุขภาพ 2 มื้อ"></textarea></label>
+              <div class="full role-pkg">
                 <label>Gallery images</label>
                 <div class="gal" id="galleryGrid"></div>
                 <div class="up-row">
@@ -204,19 +219,19 @@
               </div>
             </div>
 
-            <details>
+            <details class="role-pkg">
               <summary>Experiences / agenda (JSON array)</summary>
               <textarea id="f_experiences" class="code" placeholder='[{"title":"Yoga","th":"โยคะ","desc":"...","img":"..."}]'></textarea>
             </details>
-            <details>
+            <details class="role-pkg">
               <summary>Venue (JSON object — retreats only)</summary>
               <textarea id="f_venue" class="code" placeholder='{"name":"...","desc":"...","images":["..."]}'></textarea>
             </details>
-            <details>
+            <details class="role-pkg">
               <summary>Itinerary (JSON array — retreats only)</summary>
               <textarea id="f_itinerary" class="code" placeholder='[{"day":"Day 1","title":"...","items":[{"time":"13.00","text":"..."}]}]'></textarea>
             </details>
-            <details>
+            <details class="role-pkg">
               <summary>English overrides (JSON object)</summary>
               <textarea id="f_en" class="code" placeholder='{"duration":"2 Days 1 Night","includes":["..."]}'></textarea>
             </details>
@@ -238,6 +253,6 @@
   <script src="js/config.js?v=20260718g"></script>
   <script src="js/packages.js?v=20260717u"></script>
   <script src="js/workshops-data.js?v=20260718a"></script>
-  <script src="js/admin.js?v=20260718h"></script>
+  <script src="js/admin.js?v=20260719a"></script>
 </body>
 </html>

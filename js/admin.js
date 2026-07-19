@@ -88,7 +88,7 @@
         <div class="row__main">
           <div class="row__name">${esc(r.name || r.id)}</div>
           <div class="row__meta">
-            <span class="tag tag--${r.type === 'workshop' ? 'workshop' : 'retreat'}">${r.type}</span>
+            <span class="tag tag--${r.type}">${r.type}</span>
             <span class="tag tag--${r.status === 'published' ? 'published' : 'draft'}">${r.status}</span>
             <span>sort ${r.sort}</span><span>·</span><span>${esc(r.id)}</span>
           </div>
@@ -130,6 +130,13 @@
     (window.WORKSHOP_ORDER || []).forEach((id, i) => {
       const o = (window.WORKSHOPS || {})[id] || window.PACKAGES[id]; if (o) rows.push({ id, type: 'workshop', status: 'published', sort: i, name: o.name, data: o, en: (window.PACKAGES_EN || {})[id] || {} });
     });
+    // membership tiers (from the site's infographic) so /membership.html can be edited here too
+    const MEM_FEATURES = ['Employee App Access', 'Redeem Wellness Service', 'Company Portal', 'Credit Management'];
+    [
+      { id: 'mem-platinum', name: 'Platinum', price: '100,000', credits: '130,000', bonus: 'BONUS +30%', style: 'platinum' },
+      { id: 'mem-gold', name: 'Gold', price: '50,000', credits: '60,000', bonus: 'BONUS +20%', style: 'gold' },
+      { id: 'mem-silver', name: 'Silver', price: '20,000', credits: '22,000', bonus: 'BONUS +10%', style: 'silver' }
+    ].forEach((m, i) => rows.push({ id: m.id, type: 'membership', status: 'published', sort: i, name: m.name, data: { ...m, type: 'membership', features: MEM_FEATURES.slice() }, en: {} }));
     if (!rows.length) { showMsg('listMsg', 'err', 'No hard-coded packages found to import.'); return; }
     if (!confirm(`Import ${rows.length} packages from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
     const btn = $('importBtn'); btn.disabled = true; btn.textContent = 'Importing…';
@@ -194,6 +201,9 @@
   $('newBtn').addEventListener('click', () => openEditor(null));
   $('cancelBtn').addEventListener('click', showList);
   $('f_id').addEventListener('input', updatePreview);
+  $('f_type').addEventListener('change', applyTypeMode);
+
+  function applyTypeMode() { $('editorForm').dataset.mode = $('f_type').value; }
 
   function updatePreview() {
     $('previewBtn').href = 'package.html?id=' + encodeURIComponent($('f_id').value.trim());
@@ -234,6 +244,13 @@
     $('f_venue').value = d.venue ? JSON.stringify(d.venue, null, 2) : '';
     $('f_itinerary').value = d.itinerary ? JSON.stringify(d.itinerary, null, 2) : '';
     $('f_en').value = (row && row.en && Object.keys(row.en).length) ? JSON.stringify(row.en, null, 2) : '';
+    // membership-only fields
+    $('f_mem_price').value = d.price || '';
+    $('f_mem_credits').value = d.credits || '';
+    $('f_mem_bonus').value = d.bonus || '';
+    $('f_mem_style').value = ['platinum', 'gold', 'silver'].includes(d.style) ? d.style : 'platinum';
+    $('f_mem_features').value = Array.isArray(d.features) ? d.features.join('\n') : '';
+    applyTypeMode();
     updatePreview();
     showEditor();
     window.scrollTo(0, 0);
@@ -249,6 +266,26 @@
     const id = $('f_id').value.trim();
     if (!id) { showMsg('editorMsg', 'err', 'Slug / ID is required.'); return; }
     const type = $('f_type').value;
+
+    // ---- Membership tier: its own small shape ----
+    if (type === 'membership') {
+      const data = {
+        id, type,
+        name: $('f_name').value.trim(),
+        price: $('f_mem_price').value.trim(),
+        credits: $('f_mem_credits').value.trim(),
+        bonus: $('f_mem_bonus').value.trim(),
+        style: $('f_mem_style').value,
+        features: linesToArr($('f_mem_features').value)
+      };
+      const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: data.name || id, data, en: {} };
+      const mbtn = $('saveBtn'); mbtn.disabled = true; mbtn.textContent = 'Saving…';
+      const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
+      mbtn.disabled = false; mbtn.textContent = 'Save';
+      if (error) { showMsg('editorMsg', 'err', error.message); return; }
+      showList(); return;
+    }
+
     let experiences, venue, itinerary, en;
     try {
       experiences = parseJSONField($('f_experiences').value, [], 'Experiences');

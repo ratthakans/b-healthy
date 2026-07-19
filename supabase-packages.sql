@@ -8,7 +8,7 @@
 create table if not exists public.packages (
   id          text primary key,                       -- slug, e.g. 'amphawa'
   type        text not null default 'retreat'
-                check (type in ('retreat','workshop')),
+                check (type in ('retreat','workshop','membership')),
   status      text not null default 'draft'
                 check (status in ('published','draft')),
   sort        int  not null default 0,                -- display order (low = first)
