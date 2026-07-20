@@ -112,7 +112,7 @@ function initTopicGallery(opts) {
 
 initTopicGallery({
   heroId: 'rtourHero', stackId: 'rtourStack', listSel: '.detail--tourism .rtour__list', base: 'images/tourism',
-  counts: { 'stay-wellness': 6, 'local-route': 4, 'workshop-activities': 4, 'health-assessment': 6, 'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6 }
+  counts: { 'stay-wellness': 6, 'local-route': 7, 'workshop-activities': 4, 'health-assessment': 6, 'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6 }
 });
 initTopicGallery({
   heroId: 'wkHero', stackId: 'wkStack', listSel: '.detail--workshop .rtour__list', base: 'images/workshop',
