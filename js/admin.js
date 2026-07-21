@@ -38,7 +38,10 @@
     try { return JSON.parse(t); }
     catch (e) { throw new Error(`Invalid JSON in "${label}": ${e.message}`); }
   }
-  const esc = s => String(s == null ? '' : s);
+  // Escapes HTML — submissions are attacker-controlled, so this must never
+  // return raw markup (it is interpolated into innerHTML).
+  const esc = s => String(s == null ? '' : s)
+    .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   // ---------- views ----------
   function showLogin() { loginView.classList.remove('hide'); appView.classList.add('hide'); }
