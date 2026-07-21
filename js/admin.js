@@ -45,7 +45,7 @@
   function showApp(email) {
     loginView.classList.add('hide'); appView.classList.remove('hide');
     $('whoami').textContent = email || '';
-    showList();
+    showTab('packages');
   }
   function showList() { editorView.classList.add('hide'); listView.classList.remove('hide'); loadList(); }
   function showEditor() { listView.classList.add('hide'); editorView.classList.remove('hide'); }
@@ -68,6 +68,109 @@
   });
 
   $('signOut').addEventListener('click', async () => { await sb.auth.signOut(); showLogin(); });
+
+  // ---------- tabs ----------
+  let currentTab = 'packages';
+  function showTab(name) {
+    currentTab = name;
+    document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('is-active', b.dataset.tab === name));
+    const isPkg = name === 'packages';
+    $('tab-customers').classList.toggle('hide', isPkg);
+    if (isPkg) { showList(); }
+    else { $('listView').classList.add('hide'); $('editorView').classList.add('hide'); loadLeads(); }
+  }
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab);
+  });
+
+  // ---------- customers (form leads) ----------
+  let leadsCache = [], leadFilter = '*';
+
+  $('leadRefresh').addEventListener('click', loadLeads);
+  $('leadFilters').addEventListener('click', e => {
+    const b = e.target.closest('.prog__filter'); if (!b) return;
+    $('leadFilters').querySelectorAll('.prog__filter').forEach(x => x.classList.remove('is-active'));
+    b.classList.add('is-active');
+    leadFilter = b.dataset.status;
+    renderLeads();
+  });
+
+  async function loadLeads() {
+    clearMsg('leadMsg');
+    $('leads').innerHTML = '<div class="empty">Loading…</div>';
+    const { data, error } = await sb.from('submissions')
+      .select('id,created_at,type,name,company,phone,email,subject,package,pax,pref_date,message,status')
+      .order('created_at', { ascending: false });
+    if (error) {
+      $('leads').innerHTML = '';
+      showMsg('leadMsg', 'err', error.message.includes('submissions')
+        ? 'Table "submissions" not found — run supabase-submissions.sql in Supabase first.'
+        : error.message);
+      return;
+    }
+    leadsCache = data || [];
+    renderLeads();
+  }
+
+  function fmtDate(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+      ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderLeads() {
+    const rows = leadFilter === '*' ? leadsCache : leadsCache.filter(r => r.status === leadFilter);
+    if (!rows.length) {
+      $('leads').innerHTML = `<div class="empty">${leadsCache.length ? 'No leads with this status.' : 'No customer enquiries yet.<br>They appear here the moment someone submits a booking or contact form.'}</div>`;
+      return;
+    }
+    const STATUSES = ['new', 'contacted', 'won', 'lost'];
+    $('leads').innerHTML = `<div class="leads">` + rows.map(r => `
+      <div class="lead" data-id="${r.id}">
+        <div class="lead__top">
+          <div class="lead__who">
+            <div class="lead__name">${esc(r.name || '(no name)')}${r.company ? ` <span class="lead__company">· ${esc(r.company)}</span>` : ''}</div>
+            <div class="lead__meta">
+              <span class="tag tag--${r.type === 'contact' ? 'contact' : 'booking'}">${esc(r.type || 'lead')}</span>
+              <span class="tag tag--${esc(r.status)}">${esc(r.status)}</span>
+              <span>${fmtDate(r.created_at)}</span>
+              ${r.package ? `<span>· ${esc(r.package)}</span>` : ''}
+              ${r.subject ? `<span>· ${esc(r.subject)}</span>` : ''}
+            </div>
+          </div>
+          <div class="lead__acts">
+            <select data-act="status">${STATUSES.map(s => `<option value="${s}"${s === r.status ? ' selected' : ''}>${s}</option>`).join('')}</select>
+            <button class="btn btn--danger btn--sm" data-act="del">Delete</button>
+          </div>
+        </div>
+        <div class="lead__contact">
+          ${r.phone ? `<span>📞 <a href="tel:${esc(r.phone)}">${esc(r.phone)}</a></span>` : ''}
+          ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}">${esc(r.email)}</a></span>` : ''}
+          ${r.pax ? `<span>👥 ${esc(r.pax)} pax</span>` : ''}
+          ${r.pref_date ? `<span>📅 ${esc(r.pref_date)}</span>` : ''}
+        </div>
+        ${r.message ? `<div class="lead__msg">${esc(r.message)}</div>` : ''}
+      </div>`).join('') + `</div>`;
+  }
+
+  $('leads').addEventListener('change', async e => {
+    const sel = e.target.closest('select[data-act="status"]'); if (!sel) return;
+    const id = +e.target.closest('.lead').dataset.id;
+    const { error } = await sb.from('submissions').update({ status: sel.value }).eq('id', id);
+    if (error) showMsg('leadMsg', 'err', error.message);
+    else { const r = leadsCache.find(x => x.id === id); if (r) r.status = sel.value; renderLeads(); }
+  });
+
+  $('leads').addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-act="del"]'); if (!btn) return;
+    const id = +e.target.closest('.lead').dataset.id;
+    const r = leadsCache.find(x => x.id === id);
+    if (!confirm(`Delete the enquiry from "${(r && r.name) || id}"? This cannot be undone.`)) return;
+    const { error } = await sb.from('submissions').delete().eq('id', id);
+    if (error) showMsg('leadMsg', 'err', error.message);
+    else { leadsCache = leadsCache.filter(x => x.id !== id); renderLeads(); }
+  });
 
   // ---------- list ----------
   async function loadList() {
