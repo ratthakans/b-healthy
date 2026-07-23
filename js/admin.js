@@ -208,7 +208,8 @@
     const GROUPS = [
       { type: 'retreat', label: 'Retreats' },
       { type: 'workshop', label: 'Workshops' },
-      { type: 'membership', label: 'Membership tiers' }
+      { type: 'membership', label: 'Membership tiers' },
+      { type: 'topic', label: 'Homepage topic images' }
     ];
     let html = GROUPS.map(g => {
       const rows = rowsCache.filter(r => r.type === g.type);
@@ -260,6 +261,24 @@
       { id: 'mem-gold', name: 'Gold', price: '50,000', credits: '60,000', bonus: 'BONUS +20%', style: 'gold' },
       { id: 'mem-silver', name: 'Silver', price: '20,000', credits: '22,000', bonus: 'BONUS +10%', style: 'silver' }
     ].forEach((m, i) => rows.push({ id: m.id, type: 'membership', status: 'published', sort: i, name: m.name, data: { ...m, type: 'membership', features: MEM_FEATURES.slice() }, en: {} }));
+    // homepage topic headings — seeded with the photos currently on disk so they
+    // can be swapped in the admin without touching code
+    const TOPICS = [
+      ['tour', 'stay-wellness', 'Stay Wellness', 3], ['tour', 'local-route', 'Local Route', 3],
+      ['tour', 'health-assessment', 'Health Assessment', 3], ['tour', 'therapeutic-treatment', 'Therapeutic Treatment', 3],
+      ['tour', 'food-as-medicine', 'Food as Medicine', 3], ['tour', 'sound-healing', 'Sound Healing', 3],
+      ['tour', 'horo-health', 'Horo-Health', 3], ['tour', 'workshop-activities', 'Workshop Activities', 3],
+      ['wk', 'office-syndrome', 'Office Syndrome', 3], ['wk', 'sound-healing', 'Sound Healing', 3],
+      ['wk', 'yoga-meditation', 'Yoga Meditation', 3], ['wk', 'elemental-aroma-oil', 'Elemental Aroma Oil', 3],
+      ['wk', 'personalized-herbal-tea', 'Personalized Herbal Tea', 3], ['wk', 'flower-mandala', 'Flower Mandala', 3]
+    ];
+    TOPICS.forEach(([g, k, label, n], i) => {
+      const base = g === 'wk' ? 'images/workshop' : 'images/tourism';
+      const images = Array.from({ length: n }, (_, j) => `${base}/${k}/${k}-${j + 1}.jpg`);
+      rows.push({ id: `topic-${g}-${k}`, type: 'topic', status: 'published', sort: i,
+        name: `${label} (${g === 'wk' ? 'Workshop' : 'Retreats'})`,
+        data: { id: `topic-${g}-${k}`, type: 'topic', group: g, key: k, name: label, images }, en: {} });
+    });
     if (!rows.length) { showMsg('listMsg', 'err', 'No hard-coded packages found to import.'); return; }
     if (!confirm(`Import ${rows.length} packages from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
     const btn = $('importBtn'); btn.disabled = true; btn.textContent = 'Importing…';
@@ -320,6 +339,132 @@
     e.target.value = '';
   });
 
+  // ---------- experiences / venue / itinerary (form editors, no JSON) ----------
+  let experiences = [], venueImgs = [], itinerary = [];
+
+  // Generic "pick a file and upload it" helper for the repeater rows.
+  function pickAndUpload(onDone, statusEl, multiple) {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; if (multiple) inp.multiple = true;
+    inp.hidden = true; document.body.appendChild(inp);
+    inp.addEventListener('change', async () => {
+      const files = [...inp.files];
+      for (const f of files) {
+        if (statusEl) statusEl.textContent = 'Uploading…';
+        try { onDone(await uploadFile(f)); }
+        catch (err) { if (statusEl) statusEl.textContent = 'Upload failed: ' + err.message; }
+      }
+      inp.remove();
+    });
+    inp.click();
+  }
+
+  // --- Experiences ---
+  function renderExp() {
+    $('expList').innerHTML = experiences.map((x, i) => `
+      <div class="rep" data-i="${i}">
+        <div class="rep__head">
+          <span class="rep__n">${i + 1}</span>
+          <span class="rep__title">${esc(x.title || 'Experience')}</span>
+          <button type="button" class="rep__del" data-act="exp-del">✕ Remove</button>
+        </div>
+        <div class="rep-img">
+          <div class="rep-thumb" style="background-image:${x.img ? `url('${esc(x.img)}')` : 'none'}"></div>
+          <div class="rep-img__ctl">
+            <div class="grid">
+              <label>Title<input data-f="title" value="${esc(x.title || '')}" placeholder="Yoga &amp; Meditation" /></label>
+              <label>Thai subtitle<input data-f="th" value="${esc(x.th || '')}" placeholder="โยคะ &amp; สมาธิ" /></label>
+            </div>
+            <label>Description<textarea data-f="desc" placeholder="รายละเอียดกิจกรรม">${esc(x.desc || '')}</textarea></label>
+            <div class="up-row">
+              <button type="button" class="btn btn--soft btn--sm" data-act="exp-up">↥ Upload photo</button>
+              <span class="hint" data-role="exp-status"></span>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  $('expList').addEventListener('input', e => {
+    const f = e.target.dataset.f; if (!f) return;
+    const rep = e.target.closest('.rep');
+    experiences[+rep.dataset.i][f] = e.target.value;
+    if (f === 'title') rep.querySelector('.rep__title').textContent = e.target.value || 'Experience';
+  });
+  $('expList').addEventListener('click', e => {
+    const act = e.target.dataset.act; if (!act) return;
+    const i = +e.target.closest('.rep').dataset.i;
+    if (act === 'exp-del') { experiences.splice(i, 1); renderExp(); }
+    else if (act === 'exp-up') {
+      pickAndUpload(url => { experiences[i].img = url; renderExp(); },
+        e.target.closest('.rep').querySelector('[data-role="exp-status"]'));
+    }
+  });
+  $('expAdd').addEventListener('click', () => { experiences.push({ title: '', th: '', desc: '', img: '' }); renderExp(); });
+
+  // --- Venue photos ---
+  function renderVenue() {
+    $('venueGrid').innerHTML = venueImgs.map((url, i) =>
+      `<div class="gal__item"><img src="${esc(url)}" alt="" /><button type="button" class="gal__del" data-i="${i}" title="Remove">×</button></div>`).join('');
+  }
+  $('venueGrid').addEventListener('click', e => {
+    const d = e.target.closest('.gal__del'); if (!d) return;
+    venueImgs.splice(+d.dataset.i, 1); renderVenue();
+  });
+  $('venueAddBtn').addEventListener('click', () =>
+    pickAndUpload(url => { venueImgs.push(url); renderVenue(); }, $('venueStatus'), true));
+
+  // --- Itinerary ---
+  function renderItin() {
+    $('itinList').innerHTML = itinerary.map((d, i) => `
+      <div class="rep" data-i="${i}">
+        <div class="rep__head">
+          <span class="rep__n">${i + 1}</span>
+          <span class="rep__title">Day ${i + 1}</span>
+          <button type="button" class="rep__del" data-act="itin-del">✕ Remove day</button>
+        </div>
+        <label>Day title<input data-f="title" value="${esc(d.title || '')}" placeholder="Workshop &amp; Connection Night" /></label>
+        <label style="margin-top:10px">Schedule</label>
+        ${(d.items || []).map((it, j) => `
+          <div class="itin-item" data-j="${j}">
+            <input data-f="time" value="${esc(it.time || '')}" placeholder="13.00" />
+            <input data-f="text" value="${esc(it.text || '')}" placeholder="Welcome Check in" />
+            <button type="button" class="rep__del" data-act="item-del">✕</button>
+          </div>`).join('')}
+        <button type="button" class="btn btn--soft btn--sm" style="margin-top:8px" data-act="item-add">＋ Add time slot</button>
+      </div>`).join('');
+  }
+  $('itinList').addEventListener('input', e => {
+    const f = e.target.dataset.f; if (!f) return;
+    const i = +e.target.closest('.rep').dataset.i;
+    const item = e.target.closest('.itin-item');
+    if (item) itinerary[i].items[+item.dataset.j][f] = e.target.value;
+    else itinerary[i][f] = e.target.value;
+  });
+  $('itinList').addEventListener('click', e => {
+    const act = e.target.dataset.act; if (!act) return;
+    const i = +e.target.closest('.rep').dataset.i;
+    if (act === 'itin-del') { itinerary.splice(i, 1); renderItin(); }
+    else if (act === 'item-add') { if (!itinerary[i].items) itinerary[i].items = []; itinerary[i].items.push({ time: '', text: '' }); renderItin(); }
+    else if (act === 'item-del') { itinerary[i].items.splice(+e.target.closest('.itin-item').dataset.j, 1); renderItin(); }
+  });
+  $('itinAdd').addEventListener('click', () => {
+    itinerary.push({ day: `Day ${itinerary.length + 1}`, title: '', items: [{ time: '', text: '' }] });
+    renderItin();
+  });
+
+  // --- Homepage topic photos ---
+  let topicImgs = [];
+  function renderTopic() {
+    $('topicGrid').innerHTML = topicImgs.map((url, i) =>
+      `<div class="gal__item"><img src="${esc(url)}" alt="" /><button type="button" class="gal__del" data-i="${i}" title="Remove">×</button></div>`).join('');
+  }
+  $('topicGrid').addEventListener('click', e => {
+    const d = e.target.closest('.gal__del'); if (!d) return;
+    topicImgs.splice(+d.dataset.i, 1); renderTopic();
+  });
+  $('topicAddBtn').addEventListener('click', () =>
+    pickAndUpload(url => { topicImgs.push(url); renderTopic(); }, $('topicStatus'), true));
+
   // ---------- editor ----------
   $('newBtn').addEventListener('click', () => openEditor(null));
   $('cancelBtn').addEventListener('click', showList);
@@ -363,9 +508,16 @@
     $('f_theme_tint').value = toHex((d.theme || {}).tint, '#e6f4f8');
     $('f_intro').value = d.intro || '';
     $('f_includes').value = (d.includes || []).join('\n');
-    $('f_experiences').value = d.experiences ? JSON.stringify(d.experiences, null, 2) : '';
-    $('f_venue').value = d.venue ? JSON.stringify(d.venue, null, 2) : '';
-    $('f_itinerary').value = d.itinerary ? JSON.stringify(d.itinerary, null, 2) : '';
+    experiences = Array.isArray(d.experiences) ? JSON.parse(JSON.stringify(d.experiences)) : [];
+    renderExp();
+    const v = d.venue || {};
+    $('f_venue_name').value = v.name || '';
+    $('f_venue_desc').value = v.desc || '';
+    venueImgs = Array.isArray(v.images) ? v.images.slice() : [];
+    renderVenue();
+    $('venueStatus').textContent = '';
+    itinerary = Array.isArray(d.itinerary) ? JSON.parse(JSON.stringify(d.itinerary)) : [];
+    renderItin();
     $('f_en').value = (row && row.en && Object.keys(row.en).length) ? JSON.stringify(row.en, null, 2) : '';
     // membership-only fields
     $('f_mem_price').value = d.price || '';
@@ -373,6 +525,12 @@
     $('f_mem_bonus').value = d.bonus || '';
     $('f_mem_style').value = ['platinum', 'gold', 'silver'].includes(d.style) ? d.style : 'platinum';
     $('f_mem_features').value = Array.isArray(d.features) ? d.features.join('\n') : '';
+    // homepage topic fields
+    $('f_topic_group').value = d.group === 'wk' ? 'wk' : 'tour';
+    $('f_topic_key').value = d.key || '';
+    topicImgs = Array.isArray(d.images) ? d.images.slice() : [];
+    renderTopic();
+    $('topicStatus').textContent = '';
     applyTypeMode();
     updatePreview();
     showEditor();
@@ -389,6 +547,20 @@
     const id = $('f_id').value.trim();
     if (!id) { showMsg('editorMsg', 'err', 'Slug / ID is required.'); return; }
     const type = $('f_type').value;
+
+    // ---- Homepage topic images: heading + up to 3 photos ----
+    if (type === 'topic') {
+      const gkey = $('f_topic_group').value;
+      const tkey = $('f_topic_key').value.trim();
+      if (!tkey) { showMsg('editorMsg', 'err', 'Topic key is required (e.g. local-route).'); return; }
+      const data = { id, type, group: gkey, key: tkey, name: $('f_name').value.trim(), images: topicImgs.slice(0, 3) };
+      const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: data.name || tkey, data, en: {} };
+      const tbtn = $('saveBtn'); tbtn.disabled = true; tbtn.textContent = 'Saving…';
+      const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
+      tbtn.disabled = false; tbtn.textContent = 'Save';
+      if (error) { showMsg('editorMsg', 'err', error.message); return; }
+      showList(); return;
+    }
 
     // ---- Membership tier: its own small shape ----
     if (type === 'membership') {
@@ -409,13 +581,22 @@
       showList(); return;
     }
 
-    let experiences, venue, itinerary, en;
-    try {
-      experiences = parseJSONField($('f_experiences').value, [], 'Experiences');
-      venue = parseJSONField($('f_venue').value, undefined, 'Venue');
-      itinerary = parseJSONField($('f_itinerary').value, undefined, 'Itinerary');
-      en = parseJSONField($('f_en').value, {}, 'English overrides');
-    } catch (err) { showMsg('editorMsg', 'err', err.message); return; }
+    let en;
+    try { en = parseJSONField($('f_en').value, {}, 'English overrides'); }
+    catch (err) { showMsg('editorMsg', 'err', err.message); return; }
+
+    // Built from the form editors — drop rows the user left completely blank.
+    const expOut = experiences.filter(x => (x.title || x.desc || x.img || x.th));
+    const venueName = $('f_venue_name').value.trim();
+    const venueDesc = $('f_venue_desc').value.trim();
+    const venue = (venueName || venueDesc || venueImgs.length)
+      ? { name: venueName, desc: venueDesc, images: venueImgs.slice() }
+      : undefined;
+    const itinOut = itinerary
+      .map(d => ({ title: (d.title || '').trim(), items: (d.items || []).filter(it => it.time || it.text) }))
+      .filter(d => d.title || d.items.length)
+      .map((d, i) => ({ day: `Day ${i + 1}`, title: d.title, items: d.items }));
+    const itineraryOut = itinOut.length ? itinOut : undefined;
 
     const data = {
       id, type,
@@ -434,11 +615,11 @@
       theme: { primary: $('f_theme_primary').value, accent: $('f_theme_accent').value, tint: $('f_theme_tint').value },
       hero: $('f_hero').value.trim(),
       intro: $('f_intro').value.trim(),
-      experiences: Array.isArray(experiences) ? experiences : [],
+      experiences: expOut,
       includes: linesToArr($('f_includes').value),
     };
     if (venue !== undefined) data.venue = venue;
-    if (itinerary !== undefined) data.itinerary = itinerary;
+    if (itineraryOut !== undefined) data.itinerary = itineraryOut;
     if (galleryImgs.length) data.gallery = galleryImgs.slice();
 
     const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: data.name || id, data, en };

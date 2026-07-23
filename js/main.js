@@ -77,21 +77,36 @@ function initTopicGallery(opts) {
   if (!items.length) return;
 
   const COUNTS = opts.counts;
-  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const url = (topic, i) => `${opts.base}/${topic}/${topic}-${i}.jpg`;
 
-  // Preload every topic photo so swaps are instant (no flash / no reflow).
-  Object.keys(COUNTS).forEach(t => { for (let i = 1; i <= COUNTS[t]; i++) { const im = new Image(); im.src = url(t, i); } });
+  // Photos are FIXED per topic (no shuffling) — hovering a topic always shows
+  // the same 3 pictures. Admin-managed images (window.BH_TOPICS, set by
+  // js/topics.js) win; otherwise fall back to the files on disk.
+  const imagesFor = topic => {
+    const override = (window.BH_TOPICS || {})[opts.group + '/' + topic];
+    if (Array.isArray(override) && override.length) return override.slice(0, 3);
+    const total = Math.min(COUNTS[topic] || 3, 3);
+    return Array.from({ length: total }, (_, i) => url(topic, i + 1));
+  };
 
+  // Preload the photos actually used so swaps are instant (no flash / reflow).
+  const preload = () => Object.keys(COUNTS).forEach(t =>
+    imagesFor(t).forEach(src => { const im = new Image(); im.src = src; }));
+  preload();
+
+  let currentTopic = items[0].dataset.topic;
   const render = topic => {
-    const total = COUNTS[topic] || 4;
-    const order = shuffle(Array.from({ length: total }, (_, i) => i + 1));
-    const pick = order.slice(0, Math.min(total, 3)); // fixed: 1 hero + 2 stack, so the row never resizes
-    heroImg.src = url(topic, pick[0]);
-    stack.innerHTML = pick.slice(1).map(i =>
-      `<figure class="detail__img"><img src="${url(topic, i)}" alt="" /></figure>`
+    currentTopic = topic;
+    const pics = imagesFor(topic);
+    if (!pics.length) return;
+    heroImg.src = pics[0];
+    stack.innerHTML = pics.slice(1).map(src =>
+      `<figure class="detail__img"><img src="${src}" alt="" /></figure>`
     ).join('');
   };
+
+  // Re-render with admin images once they arrive.
+  document.addEventListener('bh:topics-ready', () => { preload(); render(currentTopic); });
 
   const setActive = li => items.forEach(x => x.classList.toggle('is-active', x === li));
 
@@ -111,10 +126,12 @@ function initTopicGallery(opts) {
 }
 
 initTopicGallery({
+  group: 'tour',
   heroId: 'rtourHero', stackId: 'rtourStack', listSel: '.detail--tourism .rtour__list', base: 'images/tourism',
   counts: { 'stay-wellness': 6, 'local-route': 7, 'workshop-activities': 4, 'health-assessment': 6, 'therapeutic-treatment': 6, 'food-as-medicine': 6, 'sound-healing': 6, 'horo-health': 6 }
 });
 initTopicGallery({
+  group: 'wk',
   heroId: 'wkHero', stackId: 'wkStack', listSel: '.detail--workshop .rtour__list', base: 'images/workshop',
   counts: { 'office-syndrome': 14, 'sound-healing': 7, 'yoga-meditation': 8, 'elemental-aroma-oil': 12, 'personalized-herbal-tea': 14, 'flower-mandala': 3 }
 });

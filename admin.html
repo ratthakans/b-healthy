@@ -54,9 +54,12 @@
     .msg--ok{background:#e7f6ef;color:var(--ok)}
     .hide{display:none!important}
     /* editor field visibility by package type */
-    .role-mem{display:none}
+    .role-mem,.role-topic{display:none}
     #editorForm[data-mode="membership"] .role-pkg{display:none}
     #editorForm[data-mode="membership"] .role-mem{display:block}
+    #editorForm[data-mode="topic"] .role-pkg{display:none}
+    #editorForm[data-mode="topic"] .role-topic{display:block}
+    .tag--topic{background:#eaf6ec;color:#3d8a52}
     /* list */
     .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 16px}
     .bar h2{font-size:1.15rem;color:var(--navy)}
@@ -121,6 +124,21 @@
     details summary{cursor:pointer;font-weight:600;font-size:.86rem;color:var(--navy);padding:12px 0}
     details[open]{padding-bottom:14px}
     .empty{text-align:center;color:var(--muted);padding:50px 20px;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius)}
+    /* repeaters (experiences / itinerary) */
+    .opt{font-weight:400;color:var(--muted);font-size:.82rem}
+    .rep{background:#fafbfd;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;position:relative}
+    .rep__head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .rep__n{width:24px;height:24px;flex:none;border-radius:50%;background:var(--blue);color:#fff;font-size:.75rem;font-weight:700;display:grid;place-items:center}
+    .rep__title{font-weight:700;color:var(--navy);font-size:.9rem;flex:1}
+    .rep__del{background:none;border:0;color:var(--danger);font-size:.8rem;font-weight:600;cursor:pointer;padding:4px 8px}
+    .rep label{margin-top:8px}
+    .rep .grid{gap:0 14px}
+    .rep-thumb{width:104px;height:74px;border-radius:8px;background:#eef1f7 center/cover no-repeat;border:1px solid var(--line);flex:none}
+    .rep-img{display:flex;gap:12px;align-items:flex-start;margin-top:8px}
+    .rep-img__ctl{flex:1;min-width:0}
+    .itin-item{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin-top:6px}
+    .itin-item input{margin:0}
+    .itin-item .rep__del{padding:4px}
     /* uploads */
     .up-row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
     .hint{color:var(--muted);font-size:.8rem}
@@ -217,7 +235,7 @@
               <label class="" >Slug / ID<input id="f_id" placeholder="e.g. amphawa" required /></label>
               <label>Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
               <label>Type
-                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option></select>
+                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option><option value="topic">Homepage topic images</option></select>
               </label>
               <label>Status
                 <select id="f_status"><option value="published">Published (live)</option><option value="draft">Draft (hidden)</option></select>
@@ -231,6 +249,23 @@
                 <select id="f_mem_style"><option value="platinum">Platinum (navy)</option><option value="gold">Gold</option><option value="silver">Silver</option></select>
               </label>
               <label class="full role-mem">Features (one per line)<textarea id="f_mem_features" placeholder="Employee App Access&#10;Redeem Wellness Service&#10;Company Portal&#10;Credit Management"></textarea></label>
+
+              <!-- Homepage topic only -->
+              <label class="role-topic">Section
+                <select id="f_topic_group">
+                  <option value="tour">Wellness Retreats (หน้าแรก)</option>
+                  <option value="wk">Wellness Workshop (หน้าแรก)</option>
+                </select>
+              </label>
+              <label class="role-topic">Topic key<input id="f_topic_key" placeholder="local-route" /></label>
+              <div class="full role-topic">
+                <p class="hint">รูปที่แสดงเมื่อเลื่อนเมาส์มาที่หัวข้อนี้ — ใส่ 3 รูป (รูปแรก = รูปใหญ่ซ้าย, อีก 2 รูป = คอลัมน์ขวา) รูปจะนิ่ง ไม่สุ่มแล้ว</p>
+                <div class="gal" id="topicGrid"></div>
+                <div class="up-row">
+                  <button type="button" class="btn btn--soft btn--sm" id="topicAddBtn">＋ Upload topic photos</button>
+                  <span class="hint" id="topicStatus"></span>
+                </div>
+              </div>
 
               <!-- Retreat / workshop only -->
               <label class="role-pkg">Category<input id="f_category" placeholder="Corporate" /></label>
@@ -276,17 +311,36 @@
               </div>
             </div>
 
-            <details class="role-pkg">
-              <summary>Experiences / agenda (JSON array)</summary>
-              <textarea id="f_experiences" class="code" placeholder='[{"title":"Yoga","th":"โยคะ","desc":"...","img":"..."}]'></textarea>
+            <details class="role-pkg" open>
+              <summary>Experiences / agenda <span class="opt">— optional</span></summary>
+              <p class="hint">กิจกรรมในแพ็กเกจ (แสดงเป็นการ์ดในหน้ารายละเอียด) เว้นว่างได้ถ้ายังไม่มี</p>
+              <div id="expList"></div>
+              <button type="button" class="btn btn--soft btn--sm" id="expAdd">＋ Add experience</button>
             </details>
+
             <details class="role-pkg">
-              <summary>Venue (JSON object — retreats only)</summary>
-              <textarea id="f_venue" class="code" placeholder='{"name":"...","desc":"...","images":["..."]}'></textarea>
+              <summary>Venue / ที่พัก <span class="opt">— optional, retreats only</span></summary>
+              <p class="hint">ข้อมูลที่พัก เว้นว่างได้ถ้าเป็นเวิร์กชอปหรือยังไม่ระบุ</p>
+              <div class="grid">
+                <label class="full">Venue name<input id="f_venue_name" placeholder="Amphawa Hideaway Homestay" /></label>
+                <label class="full">Description<textarea id="f_venue_desc" placeholder="บรรยากาศที่พัก..."></textarea></label>
+                <div class="full">
+                  <label>Venue photos</label>
+                  <div class="gal" id="venueGrid"></div>
+                  <div class="up-row">
+                    <button type="button" class="btn btn--soft btn--sm" id="venueAddBtn">＋ Upload venue photos</button>
+                    <span class="hint" id="venueStatus"></span>
+                  </div>
+                  <input type="file" id="venueFile" accept="image/*" multiple hidden />
+                </div>
+              </div>
             </details>
+
             <details class="role-pkg">
-              <summary>Itinerary (JSON array — retreats only)</summary>
-              <textarea id="f_itinerary" class="code" placeholder='[{"day":"Day 1","title":"...","items":[{"time":"13.00","text":"..."}]}]'></textarea>
+              <summary>Itinerary / กำหนดการ <span class="opt">— optional, retreats only</span></summary>
+              <p class="hint">กำหนดการแต่ละวัน เว้นว่างได้</p>
+              <div id="itinList"></div>
+              <button type="button" class="btn btn--soft btn--sm" id="itinAdd">＋ Add day</button>
             </details>
             <details class="role-pkg">
               <summary>English overrides (JSON object)</summary>
@@ -310,6 +364,6 @@
   <script src="js/config.js?v=20260718g"></script>
   <script src="js/packages.js?v=20260717u"></script>
   <script src="js/workshops-data.js?v=20260718a"></script>
-  <script src="js/admin.js?v=20260721b"></script>
+  <script src="js/admin.js?v=20260721d"></script>
 </body>
 </html>
