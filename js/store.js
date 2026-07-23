@@ -25,10 +25,12 @@
         const obj = Object.assign({}, row.data || {});
         obj.id = row.id;
         obj.type = row.type;
-        PACKAGES[row.id] = obj;
         if (row.en && Object.keys(row.en).length) EN[row.id] = row.en;
-        if (row.type === 'workshop') { workshops.push(row.id); WORKSHOPS[row.id] = obj; }
-        else retreats.push(row.id);
+        // Bucket by explicit type. Membership tiers live in the same table but
+        // have a different shape (no theme/tagline) and are rendered by
+        // membership.js — they must never leak into the retreat/workshop grids.
+        if (row.type === 'workshop') { PACKAGES[row.id] = obj; workshops.push(row.id); WORKSHOPS[row.id] = obj; }
+        else if (row.type === 'retreat') { PACKAGES[row.id] = obj; retreats.push(row.id); }
       });
       window.PACKAGES = PACKAGES;
       window.PACKAGES_EN = EN;
