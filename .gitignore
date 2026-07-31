@@ -12,3 +12,5 @@ npm-debug.log*
 
 # Local preview state
 .claude/settings.local.json
+.vercel
+.env*

@@ -54,12 +54,23 @@
     .msg--ok{background:#e7f6ef;color:var(--ok)}
     .hide{display:none!important}
     /* editor field visibility by package type */
-    .role-mem,.role-topic{display:none}
+    .role-mem,.role-topic,.role-post{display:none}
     #editorForm[data-mode="membership"] .role-pkg{display:none}
     #editorForm[data-mode="membership"] .role-mem{display:block}
     #editorForm[data-mode="topic"] .role-pkg{display:none}
     #editorForm[data-mode="topic"] .role-topic{display:block}
+    #editorForm[data-mode="post"] .role-pkg{display:none}
+    #editorForm[data-mode="post"] .role-post{display:block}
     .tag--topic{background:#eaf6ec;color:#3d8a52}
+    .tag--post{background:#efe9fb;color:#6b4fb5}
+    /* blog body blocks */
+    .blk__bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .blk__kind{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#6b4fb5;background:#efe9fb;padding:3px 9px;border-radius:999px}
+    .blk__move{background:none;border:0;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 5px}
+    .blk__move:hover{color:var(--ink)}
+    .blk__move[disabled]{opacity:.25;cursor:default}
+    .blk-li{display:flex;gap:8px;align-items:center;margin-top:6px}
+    .blk-li input{flex:1}
     /* list */
     .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:22px 0 16px}
     .bar h2{font-size:1.15rem;color:var(--navy)}
@@ -235,7 +246,7 @@
               <label class="" >Slug / ID<input id="f_id" placeholder="e.g. amphawa" required /></label>
               <label>Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
               <label>Type
-                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option><option value="topic">Homepage topic images</option></select>
+                <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option><option value="topic">Homepage topic images</option><option value="post">Blog article</option></select>
               </label>
               <label>Status
                 <select id="f_status"><option value="published">Published (live)</option><option value="draft">Draft (hidden)</option></select>
@@ -264,6 +275,46 @@
                 <div class="up-row">
                   <button type="button" class="btn btn--soft btn--sm" id="topicAddBtn">＋ Upload topic photos</button>
                   <span class="hint" id="topicStatus"></span>
+                </div>
+              </div>
+
+              <!-- Blog article only -->
+              <label class="full role-post">หัวข้อบทความ (ไทย)<input id="f_post_title" placeholder="ออฟฟิศซินโดรมไม่ใช่เรื่องของคนขี้บ่น" /></label>
+              <label class="full role-post">Title (English)<input id="f_post_titleEn" placeholder="Office syndrome isn't just complaining" /></label>
+              <label class="role-post">หมวดหมู่ (ไทย)<input id="f_post_cat" placeholder="กาย &amp; ใจ" /></label>
+              <label class="role-post">Category (English)<input id="f_post_catEn" placeholder="Body &amp; Mind" /></label>
+              <label class="role-post">วันที่เผยแพร่<input id="f_post_date" type="date" /></label>
+              <label class="role-post">เวลาอ่าน (นาที)<input id="f_post_read" type="number" min="1" value="5" /></label>
+              <label class="role-post">ผู้เขียน (ไทย)<input id="f_post_author" placeholder="ทีม B-Healthy" /></label>
+              <label class="role-post">Author (English)<input id="f_post_authorEn" placeholder="B-Healthy Team" /></label>
+              <label class="full role-post">เกริ่นนำ (ไทย) — แสดงบนการ์ดในหน้ารวม<textarea id="f_post_excerpt"></textarea></label>
+              <label class="full role-post">Excerpt (English)<textarea id="f_post_excerptEn"></textarea></label>
+              <div class="full role-post">
+                <label>รูปปก</label>
+                <div class="up-hero">
+                  <div class="up-hero__preview" id="postCoverPreview"></div>
+                  <div class="up-hero__ctl">
+                    <input id="f_post_cover" placeholder="images/blog/xxx-1.jpg — or upload →" />
+                    <div class="up-row">
+                      <button type="button" class="btn btn--soft btn--sm" id="postCoverBtn">↥ Upload cover</button>
+                      <span class="hint" id="postCoverStatus"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <label class="role-post">คำอธิบายรูปปก (ไทย)<input id="f_post_coverAlt" placeholder="ใช้สำหรับ SEO และผู้ใช้ screen reader" /></label>
+              <label class="role-post">Cover alt (English)<input id="f_post_coverAltEn" /></label>
+
+              <div class="full role-post">
+                <label>เนื้อหาบทความ</label>
+                <p class="hint">เพิ่มทีละบล็อก แล้วกดลูกศรเพื่อสลับลำดับ — ช่องภาษาอังกฤษเว้นว่างได้ ระบบจะใช้ข้อความไทยแทน</p>
+                <div id="blockList"></div>
+                <div class="blk__bar">
+                  <button type="button" class="btn btn--soft btn--sm" data-add="p">＋ ย่อหน้า</button>
+                  <button type="button" class="btn btn--soft btn--sm" data-add="h2">＋ หัวข้อย่อย</button>
+                  <button type="button" class="btn btn--soft btn--sm" data-add="ul">＋ รายการ (bullet)</button>
+                  <button type="button" class="btn btn--soft btn--sm" data-add="quote">＋ คำพูดเน้น</button>
+                  <button type="button" class="btn btn--soft btn--sm" data-add="img">＋ รูปภาพ</button>
                 </div>
               </div>
 
@@ -362,8 +413,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js?v=20260718g"></script>
-  <script src="js/packages.js?v=20260717u"></script>
+  <script src="js/packages.js?v=20260728a"></script>
   <script src="js/workshops-data.js?v=20260718a"></script>
-  <script src="js/admin.js?v=20260721d"></script>
+  <script src="js/blog-data.js?v=20260728a"></script>
+  <script src="js/admin.js?v=20260731a"></script>
 </body>
 </html>

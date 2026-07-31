@@ -2,19 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- This page is also served at /blog/<slug> (rewrite in vercel.json), so every
+       relative path — assets here, image src rendered by js/post.js — must resolve
+       from the site root rather than from /blog/. Must stay above the first
+       relative URL in <head>. -->
+  <base href="/" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Package — B-Healthy</title>
+  <title>Article — B-Healthy</title>
+  <meta name="description" content="บทความสุขภาพองค์กรจาก B-Healthy" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Albert+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="images/logo.svg" />
   <link rel="apple-touch-icon" href="images/logo.svg" />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content="article" />
   <meta property="og:site_name" content="B-Healthy" />
-  <meta property="og:title" content="B-Healthy — Corporate Wellness" />
-  <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
+  <meta property="og:title" content="B-Healthy Blog" />
   <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
+  <!-- Pointed at /blog/<slug> by js/post.js so ?id= links don't split ranking. -->
+  <link rel="canonical" href="https://b-healthy-ten.vercel.app/blog" />
   <link rel="stylesheet" href="css/styles.css?v=20260731b" />
 </head>
 <body>
@@ -30,7 +37,7 @@
         <a href="program.html">Retreats</a>
         <a href="workshops.html">Workshops</a>
         <a href="membership.html">Membership</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html" class="is-active">Blog</a>
         <a href="contact.html" class="nav__cta">Contact</a>
         <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
@@ -38,19 +45,17 @@
     </div>
   </header>
 
-  <main id="pkg"><!-- rendered by JS --></main>
+  <main id="postRoot"><!-- article rendered by js/post.js --></main>
 
   <footer class="footer" id="footer"></footer>
 
   <script src="js/config.js?v=20260718g"></script>
-  <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/packages.js?v=20260728a"></script>
-  <script src="js/workshops-data.js?v=20260718a"></script>
+  <script src="js/blog-data.js?v=20260728a"></script>
   <script src="js/site.js?v=20260728a"></script>
   <script src="js/footer.js?v=20260731b"></script>
-  <script src="js/package.js?v=20260728a"></script>
-  <script src="js/store.js?v=20260721c"></script>
+  <script src="js/post.js?v=20260731a"></script>
+  <script src="js/blog-store.js?v=20260731a"></script>
   <script src="js/reveal.js?v=20260717g"></script>
 </body>
 </html>

@@ -57,16 +57,19 @@
   }).join('');
 
   // --- Optional sections (retreats have venue + itinerary; workshops don't) ---
+  // The venue photo strip is dropped when a property has no photos yet, so the
+  // text block reads on its own instead of leaving an empty column.
+  const venueImgs = Array.isArray(p.venue?.images) ? p.venue.images.filter(Boolean) : [];
   const venueSection = p.venue ? `
     <section class="pkg-sec pkg-sec--tint">
       <div class="container">
         <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
-        <div class="pkg-venue">
+        <div class="pkg-venue${venueImgs.length ? '' : ' pkg-venue--noimg'}">
           <div class="pkg-venue__text">
             <h3>${p.venue.name}</h3>
             <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
           </div>
-          <div class="pkg-venue__imgs">${p.venue.images.map(src => `<img src="${src}" alt="${p.venue.name}" loading="lazy" />`).join('')}</div>
+          ${venueImgs.length ? `<div class="pkg-venue__imgs">${venueImgs.map(src => `<img src="${src}" alt="${p.venue.name}" loading="lazy" />`).join('')}</div>` : ''}
         </div>
       </div>
     </section>` : '';

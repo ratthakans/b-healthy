@@ -16,9 +16,9 @@
   <meta property="og:site_name" content="B-Healthy" />
   <meta property="og:title" content="B-Healthy — Corporate Wellness" />
   <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
-  <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.png" />
+  <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="css/styles.css?v=20260718f" />
+  <link rel="stylesheet" href="css/styles.css?v=20260731b" />
 </head>
 <body>
 
@@ -34,6 +34,7 @@
         <a href="program.html">Retreats</a>
         <a href="workshops.html">Workshops</a>
         <a href="membership.html">Membership</a>
+        <a href="blog.html">Blog</a>
         <a href="contact.html" class="nav__cta">Contact</a>
         <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
@@ -46,7 +47,7 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero" id="top">
-    <img class="hero__bg" data-img="hero-beach" src="images/hero-beach.png" alt="กลุ่มคนนั่งสมาธิริมทะเลยามพระอาทิตย์ตก" />
+    <img class="hero__bg" data-img="hero-beach" src="images/hero-beach.jpg" alt="กลุ่มคนนั่งสมาธิริมทะเลยามพระอาทิตย์ตก" />
     <div class="hero__overlay"></div>
     <div class="container hero__content">
       <p class="hero__eyebrow">B-HEALTHY&nbsp;·&nbsp;CORPORATE WELLNESS</p>
@@ -97,9 +98,9 @@
         </p>
       </div>
 
-      <!-- Hover a topic → left hero + right stack swap to random photos of that topic (js/main.js) -->
+      <!-- Hover a topic → left hero + right stack swap to that topic's photos (js/main.js) -->
       <div class="detail__grid rtour">
-        <figure class="detail__img detail__img--tall rtour__hero" id="rtourHero"><img src="images/tourism/stay-wellness/stay-wellness-1.jpg" alt="" /></figure>
+        <figure class="detail__img detail__img--tall rtour__hero" id="rtourHero"><img src="images/tourism/stay-wellness/stay-wellness-1.jpg" alt="Stay Wellness" loading="lazy" /></figure>
 
         <ul class="detail__list rtour__list">
           <li data-topic="stay-wellness" class="is-active">Stay Wellness</li>
@@ -123,7 +124,7 @@
 
   <!-- ============ WELLNESS WORKSHOP — VIDEO ============ -->
   <section class="feature-hero feature-hero--alt" id="workshop">
-    <img class="feature-hero__bg" src="images/photos/h-workshop2.jpg" alt="Wellness workshop" />
+    <img class="feature-hero__bg" src="images/photos/h-workshop2.jpg" alt="Wellness workshop" loading="lazy" />
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
@@ -144,7 +145,7 @@
         </p>
       </div>
 
-      <!-- Hover a topic → stack (left) + hero (right) swap to random photos of that topic (js/main.js) -->
+      <!-- Hover a topic → stack (left) + hero (right) swap to that topic's photos (js/main.js) -->
       <div class="detail__grid detail__grid--reverse rtour">
         <div class="detail__stack rtour__stack" id="wkStack" aria-live="polite"></div>
 
@@ -157,7 +158,7 @@
           <li data-topic="flower-mandala">Flower Mandala</li>
         </ul>
 
-        <figure class="detail__img detail__img--tall rtour__hero" id="wkHero"><img src="images/workshop/office-syndrome/office-syndrome-1.jpg" alt="" /></figure>
+        <figure class="detail__img detail__img--tall rtour__hero" id="wkHero"><img src="images/workshop/office-syndrome/office-syndrome-1.jpg" alt="Office Syndrome" loading="lazy" /></figure>
       </div>
 
       <div class="detail__cta">
@@ -178,7 +179,7 @@
 
       <div class="cases__grid">
         <article class="case-card">
-          <div class="case-card__img"><img data-img="case-1" src="images/photos/amphawa.jpg" alt="Amphawa Mindful Escape" /></div>
+          <div class="case-card__img"><img data-img="case-1" src="images/photos/amphawa.jpg" alt="Amphawa Mindful Escape" loading="lazy" /></div>
           <div class="case-card__body">
             <h3>Amphawa Mindful Escape</h3>
             <p><span data-en="10–12 people">10–12 ท่าน</span><span>Amphawa</span></p>
@@ -187,7 +188,7 @@
         </article>
 
         <article class="case-card">
-          <div class="case-card__img"><img data-img="case-2" src="images/photos/golden-life.jpg?v=2" alt="Golden Life Wellness Retreat" /></div>
+          <div class="case-card__img"><img data-img="case-2" src="images/photos/golden-life.jpg?v=2" alt="Golden Life Wellness Retreat" loading="lazy" /></div>
           <div class="case-card__body">
             <h3>Golden Life Wellness Retreat</h3>
             <p><span data-en="3 Days 2 Nights">3 วัน 2 คืน</span><span>Hua-Hin</span></p>
@@ -196,7 +197,7 @@
         </article>
 
         <article class="case-card">
-          <div class="case-card__img"><img data-img="case-3" src="images/photos/rebalance.jpg" alt="Rebalance Retreat" /></div>
+          <div class="case-card__img"><img data-img="case-3" src="images/photos/rebalance.jpg" alt="Rebalance Retreat" loading="lazy" /></div>
           <div class="case-card__body">
             <h3>Rebalance Retreat</h3>
             <p><span data-en="10–12 people">10–12 ท่าน</span><span>Kanchanaburi</span></p>
@@ -280,7 +281,7 @@
   <section class="register" id="register">
     <div class="register__top">
       <div class="register__photo">
-        <img data-img="register-family" src="images/photos/register.jpg" alt="ครอบครัวออกกำลังกายด้วยกัน" />
+        <img data-img="register-family" src="images/photos/register.jpg" alt="ครอบครัวออกกำลังกายด้วยกัน" loading="lazy" />
       </div>
       <div class="register__quote">
         <span class="register__mark">&ldquo;</span>
@@ -319,30 +320,8 @@
     </div>
   </section>
 
-  <!-- ============ FOOTER ============ -->
-  <footer class="footer">
-    <div class="container footer__inner">
-      <div class="footer__brand">
-        <span class="brand__mark" aria-hidden="true"><img src="images/logo.svg" alt="B-Healthy" /></span>
-        <span class="footer__brandname">B-Healthy</span>
-      </div>
-
-      <div class="footer__slogan">YOUR HOLISTIC<br /><strong>WELLNESS COMPANION</strong></div>
-
-      <div class="footer__contact">
-        <p><span>Web</span> www.b-healthy.co</p>
-        <p><span>Facebook</span> B-Healthy</p>
-        <p><span>Line</span> @bhealthyme</p>
-        <p><span>Tel</span> +66 (0) 62 225 6692</p>
-      </div>
-
-      <div class="footer__qr">
-        <img data-img="footer-qr" src="images/avatar-placeholder.svg" alt="QR Code" />
-        <span>Scan for Line</span>
-      </div>
-    </div>
-    <div class="footer__bottom container">© 2026 B-Healthy. All rights reserved.</div>
-  </footer>
+  <!-- ============ FOOTER (rendered by js/footer.js — shared with every page) ============ -->
+  <footer class="footer" id="footer"></footer>
 
   <!-- ============ VIDEO MODAL ============ -->
   <div class="vmodal" id="vmodal" hidden>
@@ -356,7 +335,8 @@
   <script src="js/config.js?v=20260718g"></script>
   <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/main.js?v=20260721d"></script>
+  <script src="js/main.js?v=20260728a"></script>
+  <script src="js/footer.js?v=20260731b"></script>
   <script src="js/topics.js?v=20260721d"></script>
   <script src="js/reveal.js?v=20260717g"></script>
 </body>

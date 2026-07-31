@@ -1,7 +1,7 @@
 /* ============================================================
    B-Healthy — Package data (single source of truth)
    Used by program.html (cards) and package.html (detail + booking)
-   Swap picsum image URLs for real photos any time.
+   Every image path is a real file under images/ — no placeholders.
    ============================================================ */
 
 window.PACKAGES = {
@@ -26,10 +26,10 @@ window.PACKAGES = {
       "สัมผัสประสบการณ์ Wellness Retreat ท่ามกลางธรรมชาติริมคลองอัมพวา " +
       "เรียนรู้การดูแลสุขภาพกายและใจอย่างสมดุล และกิจกรรมเชื่อมสัมพันธ์ในบรรยากาศอบอุ่น",
     experiences: [
-      { title: "Workshop", th: "ธาตุเจ้าเรือน & น้ำมันหอมระเหย", desc: "เรียนรู้ธาตุเจ้าเรือน และผสมน้ำมันหอมระเหยเฉพาะบุคคล", img: "https://picsum.photos/seed/bh-amp-1/500/400" },
-      { title: "Yoga & Meditation", th: "โยคะ & สมาธิ", desc: "เติมพลังกายและใจ ด้วยการฝึกโยคะและสมาธิ ในบรรยากาศริมน้ำ", img: "https://picsum.photos/seed/bh-amp-2/500/400" },
-      { title: "Healthy Dinner", th: "อาหารสุขภาพ", desc: "จากวัตถุดิบท้องถิ่น อร่อย ดีต่อใจ", img: "https://picsum.photos/seed/bh-amp-3/500/400" },
-      { title: "Music & Connection Night", th: "", desc: "เชื่อมสัมพันธ์และแบ่งปัน ในบรรยากาศอบอุ่น", img: "https://picsum.photos/seed/bh-amp-4/500/400" },
+      { title: "Workshop", th: "ธาตุเจ้าเรือน & น้ำมันหอมระเหย", desc: "เรียนรู้ธาตุเจ้าเรือน และผสมน้ำมันหอมระเหยเฉพาะบุคคล", img: "images/workshop/elemental-aroma-oil/elemental-aroma-oil-1.jpg" },
+      { title: "Yoga & Meditation", th: "โยคะ & สมาธิ", desc: "เติมพลังกายและใจ ด้วยการฝึกโยคะและสมาธิ ในบรรยากาศริมน้ำ", img: "images/workshop/yoga-meditation/yoga-meditation-1.jpg" },
+      { title: "Healthy Dinner", th: "อาหารสุขภาพ", desc: "จากวัตถุดิบท้องถิ่น อร่อย ดีต่อใจ", img: "images/tourism/food-as-medicine/food-as-medicine-1.jpg" },
+      { title: "Music & Connection Night", th: "", desc: "เชื่อมสัมพันธ์และแบ่งปัน ในบรรยากาศอบอุ่น", img: "images/tourism/local-route/local-route-1.jpg" },
     ],
     includes: [
       "ที่พัก 1 คืน — Amphawa Hideaway Homestay",
@@ -42,7 +42,7 @@ window.PACKAGES = {
     venue: {
       name: "Amphawa Hideaway Homestay",
       desc: "ที่พักติดริมคลองอัมพวา ท่ามกลางธรรมชาติและวิถีชีวิตชุมชนอัมพวา สัมผัสความสงบ เรียบง่าย ใกล้ชิดธรรมชาติ เพื่อกิจกรรมเพื่อสุขภาพอย่างแท้จริง",
-      images: ["https://picsum.photos/seed/bh-amp-v1/500/400", "https://picsum.photos/seed/bh-amp-v2/500/400", "https://picsum.photos/seed/bh-amp-v3/500/400"],
+      images: [], // TODO: add real photos of this property
     },
     itinerary: [
       { day: "Day 1", title: "Workshop & Connection Night", items: [
@@ -80,11 +80,11 @@ window.PACKAGES = {
       "โปรแกรมเตรียมความพร้อมสู่ชีวิตหลังเกษียณอย่างมีคุณภาพ ดูแลสุขภาพ เรียนรู้ วางแผนชีวิต " +
       "และเชื่อมต่อกับเพื่อนใหม่ ในรีสอร์ทระดับ 5 ดาวริมทะเลหัวหิน",
     experiences: [
-      { title: "Health Check", th: "ตรวจสุขภาพ", desc: "ตรวจและประเมินร่างกายโดยผู้เชี่ยวชาญ", img: "https://picsum.photos/seed/bh-gl-1/500/400" },
-      { title: "Workshop", th: "สุขภาพวัยเกษียณ", desc: "เรียนรู้โภชนาการ การออกกำลังกาย การนอนหลับ และการป้องกันโรคไม่ติดต่อเรื้อรัง", img: "https://picsum.photos/seed/bh-gl-2/500/400" },
-      { title: "Yoga & Meditation", th: "", desc: "เสริมสร้างความยืดหยุ่น ลดความเครียด ผ่อนคลายจิตใจ", img: "https://picsum.photos/seed/bh-gl-3/500/400" },
-      { title: "Body & Mind Retreat", th: "", desc: "ปรับสมดุลร่างกายและจิตใจ ด้วย Recovery Massage & Sound Healing", img: "https://picsum.photos/seed/bh-gl-4/500/400" },
-      { title: "Food as Medicine", th: "อาหารสุขภาพ", desc: "อาหารที่ดีต่อร่างกายตามหลักโภชนาการและสมดุล", img: "https://picsum.photos/seed/bh-gl-5/500/400" },
+      { title: "Health Check", th: "ตรวจสุขภาพ", desc: "ตรวจและประเมินร่างกายโดยผู้เชี่ยวชาญ", img: "images/tourism/health-assessment/health-assessment-1.jpg" },
+      { title: "Workshop", th: "สุขภาพวัยเกษียณ", desc: "เรียนรู้โภชนาการ การออกกำลังกาย การนอนหลับ และการป้องกันโรคไม่ติดต่อเรื้อรัง", img: "images/tourism/workshop-activities/workshop-activities-1.jpg" },
+      { title: "Yoga & Meditation", th: "", desc: "เสริมสร้างความยืดหยุ่น ลดความเครียด ผ่อนคลายจิตใจ", img: "images/workshop/yoga-meditation/yoga-meditation-2.jpg" },
+      { title: "Body & Mind Retreat", th: "", desc: "ปรับสมดุลร่างกายและจิตใจ ด้วย Recovery Massage & Sound Healing", img: "images/tourism/therapeutic-treatment/therapeutic-treatment-1.jpg" },
+      { title: "Food as Medicine", th: "อาหารสุขภาพ", desc: "อาหารที่ดีต่อร่างกายตามหลักโภชนาการและสมดุล", img: "images/tourism/food-as-medicine/food-as-medicine-2.jpg" },
     ],
     includes: [
       "ห้องพัก 2 คืน — Anantara Hua Hin Resort & Spa",
@@ -99,7 +99,7 @@ window.PACKAGES = {
     venue: {
       name: "Anantara Hua Hin Resort & Spa",
       desc: "รีสอร์ทริมทะเลหัวหิน ระดับ 5 ดาว บรรยากาศเงียบสงบ ร่มรื่น เหมาะสำหรับการพักผ่อนและฟื้นฟูสุขภาพอย่างแท้จริง",
-      images: ["https://picsum.photos/seed/bh-gl-v1/500/400", "https://picsum.photos/seed/bh-gl-v2/500/400", "https://picsum.photos/seed/bh-gl-v3/500/400"],
+      images: [], // TODO: add real photos of this property
     },
     itinerary: [
       { day: "Day 1", title: "เริ่มต้นดูแลสุขภาพ", items: [
@@ -147,10 +147,10 @@ window.PACKAGES = {
       "มาสัมผัสประสบการณ์เวลาท่ามกลางธรรมชาติริมน้ำแควน้อย จังหวัดกาญจนบุรี " +
       "โปรแกรมที่ออกแบบมาเพื่อส่งเสริมสุขภาวะบุคลากร ทั้งร่างกาย จิตใจ และกิจกรรม Wellness ที่ช่วยสร้างความสมดุลอย่างยั่งยืน",
     experiences: [
-      { title: "Move", th: "Yoga & Meditation", desc: "คลายความตึงเครียดสะสม ฟื้นฟูร่างกาย และจิตใจ", img: "https://picsum.photos/seed/bh-rb-1/500/400" },
-      { title: "Nourish", th: "Food as Medicine", desc: "สัมผัสอาหารและวัตถุดิบธรรมชาติ เพื่อพลังงานที่ดีต่อคุณ", img: "https://picsum.photos/seed/bh-rb-2/500/400" },
-      { title: "Recharge", th: "Sound Healing", desc: "ผ่อนคลายอย่างลึกซึ้ง ผ่านการบำบัดด้วยเสียง", img: "https://picsum.photos/seed/bh-rb-3/500/400" },
-      { title: "Wellness Workshop", th: "Office Syndrome Prevention", desc: "เรียนรู้และฝึกปฏิบัติจริง เพื่อดูแลสุขภาพพนักงาน", img: "https://picsum.photos/seed/bh-rb-4/500/400" },
+      { title: "Move", th: "Yoga & Meditation", desc: "คลายความตึงเครียดสะสม ฟื้นฟูร่างกาย และจิตใจ", img: "images/workshop/yoga-meditation/yoga-meditation-3.jpg" },
+      { title: "Nourish", th: "Food as Medicine", desc: "สัมผัสอาหารและวัตถุดิบธรรมชาติ เพื่อพลังงานที่ดีต่อคุณ", img: "images/tourism/food-as-medicine/food-as-medicine-3.jpg" },
+      { title: "Recharge", th: "Sound Healing", desc: "ผ่อนคลายอย่างลึกซึ้ง ผ่านการบำบัดด้วยเสียง", img: "images/workshop/sound-healing/sound-healing-1.jpg" },
+      { title: "Wellness Workshop", th: "Office Syndrome Prevention", desc: "เรียนรู้และฝึกปฏิบัติจริง เพื่อดูแลสุขภาพพนักงาน", img: "images/workshop/office-syndrome/office-syndrome-1.jpg" },
     ],
     includes: [
       "ที่พัก 1 คืน — Makham Villa Kanchanaburi",
@@ -163,7 +163,7 @@ window.PACKAGES = {
     venue: {
       name: "Makham Villa Kanchanaburi",
       desc: "รีสอร์ทสไตล์ Modern Tropical ที่รายล้อมด้วยธรรมชาติอันร่มรื่น และสายน้ำอันสงบ เหมาะสำหรับการพักผ่อน ฟื้นฟูสุขภาพ และกิจกรรม Wellness แบบกลุ่ม",
-      images: ["https://picsum.photos/seed/bh-rb-v1/500/400", "https://picsum.photos/seed/bh-rb-v2/500/400", "https://picsum.photos/seed/bh-rb-v3/500/400"],
+      images: [], // TODO: add real photos of this property
     },
     itinerary: [
       { day: "Day 1", title: "Recharge & Recover", items: [
@@ -202,12 +202,12 @@ window.PACKAGES = {
       "ประสบการณ์กอล์ฟเพื่อการฟื้นฟูร่างกายและจิตใจ ทำให้เล่นดีขึ้น ฟื้นตัวไวขึ้น และได้พักผ่อนอย่างมีคุณภาพ " +
       "Improve Mobility · Enhance Performance · Recover Faster · Sleep Better · Feel Healthier",
     experiences: [
-      { title: "Dynamic Warm Up", th: "for Golfers", desc: "อบอุ่นร่างกายอย่างถูกวิธี เตรียมพร้อมก่อนออกรอบ", img: "https://picsum.photos/seed/bh-golf-1/500/400" },
-      { title: "Sports Recovery Massage", th: "", desc: "นวดฟื้นฟูกล้ามเนื้อ ลดอาการตึงและเมื่อยล้า", img: "https://picsum.photos/seed/bh-golf-2/500/400" },
-      { title: "Personal Wellness Assessment", th: "", desc: "ประเมินสมรรถภาพร่างกายและวิเคราะห์เพื่อวางแผนฟื้นฟู", img: "https://picsum.photos/seed/bh-golf-3/500/400" },
-      { title: "18 Hole Golf & Recovery", th: "", desc: "ตีกอล์ฟพร้อมฟื้นฟูสุขภาพ", img: "https://picsum.photos/seed/bh-golf-4/500/400" },
-      { title: "Healthy Food", th: "", desc: "อาหารเพื่อสุขภาพ อร่อย ครบโภชนาการ", img: "https://picsum.photos/seed/bh-golf-5/500/400" },
-      { title: "Yoga Meditation & Sound Healing", th: "", desc: "ผ่อนคลายจิตใจ ลดความเครียด ด้วยโยคะและเสียงบำบัด", img: "https://picsum.photos/seed/bh-golf-6/500/400" },
+      { title: "Dynamic Warm Up", th: "for Golfers", desc: "อบอุ่นร่างกายอย่างถูกวิธี เตรียมพร้อมก่อนออกรอบ", img: "images/workshop/yoga-meditation/yoga-meditation-5.jpg" },
+      { title: "Sports Recovery Massage", th: "", desc: "นวดฟื้นฟูกล้ามเนื้อ ลดอาการตึงและเมื่อยล้า", img: "images/tourism/therapeutic-treatment/therapeutic-treatment-2.jpg" },
+      { title: "Personal Wellness Assessment", th: "", desc: "ประเมินสมรรถภาพร่างกายและวิเคราะห์เพื่อวางแผนฟื้นฟู", img: "images/tourism/health-assessment/health-assessment-2.jpg" },
+      { title: "18 Hole Golf & Recovery", th: "", desc: "ตีกอล์ฟพร้อมฟื้นฟูสุขภาพ", img: "images/photos/golf.jpg" },
+      { title: "Healthy Food", th: "", desc: "อาหารเพื่อสุขภาพ อร่อย ครบโภชนาการ", img: "images/tourism/food-as-medicine/food-as-medicine-4.jpg" },
+      { title: "Yoga Meditation & Sound Healing", th: "", desc: "ผ่อนคลายจิตใจ ลดความเครียด ด้วยโยคะและเสียงบำบัด", img: "images/workshop/sound-healing/sound-healing-2.jpg" },
     ],
     includes: [
       "ที่พัก Anantara Hua Hin — Garden View Room 2 คืน",
@@ -222,7 +222,7 @@ window.PACKAGES = {
     venue: {
       name: "Anantara Hua Hin Resort & Black Mountain Golf Club",
       desc: "รีสอร์ทระดับ 5 ดาว Luxury Beachfront Resort คู่กับสนามกอล์ฟระดับ Championship Course ที่ได้รับการยอมรับในระดับโลก พร้อมทัศนียภาพสวยงามและมาตรฐานการเล่นระดับมืออาชีพ",
-      images: ["https://picsum.photos/seed/bh-golf-v1/500/400", "https://picsum.photos/seed/bh-golf-v2/500/400", "https://picsum.photos/seed/bh-golf-v3/500/400"],
+      images: [], // TODO: add real photos of this property
     },
     itinerary: [
       { day: "Day 1", title: "Health Check up, Mobility & Golf Movement Screening", items: [

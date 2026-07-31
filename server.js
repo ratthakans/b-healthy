@@ -21,6 +21,12 @@ const TYPES = {
 http.createServer((req, res) => {
   let urlPath = decodeURIComponent(req.url.split('?')[0]);
   if (urlPath === '/') urlPath = '/index.html';
+  // Mirror the rewrites in vercel.json so local preview matches production:
+  // /blog/<slug> renders the article page (js/post.js reads the slug from the
+  // path). /blog itself stays the listing.
+  if (/^\/blog\/[^/]+\/?$/.test(urlPath)) urlPath = '/post.html';
+  // cleanUrls: extensionless paths fall back to the matching .html file.
+  else if (!path.extname(urlPath) && fs.existsSync(path.join(ROOT, urlPath + '.html'))) urlPath += '.html';
   const filePath = path.join(ROOT, path.normalize(urlPath));
   if (!filePath.startsWith(ROOT)) { res.writeHead(403); res.end('Forbidden'); return; }
 

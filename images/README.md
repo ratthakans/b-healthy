@@ -1,22 +1,46 @@
 # Images — B-Healthy
 
-Every image on the page has a `data-img="..."` attribute so it's easy to find and swap.
-Drop your real files in this folder, then in `index.html` change the matching `src`.
+Every image on the site is a real file in this folder. There are no remote
+placeholders (picsum.photos and friends are gone).
 
-| data-img          | Where it appears                         | Suggested size |
-|-------------------|------------------------------------------|----------------|
-| hero-beach        | Hero background (sunset meditation)      | 1920×1080      |
-| tourism-video     | "Wellness Tourism" video banner          | 1920×900       |
-| tourism-resort    | Tourism — tall left image (Resort)       | 700×900        |
-| tourism-mountain  | Tourism — Mountain                       | 700×430        |
-| tourism-camping   | Tourism — Camping                        | 700×430        |
-| workshop-video    | "Wellness Workshop" video banner         | 1920×900       |
-| workshop-1/2/3    | Workshop detail images                   | 700×430 / 900  |
-| case-1/2/3        | Case-study cards                         | 500×620        |
-| expert-lead       | Lead expert portrait (circle)            | 300×300        |
-| expert-1…6        | Expert grid portraits                    | 220×220        |
-| register-family   | Register banner photo                    | 900×700        |
-| footer-qr         | Footer Line QR code                      | 120×120        |
+## Layout
 
-Until you add them, the page loads placeholder photos from picsum.photos so the
-layout renders complete.
+| Folder | What lives there |
+|---|---|
+| `images/` | Brand + one-off assets — `logo.svg`, `hero-beach.jpg`, `line-qr.jpg` |
+| `images/photos/` | Section and card photos referenced directly from HTML |
+| `images/experts/` | Expert portraits (`expert-<firstname>.jpg`) |
+| `images/membership/` | Membership ecosystem screens — `eco-portal`, `eco-app`, `eco-experiences` |
+| `images/tourism/<topic>/` | Retreat topic galleries — `<topic>-1.jpg`, `-2.jpg`, … |
+| `images/workshop/<topic>/` | Workshop topic galleries — same numbering |
+| `images/blog/` | Article photos, `<article-slug>-1..3.jpg` — sources in `CREDITS.md` |
+
+## Topic galleries
+
+`images/tourism/*` and `images/workshop/*` feed the hover galleries on the
+homepage. The topic keys match the `data-topic` attributes in `index.html`, and
+the file counts are declared in `js/main.js` (`counts:`). **Add a file → bump
+the matching count**, or it will never be shown.
+
+Only the first 3 photos of a topic are displayed. Admin-uploaded photos
+(`type=topic` rows in Supabase) override the on-disk files — see `js/topics.js`.
+
+## Adding photos
+
+1. Drop the file in the right folder using the existing naming pattern.
+2. Point the `src` at it — HTML for static images, `js/packages.js` /
+   `js/workshops-data.js` for package and workshop data.
+3. Give every content image a real `alt`. Leave `alt=""` only for decoration.
+4. Add `width`/`height` so the layout doesn't jump while loading, and
+   `loading="lazy"` for anything below the fold.
+
+## Still missing
+
+Venue galleries in `js/packages.js` are empty (`images: []`) for all four
+retreat packages. These are real, named third-party properties — Amphawa
+Hideaway Homestay, Makham Villa Kanchanaburi, Anantara Hua Hin — so they need
+actual photos of those places, not stand-ins. The venue section renders
+text-only until they arrive.
+
+The Golf Recovery Retreat has one golf photo (`photos/golf.jpg`) covering a
+six-activity programme; the rest borrow generic wellness shots.

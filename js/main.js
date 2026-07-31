@@ -67,7 +67,7 @@ document.querySelectorAll('.play-btn').forEach(btn =>
 vmodal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', closeVideo));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !vmodal.hidden) closeVideo(); });
 
-// --- Wellness Retreats / Workshop: hover a topic → hero + stack show random photos of that topic ---
+// --- Wellness Retreats / Workshop: hover a topic → hero + stack show that topic's photos ---
 function initTopicGallery(opts) {
   const hero = document.getElementById(opts.heroId);
   const stack = document.getElementById(opts.stackId);
@@ -78,6 +78,8 @@ function initTopicGallery(opts) {
 
   const COUNTS = opts.counts;
   const url = (topic, i) => `${opts.base}/${topic}/${topic}-${i}.jpg`;
+  const labels = {};
+  items.forEach(li => { labels[li.dataset.topic] = li.textContent.trim(); });
 
   // Photos are FIXED per topic (no shuffling) — hovering a topic always shows
   // the same 3 pictures. Admin-managed images (window.BH_TOPICS, set by
@@ -89,24 +91,30 @@ function initTopicGallery(opts) {
     return Array.from({ length: total }, (_, i) => url(topic, i + 1));
   };
 
-  // Preload the photos actually used so swaps are instant (no flash / reflow).
-  const preload = () => Object.keys(COUNTS).forEach(t =>
-    imagesFor(t).forEach(src => { const im = new Image(); im.src = src; }));
-  preload();
+  // Preload one topic at a time — warming all of them on load pulled down
+  // ~40 photos before the visitor had hovered anything.
+  const warmed = new Set();
+  const preload = topic => {
+    if (warmed.has(topic)) return;
+    warmed.add(topic);
+    imagesFor(topic).forEach(src => { const im = new Image(); im.src = src; });
+  };
 
   let currentTopic = items[0].dataset.topic;
   const render = topic => {
     currentTopic = topic;
     const pics = imagesFor(topic);
     if (!pics.length) return;
+    const label = labels[topic] || '';
     heroImg.src = pics[0];
+    heroImg.alt = label;
     stack.innerHTML = pics.slice(1).map(src =>
-      `<figure class="detail__img"><img src="${src}" alt="" /></figure>`
+      `<figure class="detail__img"><img src="${src}" alt="${label}" loading="lazy" /></figure>`
     ).join('');
   };
 
   // Re-render with admin images once they arrive.
-  document.addEventListener('bh:topics-ready', () => { preload(); render(currentTopic); });
+  document.addEventListener('bh:topics-ready', () => { warmed.clear(); render(currentTopic); });
 
   const setActive = li => items.forEach(x => x.classList.toggle('is-active', x === li));
 
@@ -115,6 +123,7 @@ function initTopicGallery(opts) {
     li.tabIndex = 0;
     const go = () => {
       setActive(li);
+      preload(li.dataset.topic);            // fetch before the debounce elapses
       clearTimeout(hoverTimer);
       hoverTimer = setTimeout(() => render(li.dataset.topic), 70); // debounce pass-through
     };
@@ -122,7 +131,8 @@ function initTopicGallery(opts) {
     li.addEventListener('focus', go);
   });
 
-  render(items[0].dataset.topic); // initial set
+  preload(currentTopic);
+  render(currentTopic); // initial set
 }
 
 initTopicGallery({

@@ -209,7 +209,8 @@
       { type: 'retreat', label: 'Retreats' },
       { type: 'workshop', label: 'Workshops' },
       { type: 'membership', label: 'Membership tiers' },
-      { type: 'topic', label: 'Homepage topic images' }
+      { type: 'topic', label: 'Homepage topic images' },
+      { type: 'post', label: 'Blog articles' }
     ];
     let html = GROUPS.map(g => {
       const rows = rowsCache.filter(r => r.type === g.type);
@@ -278,6 +279,24 @@
       rows.push({ id: `topic-${g}-${k}`, type: 'topic', status: 'published', sort: i,
         name: `${label} (${g === 'wk' ? 'Workshop' : 'Retreats'})`,
         data: { id: `topic-${g}-${k}`, type: 'topic', group: g, key: k, name: label, images }, en: {} });
+    });
+    // blog articles bundled in js/blog-data.js — imported so they can be
+    // edited (and new ones added) from here instead of in code
+    (window.BLOG_POSTS || []).forEach((p, i) => {
+      rows.push({
+        id: p.id, type: 'post', status: 'published', sort: i, name: p.title,
+        data: {
+          id: p.id, type: 'post',
+          title: p.title, titleEn: p.titleEn,
+          category: p.category, categoryEn: p.categoryEn,
+          date: p.date, readMins: p.readMins,
+          author: p.author, authorEn: p.authorEn,
+          excerpt: p.excerpt, excerptEn: p.excerptEn,
+          cover: p.cover, coverAlt: p.coverAlt, coverAltEn: p.coverAltEn,
+          body: p.body || []
+        },
+        en: {}
+      });
     });
     if (!rows.length) { showMsg('listMsg', 'err', 'No hard-coded packages found to import.'); return; }
     if (!confirm(`Import ${rows.length} packages from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
@@ -465,6 +484,111 @@
   $('topicAddBtn').addEventListener('click', () =>
     pickAndUpload(url => { topicImgs.push(url); renderTopic(); }, $('topicStatus'), true));
 
+  // --- Blog article: cover + body blocks ---
+  let postBlocks = [];
+
+  function setPostCover(url) {
+    $('postCoverPreview').style.backgroundImage = url ? `url("${url}")` : '';
+  }
+  $('f_post_cover').addEventListener('input', () => setPostCover($('f_post_cover').value.trim()));
+  $('postCoverBtn').addEventListener('click', () =>
+    pickAndUpload(url => { $('f_post_cover').value = url; setPostCover(url); }, $('postCoverStatus')));
+
+  const BLOCK_LABEL = { p: 'ย่อหน้า', h2: 'หัวข้อย่อย', ul: 'รายการ', quote: 'คำพูดเน้น', img: 'รูปภาพ' };
+
+  function blockFields(b, i) {
+    if (b.type === 'img') {
+      return `
+        <div class="rep-img">
+          <div class="rep-thumb" style="background-image:${b.src ? `url('${esc(b.src)}')` : 'none'}"></div>
+          <div class="rep-img__ctl">
+            <label>คำอธิบายรูป (ไทย)<input data-f="alt" value="${esc(b.alt || '')}" placeholder="ใช้สำหรับ SEO และ screen reader" /></label>
+            <label>Alt (English)<input data-f="altEn" value="${esc(b.altEn || '')}" /></label>
+            <label>คำบรรยายใต้รูป (ไทย)<input data-f="capTh" value="${esc((b.caption || {}).th || '')}" /></label>
+            <label>Caption (English)<input data-f="capEn" value="${esc((b.caption || {}).en || '')}" /></label>
+            <div class="up-row">
+              <button type="button" class="btn btn--soft btn--sm" data-act="blk-up">↥ Upload photo</button>
+              <span class="hint" data-role="blk-status"></span>
+            </div>
+          </div>
+        </div>`;
+    }
+    if (b.type === 'ul') {
+      return `
+        ${(b.items || []).map((it, j) => `
+          <div class="blk-li" data-j="${j}">
+            <input data-f="liTh" value="${esc(it.th || '')}" placeholder="ข้อความ (ไทย)" />
+            <input data-f="liEn" value="${esc(it.en || '')}" placeholder="English" />
+            <button type="button" class="rep__del" data-act="li-del">✕</button>
+          </div>`).join('')}
+        <button type="button" class="btn btn--soft btn--sm" style="margin-top:8px" data-act="li-add">＋ เพิ่มข้อ</button>`;
+    }
+    const rows = b.type === 'h2' ? 1 : 3;
+    const tag = rows === 1 ? 'input' : 'textarea';
+    const mk = (f, val, ph) => tag === 'input'
+      ? `<input data-f="${f}" value="${esc(val)}" placeholder="${ph}" />`
+      : `<textarea data-f="${f}" placeholder="${ph}">${esc(val)}</textarea>`;
+    return `
+      <label>ข้อความ (ไทย)${mk('th', b.th || '', 'ข้อความภาษาไทย')}</label>
+      <label style="margin-top:8px">English${mk('en', b.en || '', 'English text')}</label>`;
+  }
+
+  function renderBlocks() {
+    $('blockList').innerHTML = postBlocks.map((b, i) => `
+      <div class="rep" data-i="${i}">
+        <div class="rep__head">
+          <span class="rep__n">${i + 1}</span>
+          <span class="blk__kind">${BLOCK_LABEL[b.type] || b.type}</span>
+          <span class="rep__title">${esc((b.th || b.alt || '').slice(0, 60))}</span>
+          <button type="button" class="blk__move" data-act="blk-moveup" ${i === 0 ? 'disabled' : ''} title="ขึ้น">↑</button>
+          <button type="button" class="blk__move" data-act="blk-movedn" ${i === postBlocks.length - 1 ? 'disabled' : ''} title="ลง">↓</button>
+          <button type="button" class="rep__del" data-act="blk-del">✕ Remove</button>
+        </div>
+        ${blockFields(b, i)}
+      </div>`).join('');
+  }
+
+  $('blockList').addEventListener('input', e => {
+    const f = e.target.dataset.f; if (!f) return;
+    const rep = e.target.closest('.rep');
+    const b = postBlocks[+rep.dataset.i];
+    const li = e.target.closest('.blk-li');
+    if (li) {
+      b.items[+li.dataset.j][f === 'liTh' ? 'th' : 'en'] = e.target.value;
+      return;
+    }
+    if (f === 'capTh' || f === 'capEn') {
+      b.caption = b.caption || { th: '', en: '' };
+      b.caption[f === 'capTh' ? 'th' : 'en'] = e.target.value;
+    } else {
+      b[f] = e.target.value;
+    }
+    if (f === 'th' || f === 'alt') rep.querySelector('.rep__title').textContent = e.target.value.slice(0, 60);
+  });
+
+  $('blockList').addEventListener('click', e => {
+    const act = e.target.dataset.act; if (!act) return;
+    const rep = e.target.closest('.rep');
+    const i = +rep.dataset.i;
+    if (act === 'blk-del') { postBlocks.splice(i, 1); renderBlocks(); }
+    else if (act === 'blk-moveup' && i > 0) { postBlocks.splice(i - 1, 0, postBlocks.splice(i, 1)[0]); renderBlocks(); }
+    else if (act === 'blk-movedn' && i < postBlocks.length - 1) { postBlocks.splice(i + 1, 0, postBlocks.splice(i, 1)[0]); renderBlocks(); }
+    else if (act === 'li-add') { postBlocks[i].items = postBlocks[i].items || []; postBlocks[i].items.push({ th: '', en: '' }); renderBlocks(); }
+    else if (act === 'li-del') { postBlocks[i].items.splice(+e.target.closest('.blk-li').dataset.j, 1); renderBlocks(); }
+    else if (act === 'blk-up') {
+      pickAndUpload(url => { postBlocks[i].src = url; renderBlocks(); },
+        rep.querySelector('[data-role="blk-status"]'));
+    }
+  });
+
+  $('editorForm').addEventListener('click', e => {
+    const kind = e.target.dataset.add; if (!kind) return;
+    postBlocks.push(kind === 'ul' ? { type: 'ul', items: [{ th: '', en: '' }] }
+      : kind === 'img' ? { type: 'img', src: '', alt: '', altEn: '', caption: { th: '', en: '' } }
+      : { type: kind, th: '', en: '' });
+    renderBlocks();
+  });
+
   // ---------- editor ----------
   $('newBtn').addEventListener('click', () => openEditor(null));
   $('cancelBtn').addEventListener('click', showList);
@@ -474,7 +598,8 @@
   function applyTypeMode() { $('editorForm').dataset.mode = $('f_type').value; }
 
   function updatePreview() {
-    $('previewBtn').href = 'package.html?id=' + encodeURIComponent($('f_id').value.trim());
+    const page = $('f_type').value === 'post' ? 'post.html' : 'package.html';
+    $('previewBtn').href = page + '?id=' + encodeURIComponent($('f_id').value.trim());
   }
 
   function openEditor(row) {
@@ -531,6 +656,24 @@
     topicImgs = Array.isArray(d.images) ? d.images.slice() : [];
     renderTopic();
     $('topicStatus').textContent = '';
+    // blog article fields
+    $('f_post_title').value = d.title || '';
+    $('f_post_titleEn').value = d.titleEn || '';
+    $('f_post_cat').value = d.category || '';
+    $('f_post_catEn').value = d.categoryEn || '';
+    $('f_post_date').value = /^\d{4}-\d{2}-\d{2}$/.test(d.date || '') ? d.date : todayISO();
+    $('f_post_read').value = d.readMins || 5;
+    $('f_post_author').value = d.author || 'ทีม B-Healthy';
+    $('f_post_authorEn').value = d.authorEn || 'B-Healthy Team';
+    $('f_post_excerpt').value = d.excerpt || '';
+    $('f_post_excerptEn').value = d.excerptEn || '';
+    $('f_post_cover').value = d.cover || '';
+    setPostCover(d.cover || '');
+    $('postCoverStatus').textContent = '';
+    $('f_post_coverAlt').value = d.coverAlt || '';
+    $('f_post_coverAltEn').value = d.coverAltEn || '';
+    postBlocks = Array.isArray(d.body) ? JSON.parse(JSON.stringify(d.body)) : [];
+    renderBlocks();
     applyTypeMode();
     updatePreview();
     showEditor();
@@ -539,6 +682,12 @@
 
   function toHex(v, fallback) {
     return (typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)) ? v : fallback;
+  }
+
+  function todayISO() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
 
   $('editorForm').addEventListener('submit', async e => {
@@ -558,6 +707,57 @@
       const tbtn = $('saveBtn'); tbtn.disabled = true; tbtn.textContent = 'Saving…';
       const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
       tbtn.disabled = false; tbtn.textContent = 'Save';
+      if (error) { showMsg('editorMsg', 'err', error.message); return; }
+      showList(); return;
+    }
+
+    // ---- Blog article ----
+    if (type === 'post') {
+      const title = $('f_post_title').value.trim();
+      if (!title) { showMsg('editorMsg', 'err', 'หัวข้อบทความ (ไทย) is required.'); return; }
+      const cover = $('f_post_cover').value.trim();
+      if (!cover) { showMsg('editorMsg', 'err', 'รูปปก is required — the listing card needs it.'); return; }
+
+      // Drop blocks left completely blank, and normalise each shape so the
+      // public renderer never has to guess.
+      const body = postBlocks.map(b => {
+        if (b.type === 'img') {
+          if (!b.src) return null;
+          const cap = b.caption || {};
+          const out = { type: 'img', src: b.src, alt: b.alt || '', altEn: b.altEn || b.alt || '' };
+          if (cap.th || cap.en) out.caption = { th: cap.th || '', en: cap.en || cap.th || '' };
+          return out;
+        }
+        if (b.type === 'ul') {
+          const items = (b.items || []).filter(i => i.th || i.en)
+            .map(i => ({ th: i.th || '', en: i.en || i.th || '' }));
+          return items.length ? { type: 'ul', items } : null;
+        }
+        if (!b.th && !b.en) return null;
+        return { type: b.type, th: b.th || '', en: b.en || b.th || '' };
+      }).filter(Boolean);
+
+      const data = {
+        id, type,
+        title,
+        titleEn: $('f_post_titleEn').value.trim() || title,
+        category: $('f_post_cat').value.trim() || 'บทความ',
+        categoryEn: $('f_post_catEn').value.trim() || $('f_post_cat').value.trim() || 'Articles',
+        date: $('f_post_date').value || todayISO(),
+        readMins: parseInt($('f_post_read').value, 10) || 5,
+        author: $('f_post_author').value.trim() || 'ทีม B-Healthy',
+        authorEn: $('f_post_authorEn').value.trim() || 'B-Healthy Team',
+        excerpt: $('f_post_excerpt').value.trim(),
+        excerptEn: $('f_post_excerptEn').value.trim() || $('f_post_excerpt').value.trim(),
+        cover,
+        coverAlt: $('f_post_coverAlt').value.trim(),
+        coverAltEn: $('f_post_coverAltEn').value.trim() || $('f_post_coverAlt').value.trim(),
+        body
+      };
+      const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: title, data, en: {} };
+      const pbtn = $('saveBtn'); pbtn.disabled = true; pbtn.textContent = 'Saving…';
+      const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
+      pbtn.disabled = false; pbtn.textContent = 'Save';
       if (error) { showMsg('editorMsg', 'err', error.message); return; }
       showList(); return;
     }

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Package — B-Healthy</title>
+  <title>Blog — B-Healthy</title>
+  <meta name="description" content="บทความสุขภาพองค์กรจาก B-Healthy — ออฟฟิศซินโดรม ภาวะหมดไฟ การนอน อาหารเป็นยา และการจัด Wellness Retreat ให้ทีม" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Albert+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
@@ -11,8 +12,8 @@
   <link rel="apple-touch-icon" href="images/logo.svg" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="B-Healthy" />
-  <meta property="og:title" content="B-Healthy — Corporate Wellness" />
-  <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
+  <meta property="og:title" content="Blog — B-Healthy" />
+  <meta property="og:description" content="บทความสุขภาพองค์กร — ออฟฟิศซินโดรม ภาวะหมดไฟ การนอน และอาหารเป็นยา" />
   <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="stylesheet" href="css/styles.css?v=20260731b" />
@@ -30,7 +31,7 @@
         <a href="program.html">Retreats</a>
         <a href="workshops.html">Workshops</a>
         <a href="membership.html">Membership</a>
-        <a href="blog.html">Blog</a>
+        <a href="blog.html" class="is-active">Blog</a>
         <a href="contact.html" class="nav__cta">Contact</a>
         <button class="nav__lang" id="navLang" type="button" aria-label="Language"><span>TH</span><span class="sep">|</span><span class="on">EN</span></button>
       </nav>
@@ -38,19 +39,34 @@
     </div>
   </header>
 
-  <main id="pkg"><!-- rendered by JS --></main>
+  <!-- HERO -->
+  <section class="prog-hero">
+    <div class="container">
+      <p class="prog-hero__script">Wellness Journal</p>
+      <h1 class="prog-hero__title">B-HEALTHY <span>BLOG</span></h1>
+      <p class="prog-hero__sub" data-en="Practical writing on workplace wellness — what causes the problem, and what actually changes it.">เรื่องสุขภาพในที่ทำงานแบบใช้ได้จริง — ต้นเหตุคืออะไร และอะไรที่เปลี่ยนผลลัพธ์ได้จริง</p>
+    </div>
+  </section>
+
+  <!-- ARTICLES -->
+  <section class="prog">
+    <div class="container">
+      <div class="pill-head"><span class="pill-head__pill" data-en="ARTICLES">บทความ</span></div>
+      <div class="prog__filters" id="blogFilters"><!-- filter pills rendered by JS --></div>
+      <div class="blog__grid" id="blogGrid"><!-- cards rendered by JS --></div>
+      <p class="prog__empty" id="blogEmpty" hidden data-en="No articles in this category yet.">ยังไม่มีบทความในหมวดนี้</p>
+    </div>
+  </section>
 
   <footer class="footer" id="footer"></footer>
 
   <script src="js/config.js?v=20260718g"></script>
-  <script src="js/submit.js?v=20260717d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/packages.js?v=20260728a"></script>
-  <script src="js/workshops-data.js?v=20260718a"></script>
+  <script src="js/blog-data.js?v=20260728a"></script>
   <script src="js/site.js?v=20260728a"></script>
   <script src="js/footer.js?v=20260731b"></script>
-  <script src="js/package.js?v=20260728a"></script>
-  <script src="js/store.js?v=20260721c"></script>
+  <script src="js/blog.js?v=20260731a"></script>
+  <script src="js/blog-store.js?v=20260731a"></script>
   <script src="js/reveal.js?v=20260717g"></script>
 </body>
 </html>
