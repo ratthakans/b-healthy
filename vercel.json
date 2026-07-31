@@ -6,7 +6,6 @@
   "outputDirectory": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "_comment": "Rewrite destinations must use the clean path (/post, not /post.html) — with cleanUrls on, a .html destination 308-redirects and the rewrite 404s.",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/blog/:slug", "destination": "/post" }

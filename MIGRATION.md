@@ -172,6 +172,16 @@ request — no edit needed when the domain moves to b-healthy.co. The old static
 
 `server.js` mirrors both rewrites so local preview matches production.
 
+Two `vercel.json` gotchas, both of which cost a broken deploy once:
+
+- Rewrite destinations must use the **clean** path (`/post`, not
+  `/post.html`). With `cleanUrls: true` a `.html` destination 308-redirects
+  and the rewrite 404s. Local preview doesn't reproduce this — `server.js`
+  serves the file directly.
+- `vercel.json` is schema-validated and **rejects unknown keys**. Adding a
+  `_comment` field fails the deployment *before the build starts*, so it
+  shows up as an error with no build logs at all. Keep notes here instead.
+
 ## Still-open content items (swap anytime)
 
 - Venue photos for the four retreat properties — Amphawa Hideaway Homestay,
