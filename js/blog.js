@@ -9,6 +9,10 @@
 
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // data-en values need escaping TWICE: the browser decodes entities when the
+  // attribute is parsed, and i18n.js then assigns the result with innerHTML —
+  // so a single pass hands markup straight back to the parser. See js/i18n.js.
+  const escAttr = s => esc(esc(s));
 
   function render() {
   const posts = window.BLOG_POSTS || [];
@@ -19,16 +23,16 @@
       <a class="bcard" href="/blog/${encodeURIComponent(p.id)}" data-category="${esc(p.category)}">
         <div class="bcard__media">
           <img src="${esc(p.cover)}" alt="${esc(p.coverAlt)}" ${i > 2 ? 'loading="lazy"' : ''} />
-          <span class="bcard__cat" data-en="${esc(p.categoryEn)}">${esc(p.category)}</span>
+          <span class="bcard__cat" data-en="${escAttr(p.categoryEn)}">${esc(p.category)}</span>
         </div>
         <div class="bcard__body">
           <p class="bcard__meta">
-            <span data-en="${esc(date.en)}">${esc(date.th)}</span>
+            <span data-en="${escAttr(date.en)}">${esc(date.th)}</span>
             <span class="bcard__dot"></span>
-            <span data-en="${p.readMins} min read">อ่าน ${p.readMins} นาที</span>
+            <span data-en="${escAttr(p.readMins + ' min read')}">อ่าน ${esc(p.readMins)} นาที</span>
           </p>
-          <h3 class="bcard__title" data-en="${esc(p.titleEn)}">${esc(p.title)}</h3>
-          <p class="bcard__excerpt" data-en="${esc(p.excerptEn)}">${esc(p.excerpt)}</p>
+          <h3 class="bcard__title" data-en="${escAttr(p.titleEn)}">${esc(p.title)}</h3>
+          <p class="bcard__excerpt" data-en="${escAttr(p.excerptEn)}">${esc(p.excerpt)}</p>
           <span class="bcard__cta" data-en="Read article →">อ่านบทความ →</span>
         </div>
       </a>`;
@@ -39,9 +43,15 @@
   posts.forEach(p => { if (!seen.some(c => c.th === p.category)) seen.push({ th: p.category, en: p.categoryEn }); });
   filtersEl.innerHTML =
     `<button class="prog__filter is-active" data-filter="*" data-en="All">ทั้งหมด</button>` +
-    seen.map(c => `<button class="prog__filter" data-filter="${esc(c.th)}" data-en="${esc(c.en)}">${esc(c.th)}</button>`).join('');
+    seen.map(c => `<button class="prog__filter" data-filter="${esc(c.th)}" data-en="${escAttr(c.en)}">${esc(c.th)}</button>`).join('');
 
-  if (emptyEl) emptyEl.hidden = posts.length > 0;
+  // "no articles at all" reads differently from "none in this category"
+  if (emptyEl) {
+    emptyEl.hidden = posts.length > 0;
+    emptyEl.textContent = 'ยังไม่มีบทความ';
+    emptyEl.setAttribute('data-en', 'No articles yet.');
+    delete emptyEl.__th;                         // i18n caches the old copy on first apply
+  }
 
   // apply current language to freshly rendered cards/filters
   if (window.bhApplyLang) window.bhApplyLang();
@@ -60,7 +70,14 @@
       card.classList.toggle('is-hidden', !match);
       if (match) shown++;
     });
-    if (emptyEl) emptyEl.hidden = shown > 0;
+    if (emptyEl) {
+      emptyEl.hidden = shown > 0;
+      const inCat = f !== '*';
+      emptyEl.textContent = inCat ? 'ยังไม่มีบทความในหมวดนี้' : 'ยังไม่มีบทความ';
+      emptyEl.setAttribute('data-en', inCat ? 'No articles in this category yet.' : 'No articles yet.');
+      delete emptyEl.__th;                       // i18n caches the old copy on first apply
+      if (window.bhApplyLang) window.bhApplyLang();
+    }
   });
 
   render();

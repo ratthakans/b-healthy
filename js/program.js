@@ -2,6 +2,12 @@
 // B-Healthy — render package cards + category filter on program.html
 // ============================================================
 (function () {
+  // Package data is admin-authored, so treat it as untrusted. escAttr escapes
+  // twice: attribute parsing decodes entities, then i18n.js assigns the result
+  // with innerHTML — one pass would hand the markup back to the parser.
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const escAttr = s => esc(esc(s));
   const grid = document.getElementById('progGrid');
   const filtersEl = document.getElementById('progFilters');
   const emptyEl = document.getElementById('progEmpty');
@@ -20,22 +26,22 @@
     const theme = p.theme || {};
     const tagline = Array.isArray(p.tagline) ? p.tagline : [];
     const price = p.priceNow === 'ติดต่อสอบถาม'
-      ? `<span class="pcard__price-call" data-en="${en.priceNow || 'Contact us'}">ติดต่อสอบถาม</span>`
-      : `${p.priceOld ? `<span class="pcard__price-old">${p.priceOld}</span>` : ''}
-         <span class="pcard__price-now">${p.priceNow}</span>
-         <span class="pcard__price-unit" data-en="${en.priceUnit || p.priceUnit}">${p.priceUnit}</span>`;
+      ? `<span class="pcard__price-call" data-en="${escAttr(en.priceNow || 'Contact us')}">ติดต่อสอบถาม</span>`
+      : `${p.priceOld ? `<span class="pcard__price-old">${esc(p.priceOld)}</span>` : ''}
+         <span class="pcard__price-now">${esc(p.priceNow)}</span>
+         <span class="pcard__price-unit" data-en="${escAttr(en.priceUnit || p.priceUnit)}">${esc(p.priceUnit)}</span>`;
 
     return `
-      <a class="pcard" href="package.html?id=${p.id}" data-province="${p.province || ''}" data-category="${p.category || ''}" style="--pc:${theme.primary || "#1ECAD3"};--pa:${theme.accent || "#425CC7"}">
+      <a class="pcard" href="package.html?id=${encodeURIComponent(p.id)}" data-province="${esc(p.province || '')}" data-category="${esc(p.category || '')}" style="--pc:${esc(theme.primary || "#1ECAD3")};--pa:${esc(theme.accent || "#425CC7")}">
         <div class="pcard__media">
-          <img src="${p.hero}" alt="${p.name}" loading="lazy" />
-          <span class="pcard__badge" data-en="${en.duration || p.duration}">${p.duration}</span>
+          <img src="${esc(p.hero)}" alt="${esc(p.name)}" loading="lazy" />
+          <span class="pcard__badge" data-en="${escAttr(en.duration || p.duration)}">${esc(p.duration)}</span>
         </div>
         <div class="pcard__body">
-          <p class="pcard__kicker">${tagline.join(' · ')}</p>
-          <h3 class="pcard__name">${p.name}</h3>
-          <p class="pcard__loc"><svg viewBox="0 0 24 24" width="13" height="13"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg> <span data-en="${en.location || p.location}">${p.location}</span></p>
-          <p class="pcard__group" data-en="${en.group || p.group}">${p.group}</p>
+          <p class="pcard__kicker">${esc(tagline.join(' · '))}</p>
+          <h3 class="pcard__name">${esc(p.name)}</h3>
+          <p class="pcard__loc"><svg viewBox="0 0 24 24" width="13" height="13"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg> <span data-en="${escAttr(en.location || p.location)}">${esc(p.location)}</span></p>
+          <p class="pcard__group" data-en="${escAttr(en.group || p.group)}">${esc(p.group)}</p>
           <div class="pcard__foot">
             <div class="pcard__price">${price}</div>
             <span class="pcard__cta" data-en="View details &amp; book →">ดูรายละเอียด &amp; จอง →</span>
@@ -48,7 +54,7 @@
   const provinces = ['Hua Hin', 'Amphawa', 'Kanchanaburi', 'Krabi', 'Phuket', 'Chiang Mai'];
   const pills = ['ทั้งหมด', ...provinces];
   filtersEl.innerHTML = pills.map((label, i) =>
-    `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${i === 0 ? '*' : label}"${i === 0 ? ' data-en="All"' : ''}>${label}</button>`
+    `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${i === 0 ? '*' : label}"${i === 0 ? ' data-en="All"' : ''}>${esc(label)}</button>`
   ).join('');
 
   // apply current language to freshly rendered cards/filters

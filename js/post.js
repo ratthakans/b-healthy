@@ -8,6 +8,9 @@
 
   const esc = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // Escaped twice: attribute parsing decodes entities, then i18n.js assigns the
+  // result with innerHTML — one pass would hand markup back to the parser.
+  const escAttr = s => esc(esc(s));
 
   // Canonical URL is /blog/<slug> (rewritten to this page by vercel.json).
   // ?id=<slug> still works so links shared before the change keep resolving.
@@ -34,10 +37,15 @@
   }
 
   // Tab title and description follow whichever language i18n.js has active.
-  const isEn = document.documentElement.lang === 'en';
-  document.title = `${isEn ? p.titleEn : p.title} — B-Healthy`;
-  const desc = document.querySelector('meta[name="description"]');
-  if (desc) desc.setAttribute('content', isEn ? p.excerptEn : p.excerpt);
+  // Re-applied on toggle too — i18n only swaps elements, not <head> metadata.
+  const applyMeta = () => {
+    const isEn = document.documentElement.lang === 'en';
+    document.title = `${isEn ? p.titleEn : p.title} — B-Healthy`;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute('content', isEn ? p.excerptEn : p.excerpt);
+  };
+  applyMeta();
+  document.getElementById('navLang')?.addEventListener('click', () => setTimeout(applyMeta, 0));
   const ogTitle = document.querySelector('meta[property="og:title"]');
   if (ogTitle) ogTitle.setAttribute('content', p.titleEn);
   // Resolve against <base> (the site root), not location.href — on /blog/<slug>
@@ -55,19 +63,19 @@
   const block = b => {
     switch (b.type) {
       case 'h2':
-        return `<h2 class="post__h2" data-en="${esc(b.en)}">${esc(b.th)}</h2>`;
+        return `<h2 class="post__h2" data-en="${escAttr(b.en)}">${esc(b.th)}</h2>`;
       case 'ul':
         return `<ul class="post__list">${(b.items || []).map(i =>
-          `<li data-en="${esc(i.en)}">${esc(i.th)}</li>`).join('')}</ul>`;
+          `<li data-en="${escAttr(i.en)}">${esc(i.th)}</li>`).join('')}</ul>`;
       case 'quote':
-        return `<blockquote class="post__quote" data-en="${esc(b.en)}">${esc(b.th)}</blockquote>`;
+        return `<blockquote class="post__quote" data-en="${escAttr(b.en)}">${esc(b.th)}</blockquote>`;
       case 'img':
         return `<figure class="post__fig">
           <img src="${esc(b.src)}" alt="${esc(b.alt)}" loading="lazy" />
-          ${b.caption ? `<figcaption data-en="${esc(b.caption.en)}">${esc(b.caption.th)}</figcaption>` : ''}
+          ${b.caption ? `<figcaption data-en="${escAttr(b.caption.en)}">${esc(b.caption.th)}</figcaption>` : ''}
         </figure>`;
       default:
-        return `<p class="post__p" data-en="${esc(b.en)}">${esc(b.th)}</p>`;
+        return `<p class="post__p" data-en="${escAttr(b.en)}">${esc(b.th)}</p>`;
     }
   };
 
@@ -82,11 +90,11 @@
       <a class="bcard" href="/blog/${encodeURIComponent(r.id)}">
         <div class="bcard__media">
           <img src="${esc(r.cover)}" alt="${esc(r.coverAlt)}" loading="lazy" />
-          <span class="bcard__cat" data-en="${esc(r.categoryEn)}">${esc(r.category)}</span>
+          <span class="bcard__cat" data-en="${escAttr(r.categoryEn)}">${esc(r.category)}</span>
         </div>
         <div class="bcard__body">
-          <p class="bcard__meta"><span data-en="${esc(d.en)}">${esc(d.th)}</span></p>
-          <h3 class="bcard__title" data-en="${esc(r.titleEn)}">${esc(r.title)}</h3>
+          <p class="bcard__meta"><span data-en="${escAttr(d.en)}">${esc(d.th)}</span></p>
+          <h3 class="bcard__title" data-en="${escAttr(r.titleEn)}">${esc(r.title)}</h3>
         </div>
       </a>`;
   };
@@ -96,14 +104,14 @@
       <header class="post__head">
         <div class="container post__head-inner">
           <a class="post__back" href="blog.html" data-en="← All articles">← บทความทั้งหมด</a>
-          <span class="post__cat" data-en="${esc(p.categoryEn)}">${esc(p.category)}</span>
-          <h1 class="post__title" data-en="${esc(p.titleEn)}">${esc(p.title)}</h1>
+          <span class="post__cat" data-en="${escAttr(p.categoryEn)}">${esc(p.category)}</span>
+          <h1 class="post__title" data-en="${escAttr(p.titleEn)}">${esc(p.title)}</h1>
           <p class="post__meta">
-            <span data-en="${esc(p.authorEn)}">${esc(p.author)}</span>
+            <span data-en="${escAttr(p.authorEn)}">${esc(p.author)}</span>
             <span class="bcard__dot"></span>
-            <span data-en="${esc(date.en)}">${esc(date.th)}</span>
+            <span data-en="${escAttr(date.en)}">${esc(date.th)}</span>
             <span class="bcard__dot"></span>
-            <span data-en="${p.readMins} min read">อ่าน ${p.readMins} นาที</span>
+            <span data-en="${escAttr(p.readMins + ' min read')}">อ่าน ${esc(p.readMins)} นาที</span>
           </p>
         </div>
       </header>
@@ -123,12 +131,13 @@
       </div>
     </article>
 
+    ${related.length ? `
     <section class="pkg-sec pkg-sec--tint">
       <div class="container">
         <div class="pill-head"><span class="pill-head__pill" data-en="KEEP READING">อ่านต่อ</span></div>
         <div class="blog__grid">${related.map(relatedCard).join('')}</div>
       </div>
-    </section>`;
+    </section>` : ''}`;
 
   if (window.bhApplyLang) window.bhApplyLang();
   }

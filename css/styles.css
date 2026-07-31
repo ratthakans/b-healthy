@@ -529,6 +529,19 @@ video.feature-hero__bg { background: var(--navy); }
 
 /* Filter pills */
 .prog__filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 0 40px; }
+/* On phones the pills wrapped to five rows and pushed the first card past the
+   fold. Scroll them sideways on one line instead. */
+@media (max-width: 700px) {
+  .prog__filters {
+    flex-wrap: nowrap; justify-content: flex-start;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; margin-bottom: 26px;
+    padding-inline: 24px;      /* matches .container so pills align with the cards */
+    margin-inline: -24px;      /* … while still scrolling edge to edge */
+  }
+  .prog__filters::-webkit-scrollbar { display: none; }
+  .prog__filters .prog__filter { flex: 0 0 auto; }
+}
 .prog__filter {
   font-family: var(--font-en); font-size: .88rem; font-weight: 500; letter-spacing: .02em;
   color: var(--ink); background: #fff; border: 1.5px solid var(--line);

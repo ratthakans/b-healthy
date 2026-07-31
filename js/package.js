@@ -3,6 +3,12 @@
 // Reads ?id= from the URL and pulls from window.PACKAGES (+ PACKAGES_EN)
 // ============================================================
 (function () {
+  // Package data is admin-authored, so treat it as untrusted. escAttr escapes
+  // twice: attribute parsing decodes entities, then i18n.js assigns the result
+  // with innerHTML — one pass would hand the markup back to the parser.
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const escAttr = s => esc(esc(s));
   const root = document.getElementById('pkg');
   if (!root) return;
 
@@ -25,20 +31,20 @@
   document.title = `${p.name} — B-Healthy`;
 
   const price = p.priceNow === 'ติดต่อสอบถาม'
-    ? `<div class="pkg-price__now" data-en="${en.priceNow || 'Contact us'}">ติดต่อสอบถาม</div>`
-    : `${p.priceOld ? `<div class="pkg-price__old" data-en="Regular ${p.priceOld} THB">ราคาปกติ ${p.priceOld} บาท</div>` : ''}
-       <div class="pkg-price__now">${p.priceNow}<span data-en=" ${en.priceUnit || p.priceUnit}"> ${p.priceUnit}</span></div>
-       ${p.priceNote ? `<div class="pkg-price__note" data-en="${en.priceNote || p.priceNote}">${p.priceNote}</div>` : ''}`;
+    ? `<div class="pkg-price__now" data-en="${escAttr(en.priceNow || 'Contact us')}">ติดต่อสอบถาม</div>`
+    : `${p.priceOld ? `<div class="pkg-price__old" data-en="Regular ${escAttr(p.priceOld)} THB">ราคาปกติ ${esc(p.priceOld)} บาท</div>` : ''}
+       <div class="pkg-price__now">${esc(p.priceNow)}<span data-en=" ${escAttr(en.priceUnit || p.priceUnit)}"> ${esc(p.priceUnit)}</span></div>
+       ${p.priceNote ? `<div class="pkg-price__note" data-en="${escAttr(en.priceNote || p.priceNote)}">${esc(p.priceNote)}</div>` : ''}`;
 
   const exp = p.experiences.map((e, i) => `
     <article class="pxp">
-      <div class="pxp__img"><img src="${e.img}" alt="${e.title}" loading="lazy" /></div>
-      <h4>${e.title}${e.th ? `<span>${e.th}</span>` : ''}</h4>
-      <p${en.expDesc && en.expDesc[i] ? ` data-en="${en.expDesc[i]}"` : ''}>${e.desc}</p>
+      <div class="pxp__img"><img src="${esc(e.img)}" alt="${esc(e.title)}" loading="lazy" /></div>
+      <h4>${esc(e.title)}${e.th ? `<span>${esc(e.th)}</span>` : ''}</h4>
+      <p${en.expDesc && en.expDesc[i] ? ` data-en="${escAttr(en.expDesc[i])}"` : ''}>${esc(e.desc)}</p>
     </article>`).join('');
 
   const includes = p.includes.map((it, i) =>
-    `<li${en.includes && en.includes[i] ? ` data-en="${en.includes[i]}"` : ''}>${it}</li>`).join('');
+    `<li${en.includes && en.includes[i] ? ` data-en="${escAttr(en.includes[i])}"` : ''}>${esc(it)}</li>`).join('');
 
   const isWorkshop = p.type === 'workshop';
   const backHref = isWorkshop ? 'workshops.html' : 'program.html';
@@ -50,8 +56,8 @@
     <div class="tl">
       <div class="tl__day"><span>DAY</span><strong>${idx + 1}</strong></div>
       <div class="tl__content">
-        <h4${den.title ? ` data-en="${den.title}"` : ''}>${d.title}</h4>
-        <ul>${d.items.map((item, j) => `<li><span class="tl__time">${item.time}</span><span class="tl__text"${den.items && den.items[j] ? ` data-en="${den.items[j]}"` : ''}>${item.text}</span></li>`).join('')}</ul>
+        <h4${den.title ? ` data-en="${escAttr(den.title)}"` : ''}>${esc(d.title)}</h4>
+        <ul>${d.items.map((item, j) => `<li><span class="tl__time">${esc(item.time)}</span><span class="tl__text"${den.items && den.items[j] ? ` data-en="${escAttr(den.items[j])}"` : ''}>${esc(item.text)}</span></li>`).join('')}</ul>
       </div>
     </div>`;
   }).join('');
@@ -66,10 +72,10 @@
         <div class="pill-head"><span class="pill-head__script">Luxury</span><span class="pill-head__pill">VENUE</span></div>
         <div class="pkg-venue${venueImgs.length ? '' : ' pkg-venue--noimg'}">
           <div class="pkg-venue__text">
-            <h3>${p.venue.name}</h3>
-            <p${en.venueDesc ? ` data-en="${en.venueDesc}"` : ''}>${p.venue.desc}</p>
+            <h3>${esc(p.venue.name)}</h3>
+            <p${en.venueDesc ? ` data-en="${escAttr(en.venueDesc)}"` : ''}>${esc(p.venue.desc)}</p>
           </div>
-          ${venueImgs.length ? `<div class="pkg-venue__imgs">${venueImgs.map(src => `<img src="${src}" alt="${p.venue.name}" loading="lazy" />`).join('')}</div>` : ''}
+          ${venueImgs.length ? `<div class="pkg-venue__imgs">${venueImgs.map(src => `<img src="${esc(src)}" alt="${esc(p.venue.name)}" loading="lazy" />`).join('')}</div>` : ''}
         </div>
       </div>
     </section>` : '';
@@ -87,7 +93,7 @@
     <section class="pkg-sec">
       <div class="container">
         <div class="pill-head"><span class="pill-head__pill" data-en="GALLERY">GALLERY</span></div>
-        <div class="pkg-gallery">${gallery.map(src => `<a class="pkg-gallery__item" href="${src}" target="_blank" rel="noopener"><img src="${src}" alt="${p.name}" loading="lazy" /></a>`).join('')}</div>
+        <div class="pkg-gallery">${gallery.map(src => `<a class="pkg-gallery__item" href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="${esc(p.name)}" loading="lazy" /></a>`).join('')}</div>
       </div>
     </section>` : '';
 
@@ -105,15 +111,15 @@
   root.innerHTML = `
     <!-- HERO -->
     <section class="pkg-hero">
-      <img class="pkg-hero__bg" src="${p.hero}" alt="${p.name}" />
+      <img class="pkg-hero__bg" src="${esc(p.hero)}" alt="${esc(p.name)}" />
       <div class="pkg-hero__overlay"></div>
       <div class="container pkg-hero__inner">
-        <a class="pkg-back" href="${backHref}">← ${backLabel}</a>
-        <p class="pkg-hero__tags">${p.tagline.map(t => `<span>${t}</span>`).join('')}</p>
-        <h1 class="pkg-hero__title">${p.name}</h1>
-        <p class="pkg-hero__meta"><span data-en="${en.duration || p.duration}">${p.duration}</span></p>
-        <p class="pkg-hero__meta"><span data-en="${en.group || p.group}">${p.group}</span></p>
-        <p class="pkg-hero__loc" data-en="${en.location || p.location}">${p.location}</p>
+        <a class="pkg-back" href="${esc(backHref)}">← ${backLabel}</a>
+        <p class="pkg-hero__tags">${p.tagline.map(t => `<span>${esc(t)}</span>`).join('')}</p>
+        <h1 class="pkg-hero__title">${esc(p.name)}</h1>
+        <p class="pkg-hero__meta"><span data-en="${escAttr(en.duration || p.duration)}">${esc(p.duration)}</span></p>
+        <p class="pkg-hero__meta"><span data-en="${escAttr(en.group || p.group)}">${esc(p.group)}</span></p>
+        <p class="pkg-hero__loc" data-en="${escAttr(en.location || p.location)}">${esc(p.location)}</p>
         <a href="#booking" class="btn btn--primary" data-en="Book this package">จองแพ็กเกจนี้</a>
       </div>
     </section>
@@ -123,8 +129,8 @@
       <div class="container pkg-over__grid">
         <div class="pkg-over__text">
           <p class="section__eyebrow">Overview</p>
-          <h2 class="pkg-h2">${p.kicker}</h2>
-          <p class="pkg-intro"${en.intro ? ` data-en="${en.intro}"` : ''}>${p.intro}</p>
+          <h2 class="pkg-h2">${esc(p.kicker)}</h2>
+          <p class="pkg-intro"${en.intro ? ` data-en="${escAttr(en.intro)}"` : ''}>${esc(p.intro)}</p>
         </div>
         <aside class="pkg-price">
           <span class="pkg-price__pill" data-en="From">ราคาเพียง</span>
@@ -165,10 +171,10 @@
         <div class="pkg-book__card">
           <div class="pkg-book__head">
             <h2 data-en="Book package">จองแพ็กเกจ</h2>
-            <p>${p.name} · <span data-en="${en.duration || p.duration}">${p.duration}</span></p>
+            <p>${esc(p.name)} · <span data-en="${escAttr(en.duration || p.duration)}">${esc(p.duration)}</span></p>
           </div>
           <form class="form" id="bookForm" novalidate>
-            <label class="form__full"><span data-en="Package">แพ็กเกจ</span><input type="text" name="package" value="${p.name}" readonly /></label>
+            <label class="form__full"><span data-en="Package">แพ็กเกจ</span><input type="text" name="package" value="${esc(p.name)}" readonly /></label>
             <div class="form__row">
               <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" required placeholder="ชื่อ-นามสกุล" data-en-ph="Full name" /></label>
               <label><span data-en="Company / Organization">ชื่อบริษัท / องค์กร</span><input type="text" name="company" placeholder="ชื่อองค์กร" data-en-ph="Organization" /></label>

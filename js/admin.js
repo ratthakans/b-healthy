@@ -593,7 +593,7 @@
   $('newBtn').addEventListener('click', () => openEditor(null));
   $('cancelBtn').addEventListener('click', showList);
   $('f_id').addEventListener('input', updatePreview);
-  $('f_type').addEventListener('change', applyTypeMode);
+  $('f_type').addEventListener('change', () => { applyTypeMode(); updatePreview(); });
 
   function applyTypeMode() { $('editorForm').dataset.mode = $('f_type').value; }
 
@@ -696,6 +696,20 @@
     const id = $('f_id').value.trim();
     if (!id) { showMsg('editorMsg', 'err', 'Slug / ID is required.'); return; }
     const type = $('f_type').value;
+
+    // The slug is the primary key across every type, and saving is an upsert —
+    // so reusing an existing slug for a new record silently overwrites that
+    // record and changes its type. f_id is read-only when editing, so a clash
+    // here always means a genuinely new row colliding with something else.
+    if (!$('f_id').readOnly) {
+      const clash = rowsCache.find(r => r.id === id);
+      if (clash) {
+        showMsg('editorMsg', 'err',
+          `Slug "${id}" is already used by a ${clash.type} ("${clash.name || clash.id}"). ` +
+          `Saving would overwrite it — pick a different slug, or edit that record from the list.`);
+        return;
+      }
+    }
 
     // ---- Homepage topic images: heading + up to 3 photos ----
     if (type === 'topic') {
