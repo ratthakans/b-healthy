@@ -3,12 +3,7 @@
 // Reads ?id= from the URL and pulls from window.PACKAGES (+ PACKAGES_EN)
 // ============================================================
 (function () {
-  // Package data is admin-authored, so treat it as untrusted. escAttr escapes
-  // twice: attribute parsing decodes entities, then i18n.js assigns the result
-  // with innerHTML — one pass would hand the markup back to the parser.
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const escAttr = s => esc(esc(s));
+  const esc = window.bhEsc, escAttr = window.bhEscAttr;   // js/core.js
   const root = document.getElementById('pkg');
   if (!root) return;
 

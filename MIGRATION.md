@@ -105,24 +105,30 @@ How it behaves:
 
 ## Blog — add / edit an article
 
-Unlike packages, the blog is **not** in Supabase and has no back-office. Articles
-live in [`js/blog-data.js`](js/blog-data.js) and ship with the code, so adding one
-means an edit and a `git push`.
+Articles are managed in `/admin.html` like everything else — **Type → Blog
+article**. The editor has a block-based body (paragraph, heading, bullet list,
+pull quote, image), reorder arrows, image upload, and a **Preview** that renders
+the draft through the real article page before you publish it.
 
-1. **Photos** — drop 2–3 files in `images/blog/` named `<slug>-1.jpg`, `-2.jpg`,
-   `-3.jpg`. Record where they came from in `images/blog/CREDITS.md`.
-2. **Article** — copy an existing entry in `js/blog-data.js` and fill it in. Every
-   field has a Thai value plus its `…En` / `en` counterpart; the language toggle
-   swaps between them, so **both are required** or the EN site shows blanks.
-3. **Body blocks** — `p`, `h2`, `ul`, `quote`, `img`, in whatever order you like.
-4. **Sitemap** — add the new `/post?id=<slug>` line to `sitemap.xml`.
+Sorting is automatic (newest `date` first), the "keep reading" strip fills itself
+from the same category, and `/sitemap.xml` picks up new articles on its own.
 
-Sorting is automatic (newest `date` first) and the "keep reading" strip fills
-itself from the same category. Nothing else needs touching.
+**Photos** — upload straight from the editor, or drop files in `images/blog/`
+named `<slug>-1.jpg`, `-2.jpg`, `-3.jpg` and record the source in
+`images/blog/CREDITS.md`.
 
-> If the client wants to publish articles themselves, this needs a `type='post'`
-> row type in the `packages` table plus a tab in `/admin.html` — same pattern the
-> topic images already use. Not built yet.
+**English fields are optional.** Leave one blank and the site falls back to the
+Thai text rather than showing an empty string.
+
+### The bundled fallback
+
+`js/blog-index.js` (listing fields) and `js/blog-bodies.js` (article text) ship
+with the code and are used only when Supabase is unconfigured, unreachable or
+has no articles — the blog can never render blank. They are split so the listing
+page loads ~7KB instead of ~60KB; it has no reason to download article prose it
+will not render.
+
+Editing them by hand is only needed to change what shows during an outage.
 
 ---
 
@@ -154,7 +160,9 @@ Both are idempotent — safe to re-run.
 
 After (1), open `/admin.html` → **↧ Import current packages** to load the ten
 bundled articles into the database. From then on the site reads articles from
-Supabase and `js/blog-data.js` is only the offline fallback.
+Supabase and the bundled `js/blog-index.js` + `js/blog-bodies.js` are only the
+offline fallback. The listing page loads the index alone, so it never ships
+article text it will not render.
 
 ## Blog URLs and sitemap
 

@@ -38,10 +38,7 @@
     try { return JSON.parse(t); }
     catch (e) { throw new Error(`Invalid JSON in "${label}": ${e.message}`); }
   }
-  // Escapes HTML — submissions are attacker-controlled, so this must never
-  // return raw markup (it is interpolated into innerHTML).
-  const esc = s => String(s == null ? '' : s)
-    .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const esc = window.bhEsc;                               // js/core.js
 
   // ---------- views ----------
   function showLogin() { loginView.classList.remove('hide'); appView.classList.add('hide'); }
@@ -284,7 +281,7 @@
         name: `${label} (${g === 'wk' ? 'Workshop' : 'Retreats'})`,
         data: { id: `topic-${g}-${k}`, type: 'topic', group: g, key: k, name: label, images }, en: {} });
     });
-    // blog articles bundled in js/blog-data.js — imported so they can be
+    // blog articles bundled in js/blog-index.js + js/blog-bodies.js — imported
     // edited (and new ones added) from here instead of in code
     (window.BLOG_POSTS || []).forEach((p, i) => {
       rows.push({
@@ -297,7 +294,8 @@
           author: p.author, authorEn: p.authorEn,
           excerpt: p.excerpt, excerptEn: p.excerptEn,
           cover: p.cover, coverAlt: p.coverAlt, coverAltEn: p.coverAltEn,
-          body: p.body || []
+          // The bundled index carries no bodies — they live in blog-bodies.js.
+          body: (p.body && p.body.length) ? p.body : ((window.BLOG_BODIES || {})[p.id] || [])
         },
         en: {}
       });

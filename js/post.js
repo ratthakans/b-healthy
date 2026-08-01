@@ -6,11 +6,7 @@
   const root = document.getElementById('postRoot');
   if (!root || !window.BLOG_POSTS) return;
 
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  // Escaped twice: attribute parsing decodes entities, then i18n.js assigns the
-  // result with innerHTML — one pass would hand markup back to the parser.
-  const escAttr = s => esc(esc(s));
+  const esc = window.bhEsc, escAttr = window.bhEscAttr;   // js/core.js
 
   const params = new URLSearchParams(location.search);
 
@@ -79,6 +75,13 @@
     ? window.bhBlogDate(p.date)
     : { th: p.date, en: p.date };
 
+  // Articles from the database (and previews) carry their own body. The bundled
+  // fallback keeps bodies in js/blog-bodies.js so the listing page never has to
+  // download them — look there when the record itself has none.
+  const bodyBlocks = (Array.isArray(p.body) && p.body.length)
+    ? p.body
+    : ((window.BLOG_BODIES || {})[p.id] || []);
+
   // --- Body blocks ---
   const block = b => {
     switch (b.type) {
@@ -146,7 +149,7 @@
       </figure>
 
       <div class="container post__body">
-        ${(p.body || []).map(block).join('')}
+        ${bodyBlocks.map(block).join('')}
       </div>
 
       <div class="container post__cta">

@@ -7,7 +7,7 @@
 // Source order:
 //   1. published `post` rows in Supabase — the live source once
 //      supabase-blog.sql has run and the articles are imported
-//   2. js/blog-data.js — the bundled fallback, used if the DB is
+//   2. js/blog-index.js — the bundled fallback, used if the DB is
 //      unreachable or still empty, so the sitemap is never blank
 //
 // The host is taken from the request, so this keeps working when the
@@ -38,10 +38,12 @@ const xmlEsc = (s) => String(s ?? "")
   .replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
 // The bundled articles, so a DB outage still yields a complete sitemap.
+// Only the index is needed here — a sitemap entry is an id and a date, so the
+// article bodies (js/blog-bodies.js) are deliberately not loaded.
 function bundledPosts() {
   try {
     global.window = global.window || {};
-    require("../js/blog-data.js");
+    require("../js/blog-index.js");
     return (global.window.BLOG_POSTS || []).map(p => ({ id: p.id, date: p.date }));
   } catch (e) {
     console.error("sitemap: bundled fallback failed", e);

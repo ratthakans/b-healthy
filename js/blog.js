@@ -7,12 +7,7 @@
   const emptyEl = document.getElementById('blogEmpty');
   if (!grid || !window.BLOG_POSTS) return;
 
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  // data-en values need escaping TWICE: the browser decodes entities when the
-  // attribute is parsed, and i18n.js then assigns the result with innerHTML —
-  // so a single pass hands markup straight back to the parser. See js/i18n.js.
-  const escAttr = s => esc(esc(s));
+  const esc = window.bhEsc, escAttr = window.bhEscAttr;   // js/core.js
 
   function render() {
   const posts = window.BLOG_POSTS || [];

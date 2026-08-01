@@ -17,7 +17,7 @@
     gold: '<path fill="currentColor" d="M12 2l3 6.5 7 .6-5.3 4.6L18.5 21 12 17.3 5.5 21l1.8-7.3L2 9.1l7-.6z"/>',
     silver: '<path fill="currentColor" d="M12 2l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5z"/>'
   };
-  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const esc = window.bhEsc;                               // js/core.js
 
   const endpoint = url +
     '/rest/v1/packages?type=eq.membership&status=eq.published&select=id,sort,data&order=sort.asc';

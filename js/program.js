@@ -1,82 +1,29 @@
 // ============================================================
-// B-Healthy — render package cards + category filter on program.html
+// B-Healthy — retreat cards on program.html
+// The card markup and filter behaviour live in js/cards.js, shared with
+// workshops.html. This file only declares where the data comes from and
+// what the filter pills are.
 // ============================================================
 (function () {
-  // Package data is admin-authored, so treat it as untrusted. escAttr escapes
-  // twice: attribute parsing decodes entities, then i18n.js assigns the result
-  // with innerHTML — one pass would hand the markup back to the parser.
-  const esc = s => String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const escAttr = s => esc(esc(s));
-  const grid = document.getElementById('progGrid');
-  const filtersEl = document.getElementById('progFilters');
-  const emptyEl = document.getElementById('progEmpty');
-  if (!grid) return;
+  // Fixed destination list — deliberately not derived from the data, so a
+  // province we are opening can appear before a package exists for it.
+  const PROVINCES = ['Hua Hin', 'Amphawa', 'Kanchanaburi', 'Krabi', 'Phuket', 'Chiang Mai'];
 
-  function render() {
-  if (!window.PACKAGES || !window.PACKAGE_ORDER) return;
-  const EN = window.PACKAGES_EN || {};
-
-  // --- Cards ---
-  // Packages are admin-editable, so tolerate missing fields — one bad record
-  // must never blank the whole grid.
-  grid.innerHTML = window.PACKAGE_ORDER.filter(id => window.PACKAGES[id]).map(id => {
-    const p = window.PACKAGES[id];
-    const en = EN[id] || {};
-    const theme = p.theme || {};
-    const tagline = Array.isArray(p.tagline) ? p.tagline : [];
-    const price = p.priceNow === 'ติดต่อสอบถาม'
-      ? `<span class="pcard__price-call" data-en="${escAttr(en.priceNow || 'Contact us')}">ติดต่อสอบถาม</span>`
-      : `${p.priceOld ? `<span class="pcard__price-old">${esc(p.priceOld)}</span>` : ''}
-         <span class="pcard__price-now">${esc(p.priceNow)}</span>
-         <span class="pcard__price-unit" data-en="${escAttr(en.priceUnit || p.priceUnit)}">${esc(p.priceUnit)}</span>`;
-
-    return `
-      <a class="pcard" href="package.html?id=${encodeURIComponent(p.id)}" data-province="${esc(p.province || '')}" data-category="${esc(p.category || '')}" style="--pc:${esc(theme.primary || "#1ECAD3")};--pa:${esc(theme.accent || "#425CC7")}">
-        <div class="pcard__media">
-          <img src="${esc(p.hero)}" alt="${esc(p.name)}" loading="lazy" />
-          <span class="pcard__badge" data-en="${escAttr(en.duration || p.duration)}">${esc(p.duration)}</span>
-        </div>
-        <div class="pcard__body">
-          <p class="pcard__kicker">${esc(tagline.join(' · '))}</p>
-          <h3 class="pcard__name">${esc(p.name)}</h3>
-          <p class="pcard__loc"><svg viewBox="0 0 24 24" width="13" height="13"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg> <span data-en="${escAttr(en.location || p.location)}">${esc(p.location)}</span></p>
-          <p class="pcard__group" data-en="${escAttr(en.group || p.group)}">${esc(p.group)}</p>
-          <div class="pcard__foot">
-            <div class="pcard__price">${price}</div>
-            <span class="pcard__cta" data-en="View details &amp; book →">ดูรายละเอียด &amp; จอง →</span>
-          </div>
-        </div>
-      </a>`;
-  }).join('');
-
-  // --- Filter pills (by location / province — fixed destination list) ---
-  const provinces = ['Hua Hin', 'Amphawa', 'Kanchanaburi', 'Krabi', 'Phuket', 'Chiang Mai'];
-  const pills = ['ทั้งหมด', ...provinces];
-  filtersEl.innerHTML = pills.map((label, i) =>
-    `<button class="prog__filter${i === 0 ? ' is-active' : ''}" data-filter="${i === 0 ? '*' : label}"${i === 0 ? ' data-en="All"' : ''}>${esc(label)}</button>`
-  ).join('');
-
-  // apply current language to freshly rendered cards/filters
-  if (window.bhApplyLang) window.bhApplyLang();
-  }
-
-  // Filter clicks — bound once via delegation (cards re-queried live)
-  filtersEl.addEventListener('click', e => {
-    const btn = e.target.closest('.prog__filter');
-    if (!btn) return;
-    filtersEl.querySelectorAll('.prog__filter').forEach(b => b.classList.remove('is-active'));
-    btn.classList.add('is-active');
-    const f = btn.dataset.filter;
-    let shown = 0;
-    grid.querySelectorAll('.pcard').forEach(card => {
-      const match = f === '*' || card.dataset.province === f;
-      card.classList.toggle('is-hidden', !match);
-      if (match) shown++;
-    });
-    if (emptyEl) emptyEl.hidden = shown > 0;
+  window.bhRenderCards({
+    gridId: 'progGrid',
+    filtersId: 'progFilters',
+    emptyId: 'progEmpty',
+    filterAttr: 'province',
+    source() {
+      if (!window.PACKAGES || !window.PACKAGE_ORDER) return null;
+      return {
+        items: window.PACKAGE_ORDER.filter(id => window.PACKAGES[id]).map(id => window.PACKAGES[id]),
+        en: window.PACKAGES_EN || {}
+      };
+    },
+    pills() {
+      return [{ f: '*', th: 'ทั้งหมด', en: 'All' },
+        ...PROVINCES.map(p => ({ f: p, th: p, en: p }))];
+    }
   });
-
-  render();
-  document.addEventListener('bh:packages-ready', render);
 })();
