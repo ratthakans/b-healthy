@@ -7,10 +7,6 @@
 (function () {
   const grid = document.getElementById('memTiers');
   if (!grid) return;
-  const cfg = window.BH_CONFIG || {};
-  const url = (cfg.SUPABASE_URL || '').replace(/\/$/, '');
-  const key = cfg.SUPABASE_ANON_KEY || '';
-  if (!url || !key) return; // fallback: keep hard-coded cards
 
   const ICONS = {
     platinum: '<path fill="currentColor" d="M5 3h14l3 6-10 12L2 9z"/>',
@@ -19,13 +15,11 @@
   };
   const esc = window.bhEsc;                               // js/core.js
 
-  const endpoint = url +
-    '/rest/v1/packages?type=eq.membership&status=eq.published&select=id,sort,data&order=sort.asc';
-
-  fetch(endpoint, { headers: { apikey: key, Authorization: 'Bearer ' + key } })
-    .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+  // Uses the shared reader in js/core.js like every other store — this file was
+  // missed when the three hand-rolled fetches were consolidated.
+  window.bhFetchRows({ type: 'eq.membership', select: 'id,sort,data', order: 'sort.asc,id.asc' })
     .then(rows => {
-      if (!Array.isArray(rows) || !rows.length) return; // no membership rows → keep fallback
+      if (!rows) return;                     // keep the hard-coded cards
       grid.innerHTML = rows.map(row => {
         const d = row.data || {};
         const style = ['platinum', 'gold', 'silver'].includes(d.style) ? d.style : 'platinum';

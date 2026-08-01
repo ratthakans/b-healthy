@@ -47,6 +47,14 @@
 
   document.title = `${p.name} — B-Healthy`;
 
+  // Per-package canonical: without it every package shares /package, and the
+  // legacy-slug URLs above would each look like a separate page to crawlers.
+  const canonical = document.querySelector('link[rel="canonical"]');
+  if (canonical) {
+    canonical.setAttribute('href',
+      'https://www.b-healthy.co/package?id=' + encodeURIComponent(p.id));
+  }
+
   const price = p.priceNow === 'ติดต่อสอบถาม'
     ? `<div class="pkg-price__now" data-en="${escAttr(en.priceNow || 'Contact us')}">ติดต่อสอบถาม</div>`
     : `${p.priceOld ? `<div class="pkg-price__old" data-en="Regular ${escAttr(p.priceOld)} THB">ราคาปกติ ${esc(p.priceOld)} บาท</div>` : ''}

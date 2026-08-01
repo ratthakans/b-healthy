@@ -65,10 +65,14 @@ async function livePosts() {
     .filter(p => p.id);
 }
 
+// The site also answers on b-healthy-ten.vercel.app. Deriving the origin from
+// the request would make that copy advertise its own URLs to crawlers and split
+// ranking across two hosts, so the sitemap always names the canonical one.
+// Override with SITE_ORIGIN if the domain ever changes.
+const CANONICAL_ORIGIN = (process.env.SITE_ORIGIN || "https://www.b-healthy.co").replace(/\/$/, "");
+
 module.exports = async (req, res) => {
-  const host = req.headers["x-forwarded-host"] || req.headers.host || "b-healthy.co";
-  const proto = (req.headers["x-forwarded-proto"] || "https").split(",")[0];
-  const origin = `${proto}://${host}`;
+  const origin = CANONICAL_ORIGIN;
 
   let posts = [];
   try {
