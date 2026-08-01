@@ -149,7 +149,7 @@ No code changes are required for any of the above.
 
 ## SQL to run in Supabase (in order)
 
-Both are idempotent — safe to re-run.
+All three are idempotent — safe to re-run.
 
 1. `supabase-blog.sql` — widens the `packages.type` check constraint to allow
    `topic` and `post`. Until this runs, **the blog cannot be saved from
