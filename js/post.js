@@ -12,30 +12,45 @@
   // result with innerHTML — one pass would hand markup back to the parser.
   const escAttr = s => esc(esc(s));
 
+  const params = new URLSearchParams(location.search);
+
   // Canonical URL is /blog/<slug> (rewritten to this page by vercel.json).
   // ?id=<slug> still works so links shared before the change keep resolving.
   const fromPath = (location.pathname.match(/\/blog\/([^/]+)\/?$/) || [])[1];
-  const id = fromPath
-    ? decodeURIComponent(fromPath)
-    : new URLSearchParams(location.search).get('id');
+  const id = fromPath ? decodeURIComponent(fromPath) : params.get('id');
 
-  function render() {
-  const posts = window.BLOG_POSTS || [];
-  const p = posts.find(x => x.id === id);
+  // ?preview=1 renders the draft the admin just put in sessionStorage, so an
+  // unpublished (or unsaved) article can be checked through the real article
+  // page. Same-origin only, and never consulted without the flag.
+  const preview = params.get('preview') === '1' ? readPreview() : null;
 
-  if (!p) {
-    root.innerHTML = `
-      <section class="pkg-sec">
-        <div class="container post-missing">
-          <h1 data-en="Article not found">ไม่พบบทความนี้</h1>
-          <p data-en="It may have been moved or renamed.">บทความอาจถูกย้ายหรือเปลี่ยนชื่อแล้ว</p>
-          <a class="btn btn--primary" href="blog.html" data-en="Back to all articles">กลับไปดูบทความทั้งหมด</a>
-        </div>
-      </section>`;
-    if (window.bhApplyLang) window.bhApplyLang();
-    return;
+  function readPreview() {
+    try {
+      const raw = sessionStorage.getItem('bh-preview-post');
+      const obj = raw ? JSON.parse(raw) : null;
+      return obj && obj.title ? obj : null;
+    } catch (e) { return null; }
   }
 
+  function render() {
+    if (preview) { paint(preview, true); return; }
+    const found = (window.BLOG_POSTS || []).find(x => x.id === id);
+    if (!found) {
+      root.innerHTML = `
+        <section class="pkg-sec">
+          <div class="container post-missing">
+            <h1 data-en="Article not found">ไม่พบบทความนี้</h1>
+            <p data-en="It may have been moved or renamed.">บทความอาจถูกย้ายหรือเปลี่ยนชื่อแล้ว</p>
+            <a class="btn btn--primary" href="blog.html" data-en="Back to all articles">กลับไปดูบทความทั้งหมด</a>
+          </div>
+        </section>`;
+      if (window.bhApplyLang) window.bhApplyLang();
+      return;
+    }
+    paint(found, false);
+  }
+
+  function paint(p, isPreview) {
   // Tab title and description follow whichever language i18n.js has active.
   // Re-applied on toggle too — i18n only swaps elements, not <head> metadata.
   const applyMeta = () => {
@@ -52,6 +67,11 @@
   // the latter would produce /blog/images/... and break the share preview.
   const ogImg = document.querySelector('meta[property="og:image"]');
   if (ogImg) ogImg.setAttribute('content', new URL(p.cover, document.baseURI).href);
+  if (isPreview) {
+    const robots = document.createElement('meta');
+    robots.name = 'robots'; robots.content = 'noindex,nofollow';
+    document.head.appendChild(robots);
+  }
   const canonical = document.querySelector('link[rel="canonical"]');
   if (canonical) canonical.setAttribute('href', new URL('blog/' + encodeURIComponent(p.id), document.baseURI).href);
 
@@ -80,6 +100,7 @@
   };
 
   // --- Related: same category first, topped up with the newest others ---
+  const posts = isPreview ? [] : (window.BLOG_POSTS || []);
   const sameCat = posts.filter(x => x.id !== p.id && x.category === p.category);
   const others = posts.filter(x => x.id !== p.id && x.category !== p.category);
   const related = [...sameCat, ...others].slice(0, 3);
@@ -100,6 +121,10 @@
   };
 
   root.innerHTML = `
+    ${isPreview ? `<div class="post-preview-bar" role="status">
+      <strong data-en="Preview">พรีวิว</strong>
+      <span data-en="This is a draft — not visible to visitors until you publish it.">นี่คือฉบับร่าง ยังไม่แสดงบนเว็บจนกว่าจะกด Publish</span>
+    </div>` : ''}
     <article class="post">
       <header class="post__head">
         <div class="container post__head-inner">

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex,nofollow" />
-  <title>Package Manager — B-Healthy</title>
+  <title>Content Manager — B-Healthy</title>
   <link rel="icon" type="image/svg+xml" href="images/logo.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@300;400;500;600;700;800&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet" />
@@ -55,6 +55,12 @@
     .hide{display:none!important}
     /* editor field visibility by package type */
     .role-mem,.role-topic,.role-post{display:none}
+    #editorForm[data-mode="post"] .role-notpost{display:none}
+    .searchbox{position:relative}
+    .searchbox input{width:220px;padding:7px 12px;font-size:.84rem;border-radius:999px}
+    .cnt{font-size:.72rem;color:var(--muted);float:right;font-weight:500}
+    .cnt--over{color:var(--warn)}
+    .dirty-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:7px;vertical-align:middle}
     #editorForm[data-mode="membership"] .role-pkg{display:none}
     #editorForm[data-mode="membership"] .role-mem{display:block}
     #editorForm[data-mode="topic"] .role-pkg{display:none}
@@ -176,8 +182,8 @@
   <div id="loginView">
     <div class="login">
       <div class="logo"><img src="images/logo.svg" alt="" /> B-Healthy</div>
-      <h1>Package Manager</h1>
-      <p>Sign in to manage retreats &amp; workshops.</p>
+      <h1>Content Manager</h1>
+      <p>Sign in to manage retreats, workshops, membership, articles and enquiries.</p>
       <form id="loginForm">
         <label for="email">Email</label>
         <input type="email" id="email" autocomplete="username" required />
@@ -192,7 +198,7 @@
   <!-- APP -->
   <div id="appView" class="hide">
     <div class="top">
-      <div class="top__brand"><img src="images/logo.svg" alt="" /> B-Healthy <small>Package Manager</small></div>
+      <div class="top__brand"><img src="images/logo.svg" alt="" /> B-Healthy <small>Content Manager</small></div>
       <div class="top__sp"></div>
       <span class="who" id="whoami"></span>
       <button class="btn btn--ghost btn--sm" id="signOut">Sign out</button>
@@ -227,10 +233,11 @@
       <!-- LIST -->
       <div id="listView">
         <div class="bar">
-          <h2>Packages</h2>
+          <h2>Content</h2>
           <div class="sp"></div>
-          <button class="btn btn--soft btn--sm" id="importBtn" title="Load the packages currently hard-coded on the site into the database">↧ Import current packages</button>
-          <button class="btn btn--sm" id="newBtn">+ New package</button>
+          <button class="btn btn--soft btn--sm" id="importBtn" title="Load everything currently hard-coded on the site (packages, membership tiers, homepage topic photos and blog articles) into the database">↧ Import from site</button>
+          <span class="searchbox"><input id="listSearch" type="search" placeholder="Search by name or slug…" aria-label="Search content" /></span>
+          <button class="btn btn--sm" id="newBtn">+ New</button>
         </div>
         <div class="msg" id="listMsg"></div>
         <div class="list" id="list"></div>
@@ -239,12 +246,12 @@
       <!-- EDITOR -->
       <div id="editorView" class="hide">
         <div class="editor">
-          <h2 id="editorTitle">New package</h2>
-          <p class="hint">Fields marked with JSON accept raw JSON — leave <code>venue</code>/<code>itinerary</code> empty for workshops.</p>
+          <h2 id="editorTitle">New</h2>
+          <p class="hint" id="editorHint">Pick a Type first — the form below changes to match it.</p>
           <form id="editorForm">
             <div class="grid">
               <label class="" >Slug / ID<input id="f_id" placeholder="e.g. amphawa" required /></label>
-              <label>Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
+              <label class="role-notpost">Name<input id="f_name" placeholder="Amphawa Mindful Escape" /></label>
               <label>Type
                 <select id="f_type"><option value="retreat">Retreat</option><option value="workshop">Workshop</option><option value="membership">Membership tier</option><option value="topic">Homepage topic images</option><option value="post">Blog article</option></select>
               </label>
@@ -279,7 +286,7 @@
               </div>
 
               <!-- Blog article only -->
-              <label class="full role-post">หัวข้อบทความ (ไทย)<input id="f_post_title" placeholder="ออฟฟิศซินโดรมไม่ใช่เรื่องของคนขี้บ่น" /></label>
+              <label class="full role-post">หัวข้อบทความ (ไทย) <span class="cnt" id="cnt_title"></span><input id="f_post_title" placeholder="ออฟฟิศซินโดรมไม่ใช่เรื่องของคนขี้บ่น" /></label>
               <label class="full role-post">Title (English)<input id="f_post_titleEn" placeholder="Office syndrome isn't just complaining" /></label>
               <label class="role-post">หมวดหมู่ (ไทย)<input id="f_post_cat" placeholder="กาย &amp; ใจ" /></label>
               <label class="role-post">Category (English)<input id="f_post_catEn" placeholder="Body &amp; Mind" /></label>
@@ -287,7 +294,7 @@
               <label class="role-post">เวลาอ่าน (นาที)<input id="f_post_read" type="number" min="1" value="5" /></label>
               <label class="role-post">ผู้เขียน (ไทย)<input id="f_post_author" placeholder="ทีม B-Healthy" /></label>
               <label class="role-post">Author (English)<input id="f_post_authorEn" placeholder="B-Healthy Team" /></label>
-              <label class="full role-post">เกริ่นนำ (ไทย) — แสดงบนการ์ดในหน้ารวม<textarea id="f_post_excerpt"></textarea></label>
+              <label class="full role-post">เกริ่นนำ (ไทย) — แสดงบนการ์ดในหน้ารวม <span class="cnt" id="cnt_excerpt"></span><textarea id="f_post_excerpt"></textarea></label>
               <label class="full role-post">Excerpt (English)<textarea id="f_post_excerptEn"></textarea></label>
               <div class="full role-post">
                 <label>รูปปก</label>
@@ -416,6 +423,6 @@
   <script src="js/packages.js?v=20260728a"></script>
   <script src="js/workshops-data.js?v=20260718a"></script>
   <script src="js/blog-data.js?v=20260728a"></script>
-  <script src="js/admin.js?v=20260731c"></script>
+  <script src="js/admin.js?v=20260731e"></script>
 </body>
 </html>

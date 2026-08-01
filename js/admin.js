@@ -50,7 +50,11 @@
     $('whoami').textContent = email || '';
     showTab('packages');
   }
-  function showList() { editorView.classList.add('hide'); listView.classList.remove('hide'); loadList(); }
+  // Slug of the record being edited, or null when creating — drives the editor
+  // heading and tells the unsaved-changes guard which state it is in.
+  let editingId = null;
+
+  function showList() { clearDirty(); editorView.classList.add('hide'); listView.classList.remove('hide'); loadList(); }
   function showEditor() { listView.classList.add('hide'); editorView.classList.remove('hide'); }
 
   // ---------- auth ----------
@@ -589,23 +593,165 @@
     renderBlocks();
   });
 
+  // ---------- article object (shared by Save and Preview) ----------
+  // Blank blocks are dropped and every shape is normalised here, so the public
+  // renderer never has to guess and a preview always matches what gets saved.
+  function buildPostData(id) {
+    const body = postBlocks.map(b => {
+      if (b.type === 'img') {
+        if (!b.src) return null;
+        const cap = b.caption || {};
+        const out = { type: 'img', src: b.src, alt: b.alt || '', altEn: b.altEn || b.alt || '' };
+        if (cap.th || cap.en) out.caption = { th: cap.th || '', en: cap.en || cap.th || '' };
+        return out;
+      }
+      if (b.type === 'ul') {
+        const items = (b.items || []).filter(i => i.th || i.en)
+          .map(i => ({ th: i.th || '', en: i.en || i.th || '' }));
+        return items.length ? { type: 'ul', items } : null;
+      }
+      if (!b.th && !b.en) return null;
+      return { type: b.type, th: b.th || '', en: b.en || b.th || '' };
+    }).filter(Boolean);
+
+    const title = $('f_post_title').value.trim();
+    return {
+      id, type: 'post',
+      title,
+      titleEn: $('f_post_titleEn').value.trim() || title,
+      category: $('f_post_cat').value.trim() || 'บทความ',
+      categoryEn: $('f_post_catEn').value.trim() || $('f_post_cat').value.trim() || 'Articles',
+      date: $('f_post_date').value || todayISO(),
+      readMins: parseInt($('f_post_read').value, 10) || 5,
+      author: $('f_post_author').value.trim() || 'ทีม B-Healthy',
+      authorEn: $('f_post_authorEn').value.trim() || 'B-Healthy Team',
+      excerpt: $('f_post_excerpt').value.trim(),
+      excerptEn: $('f_post_excerptEn').value.trim() || $('f_post_excerpt').value.trim(),
+      cover: $('f_post_cover').value.trim(),
+      coverAlt: $('f_post_coverAlt').value.trim(),
+      coverAltEn: $('f_post_coverAltEn').value.trim() || $('f_post_coverAlt').value.trim(),
+      body
+    };
+  }
+
   // ---------- editor ----------
   $('newBtn').addEventListener('click', () => openEditor(null));
-  $('cancelBtn').addEventListener('click', showList);
+  $('cancelBtn').addEventListener('click', () => {
+    if (dirty && !confirm('Discard unsaved changes?')) return;
+    clearDirty();
+    showList();
+  });
   $('f_id').addEventListener('input', updatePreview);
   $('f_type').addEventListener('change', () => { applyTypeMode(); updatePreview(); });
 
-  function applyTypeMode() { $('editorForm').dataset.mode = $('f_type').value; }
+  const TYPE_LABEL = {
+    retreat: 'retreat', workshop: 'workshop', membership: 'membership tier',
+    topic: 'homepage topic images', post: 'blog article'
+  };
+
+  function applyTypeMode() {
+    const type = $('f_type').value;
+    $('editorForm').dataset.mode = type;
+    // The heading and hint used to say "package" whatever you were editing.
+    if (!editingId) $('editorTitle').textContent = 'New ' + (TYPE_LABEL[type] || type);
+    const hint = $('editorHint');
+    if (hint) {
+      hint.textContent = type === 'post'
+        ? 'Write the Thai text; English fields are optional — the site falls back to Thai when one is blank.'
+        : type === 'topic'
+          ? 'Three photos per heading: the first is the large one, the other two fill the side column.'
+          : 'Only the fields for this type are shown. Leave anything that does not apply blank.';
+    }
+    updateCounters();
+  }
+
+  // --- Character counters on the fields that show up in search results ---
+  const COUNTERS = [
+    { field: 'f_post_title', out: 'cnt_title', max: 60 },
+    { field: 'f_post_excerpt', out: 'cnt_excerpt', max: 160 }
+  ];
+  function updateCounters() {
+    COUNTERS.forEach(c => {
+      const el = $(c.field), out = $(c.out);
+      if (!el || !out) return;
+      const n = el.value.trim().length;
+      out.textContent = `${n}/${c.max}`;
+      out.classList.toggle('cnt--over', n > c.max);
+    });
+  }
+  COUNTERS.forEach(c => $(c.field)?.addEventListener('input', updateCounters));
+
+  // --- Unsaved-changes guard -------------------------------------------
+  // Writing a long article and closing the tab used to lose everything.
+  let dirty = false;
+  const markDirty = () => {
+    if (dirty || $('editorView').classList.contains('hide')) return;
+    dirty = true;
+    if (!$('editorTitle').querySelector('.dirty-dot')) {
+      const dot = document.createElement('span');
+      dot.className = 'dirty-dot';
+      dot.title = 'Unsaved changes';
+      $('editorTitle').appendChild(dot);
+    }
+  };
+  function clearDirty() {
+    dirty = false;
+    $('editorTitle').querySelector('.dirty-dot')?.remove();
+  }
+  $('editorForm').addEventListener('input', markDirty);
+  $('editorForm').addEventListener('change', markDirty);
+  // Block-editor add/remove/reorder happen via clicks, not input events.
+  $('blockList').addEventListener('click', markDirty);
+  window.addEventListener('beforeunload', e => {
+    if (!dirty) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  // --- Search the content list -----------------------------------------
+  $('listSearch')?.addEventListener('input', () => {
+    const q = $('listSearch').value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('#list .row').forEach(row => {
+      const hay = row.textContent.toLowerCase();
+      const hit = !q || hay.includes(q);
+      row.classList.toggle('hide', !hit);
+      if (hit) shown++;
+    });
+    // Hide a group heading once everything under it is filtered out.
+    document.querySelectorAll('#list .group').forEach(g => {
+      const any = [...g.querySelectorAll('.row')].some(r => !r.classList.contains('hide'));
+      g.classList.toggle('hide', !any);
+    });
+  });
 
   function updatePreview() {
     const page = $('f_type').value === 'post' ? 'post.html' : 'package.html';
     $('previewBtn').href = page + '?id=' + encodeURIComponent($('f_id').value.trim());
   }
 
+  // Previewing an article used to open the public page, which only ever reads
+  // PUBLISHED rows — so a draft (or an unsaved edit) showed "ไม่พบบทความ".
+  // Hand the current form state to post.html through sessionStorage instead:
+  // same origin, no auth needed, and it renders through the real article code
+  // so what you see is exactly what visitors will get.
+  $('previewBtn').addEventListener('click', e => {
+    if ($('f_type').value !== 'post') return;          // packages preview as before
+    e.preventDefault();
+    const draft = buildPostData($('f_id').value.trim() || 'preview');
+    try {
+      sessionStorage.setItem('bh-preview-post', JSON.stringify(draft));
+      window.open('post.html?preview=1', '_blank', 'noopener');
+    } catch (err) {
+      showMsg('editorMsg', 'err', 'Could not open preview: ' + err.message);
+    }
+  });
+
   function openEditor(row) {
     clearMsg('editorMsg');
     const d = (row && row.data) || {};
-    $('editorTitle').textContent = row ? `Edit — ${row.name || row.id}` : 'New package';
+    editingId = row ? row.id : null;
+    $('editorTitle').textContent = row ? `Edit — ${row.name || row.id}` : 'New';
     $('f_id').value = row ? row.id : '';
     $('f_id').readOnly = !!row;
     $('f_type').value = (row && row.type) || d.type || 'retreat';
@@ -676,6 +822,7 @@
     renderBlocks();
     applyTypeMode();
     updatePreview();
+    clearDirty();          // a freshly loaded record has no unsaved edits
     showEditor();
     window.scrollTo(0, 0);
   }
@@ -729,45 +876,9 @@
     if (type === 'post') {
       const title = $('f_post_title').value.trim();
       if (!title) { showMsg('editorMsg', 'err', 'หัวข้อบทความ (ไทย) is required.'); return; }
-      const cover = $('f_post_cover').value.trim();
-      if (!cover) { showMsg('editorMsg', 'err', 'รูปปก is required — the listing card needs it.'); return; }
+      if (!$('f_post_cover').value.trim()) { showMsg('editorMsg', 'err', 'รูปปก is required — the listing card needs it.'); return; }
 
-      // Drop blocks left completely blank, and normalise each shape so the
-      // public renderer never has to guess.
-      const body = postBlocks.map(b => {
-        if (b.type === 'img') {
-          if (!b.src) return null;
-          const cap = b.caption || {};
-          const out = { type: 'img', src: b.src, alt: b.alt || '', altEn: b.altEn || b.alt || '' };
-          if (cap.th || cap.en) out.caption = { th: cap.th || '', en: cap.en || cap.th || '' };
-          return out;
-        }
-        if (b.type === 'ul') {
-          const items = (b.items || []).filter(i => i.th || i.en)
-            .map(i => ({ th: i.th || '', en: i.en || i.th || '' }));
-          return items.length ? { type: 'ul', items } : null;
-        }
-        if (!b.th && !b.en) return null;
-        return { type: b.type, th: b.th || '', en: b.en || b.th || '' };
-      }).filter(Boolean);
-
-      const data = {
-        id, type,
-        title,
-        titleEn: $('f_post_titleEn').value.trim() || title,
-        category: $('f_post_cat').value.trim() || 'บทความ',
-        categoryEn: $('f_post_catEn').value.trim() || $('f_post_cat').value.trim() || 'Articles',
-        date: $('f_post_date').value || todayISO(),
-        readMins: parseInt($('f_post_read').value, 10) || 5,
-        author: $('f_post_author').value.trim() || 'ทีม B-Healthy',
-        authorEn: $('f_post_authorEn').value.trim() || 'B-Healthy Team',
-        excerpt: $('f_post_excerpt').value.trim(),
-        excerptEn: $('f_post_excerptEn').value.trim() || $('f_post_excerpt').value.trim(),
-        cover,
-        coverAlt: $('f_post_coverAlt').value.trim(),
-        coverAltEn: $('f_post_coverAltEn').value.trim() || $('f_post_coverAlt').value.trim(),
-        body
-      };
+      const data = buildPostData(id);
       const rec = { id, type, status: $('f_status').value, sort: parseInt($('f_sort').value, 10) || 0, name: title, data, en: {} };
       const pbtn = $('saveBtn'); pbtn.disabled = true; pbtn.textContent = 'Saving…';
       const { error } = await sb.from('packages').upsert(rec, { onConflict: 'id' });
