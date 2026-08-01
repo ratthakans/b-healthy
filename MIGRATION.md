@@ -157,6 +157,13 @@ Both are idempotent — safe to re-run.
    homepage topic photos (which is why no `topic` rows exist today).
 2. `supabase-fix-placeholder-images.sql` — replaces the picsum placeholders
    still stored in the `packages` rows with the real photo paths.
+3. `supabase-fix-workshop-ids.sql` — three workshops were saved with their
+   display name in the slug field, so their URLs contained spaces
+   (`/package?id=Personalized%20Herbal%20Tea`). Renames them to the hyphenated
+   form the rest of the system already uses, and gives all six an intentional
+   `sort` so the grid stops reshuffling between page loads. Links shared before
+   the rename keep working — `js/package.js` maps the old ids and rewrites the
+   address bar.
 
 After (1), open `/admin.html` → **↧ Import current packages** to load the ten
 bundled articles into the database. From then on the site reads articles from

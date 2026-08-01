@@ -7,9 +7,31 @@
   const root = document.getElementById('pkg');
   if (!root) return;
 
+  // Three workshops were originally saved with their display name as the slug,
+  // so their URLs carried spaces. supabase-fix-workshop-ids.sql renamed them;
+  // anything shared before that still has to resolve, so map the old ids and
+  // quietly correct the address bar. Safe to delete once the old links die out.
+  const LEGACY_IDS = {
+    'Elemental Aroma Oil': 'elemental-aroma-oil',
+    'Personalized Herbal Tea': 'personalized-herbal-tea',
+    'Flower Mandala': 'flower-mandala'
+  };
+
+  function resolveId() {
+    const raw = new URLSearchParams(location.search).get('id');
+    const moved = LEGACY_IDS[raw];
+    // Only rewrite once the new record is actually loaded, so a slow fetch
+    // doesn't leave the URL pointing at something that isn't there yet.
+    if (moved && window.PACKAGES && window.PACKAGES[moved]) {
+      history.replaceState(null, '', 'package.html?id=' + encodeURIComponent(moved));
+      return moved;
+    }
+    return raw;
+  }
+
   function render() {
   if (!window.PACKAGES) return;
-  const id = new URLSearchParams(location.search).get('id');
+  const id = resolveId();
   const p = window.PACKAGES[id];
   const en = (window.PACKAGES_EN || {})[id] || {};
 
