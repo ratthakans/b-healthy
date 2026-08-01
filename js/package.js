@@ -176,21 +176,21 @@
           <form class="form" id="bookForm" novalidate>
             <label class="form__full"><span data-en="Package">แพ็กเกจ</span><input type="text" name="package" value="${esc(p.name)}" readonly /></label>
             <div class="form__row">
-              <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" required placeholder="ชื่อ-นามสกุล" data-en-ph="Full name" /></label>
-              <label><span data-en="Company / Organization">ชื่อบริษัท / องค์กร</span><input type="text" name="company" placeholder="ชื่อองค์กร" data-en-ph="Organization" /></label>
+              <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" autocomplete="name" required placeholder="ชื่อ-นามสกุล" data-en-ph="Full name" /></label>
+              <label><span data-en="Company / Organization">ชื่อบริษัท / องค์กร</span><input type="text" name="company" autocomplete="organization" placeholder="ชื่อองค์กร" data-en-ph="Organization" /></label>
             </div>
             <div class="form__row">
-              <label><span data-en="Phone">เบอร์โทรศัพท์</span> <span>*</span><input type="tel" name="phone" required placeholder="08x-xxx-xxxx" /></label>
-              <label><span data-en="Email">อีเมล</span> <span>*</span><input type="email" name="email" required placeholder="you@email.com" /></label>
+              <label><span data-en="Phone">เบอร์โทรศัพท์</span> <span>*</span><input type="tel" name="phone" autocomplete="tel" inputmode="tel" required placeholder="08x-xxx-xxxx" /></label>
+              <label><span data-en="Email">อีเมล</span> <span>*</span><input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@email.com" /></label>
             </div>
             <div class="form__row">
-              <label><span data-en="Number of participants">จำนวนผู้เข้าร่วม</span><input type="number" name="pax" min="1" placeholder="เช่น 12" data-en-ph="e.g. 12" /></label>
+              <label><span data-en="Number of participants">จำนวนผู้เข้าร่วม</span><input type="number" name="pax" inputmode="numeric" min="1" placeholder="เช่น 12" data-en-ph="e.g. 12" /></label>
               <label><span data-en="Preferred date">วันที่สนใจ</span><input type="date" name="date" /></label>
             </div>
             <label class="form__full"><span data-en="Additional details">รายละเอียดเพิ่มเติม</span><textarea name="message" rows="3" placeholder="เล่าให้เราฟังเกี่ยวกับทีมและเป้าหมายของคุณ" data-en-ph="Tell us about your team and your goals"></textarea></label>
             <label class="form__check"><input type="checkbox" name="consent" required /><span data-en="I accept the <a href='#'>Privacy Policy</a> and consent to be contacted by B-Healthy.">ฉันยอมรับ <a href="#">นโยบายความเป็นส่วนตัว</a> และยินยอมให้ B-Healthy ติดต่อกลับ</span></label>
             <button type="submit" class="btn btn--primary btn--block" data-en="Send booking request">ส่งคำขอจอง</button>
-            <p class="form__done" id="formDone" hidden data-en="Thank you! Our team will contact you to confirm your booking as soon as possible 🌿">ขอบคุณค่ะ ทีมของเราจะติดต่อกลับเพื่อยืนยันการจองโดยเร็วที่สุด 🌿</p>
+            <p class="form__done" id="formDone" role="status" aria-live="polite" hidden data-en="Thank you! Our team will contact you to confirm your booking as soon as possible 🌿">ขอบคุณค่ะ ทีมของเราจะติดต่อกลับเพื่อยืนยันการจองโดยเร็วที่สุด 🌿</p>
           </form>
         </div>
       </div>
@@ -204,9 +204,8 @@
     if (!form.checkValidity()) { form.reportValidity(); return; }
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
-    await window.bhSubmit?.('booking', Object.fromEntries(new FormData(form)));
-    done.hidden = false;
-    btn.textContent = '✓';
+    const res = await window.bhSubmit?.('booking', Object.fromEntries(new FormData(form)));
+    window.bhSubmitDone(res, form, done, btn, '✓');
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 

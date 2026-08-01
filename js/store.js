@@ -13,8 +13,12 @@
   const key = cfg.SUPABASE_ANON_KEY || '';
   if (!url || !key) return; // demo/fallback mode — keep hard-coded data
 
+  // Filter by type in the query, not in JS afterwards. Blog articles and topic
+  // photos live in the same table, so without this every package page also
+  // downloads the entire blog — ~3KB of article body per post, forever growing.
   const endpoint = url +
-    '/rest/v1/packages?status=eq.published&select=id,type,sort,data,en&order=type.asc,sort.asc';
+    '/rest/v1/packages?status=eq.published&type=in.(retreat,workshop,membership)' +
+    '&select=id,type,sort,data,en&order=type.asc,sort.asc';
 
   fetch(endpoint, { headers: { apikey: key, Authorization: 'Bearer ' + key } })
     .then(r => (r.ok ? r.json() : Promise.reject(r.status)))

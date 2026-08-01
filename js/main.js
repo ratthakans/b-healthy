@@ -41,10 +41,12 @@ form.addEventListener('submit', async e => {
   if (!form.checkValidity()) { form.reportValidity(); return; }
   const btn = form.querySelector('button[type=submit]');
   btn.disabled = true;
-  await window.bhSubmit?.('register', Object.fromEntries(new FormData(form)));
-  done.hidden = false;
-  btn.textContent = 'SENT ✓';
-  setTimeout(() => { form.reset(); btn.disabled = false; }, 600);
+  const res = await window.bhSubmit?.('register', Object.fromEntries(new FormData(form)));
+  // Only clear the form once the enquiry actually landed somewhere — otherwise
+  // the visitor would lose what they typed and have nothing to resend.
+  if (window.bhSubmitDone(res, form, done, btn, 'SENT ✓')) {
+    setTimeout(() => { form.reset(); btn.disabled = false; }, 600);
+  }
 });
 
 // --- Video modal (Google Drive embed) ---

@@ -438,6 +438,8 @@ video.feature-hero__bg { background: var(--navy); }
 .form__check input { width: auto; margin-top: 4px; accent-color: var(--coral); }
 .form__check a { color: var(--sky-deep); }
 .form__done { text-align: center; color: #2c8a5f; margin-top: 16px; font-weight: 500; }
+/* Send failed — the enquiry did not reach us and the visitor must retry. */
+.form__done--err { color: #c0392b; }
 
 /* ============================================================
    FOOTER

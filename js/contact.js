@@ -23,9 +23,8 @@
     if (!form.checkValidity()) { form.reportValidity(); return; }
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true;
-    await window.bhSubmit?.('contact', Object.fromEntries(new FormData(form)));
-    done.hidden = false;
-    btn.textContent = '✓';
+    const res = await window.bhSubmit?.('contact', Object.fromEntries(new FormData(form)));
+    window.bhSubmitDone(res, form, done, btn, '✓');
     done.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 })();

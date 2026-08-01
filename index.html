@@ -18,7 +18,7 @@
   <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
   <meta property="og:image" content="https://b-healthy-ten.vercel.app/images/hero-beach.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="stylesheet" href="css/styles.css?v=20260731c" />
+  <link rel="stylesheet" href="css/styles.css?v=20260731d" />
 </head>
 <body>
 
@@ -295,16 +295,16 @@
         <h2 class="register__title" data-en="Register">ลงทะเบียน</h2>
         <form class="form" id="registerForm" novalidate>
           <div class="form__row">
-            <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" required placeholder="ชื่อผู้ติดต่อ" data-en-ph="Full name" /></label>
-            <label><span data-en="Company name">ชื่อบริษัท</span> <span>*</span><input type="text" name="company" required placeholder="ชื่อบริษัท" data-en-ph="Company name" /></label>
+            <label><span data-en="Contact name">ชื่อผู้ติดต่อ</span> <span>*</span><input type="text" name="contact" autocomplete="name" required placeholder="ชื่อผู้ติดต่อ" data-en-ph="Full name" /></label>
+            <label><span data-en="Company name">ชื่อบริษัท</span> <span>*</span><input type="text" name="company" autocomplete="organization" required placeholder="ชื่อบริษัท" data-en-ph="Company name" /></label>
           </div>
           <div class="form__row">
             <label><span data-en="Role / Position">ตำแหน่ง</span><input type="text" name="role" placeholder="ตำแหน่ง" data-en-ph="Position" /></label>
             <label><span data-en="Business Type">ประเภทธุรกิจ</span><input type="text" name="business" placeholder="ประเภทธุรกิจ" data-en-ph="Business type" /></label>
           </div>
           <div class="form__row">
-            <label><span data-en="Phone">เบอร์โทรศัพท์</span> <span>*</span><input type="tel" name="phone" required placeholder="เบอร์โทรศัพท์" data-en-ph="Phone number" /></label>
-            <label><span data-en="Email">อีเมล</span> <span>*</span><input type="email" name="email" required placeholder="อีเมล" data-en-ph="Email" /></label>
+            <label><span data-en="Phone">เบอร์โทรศัพท์</span> <span>*</span><input type="tel" name="phone" autocomplete="tel" inputmode="tel" required placeholder="เบอร์โทรศัพท์" data-en-ph="Phone number" /></label>
+            <label><span data-en="Email">อีเมล</span> <span>*</span><input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="อีเมล" data-en-ph="Email" /></label>
           </div>
           <label class="form__full"><span data-en="How can we help you?">เราช่วยอะไรคุณได้บ้าง?</span><textarea name="message" rows="3" placeholder="เล่าให้เราฟังเกี่ยวกับทีมและเป้าหมายของคุณ" data-en-ph="Tell us about your team and your goals"></textarea></label>
 
@@ -314,7 +314,7 @@
           </label>
 
           <button type="submit" class="btn btn--primary btn--block" data-en="Send request">ส่งคำขอ</button>
-          <p class="form__done" id="formDone" hidden data-en="Thank you! Our team will get back to you as soon as possible 🌿">ขอบคุณค่ะ ทีมของเราจะติดต่อกลับโดยเร็วที่สุด 🌿</p>
+          <p class="form__done" id="formDone" role="status" aria-live="polite" hidden data-en="Thank you! Our team will get back to you as soon as possible 🌿">ขอบคุณค่ะ ทีมของเราจะติดต่อกลับโดยเร็วที่สุด 🌿</p>
         </form>
       </div>
     </div>
@@ -333,9 +333,9 @@
   </div>
 
   <script src="js/config.js?v=20260718g"></script>
-  <script src="js/submit.js?v=20260717d"></script>
+  <script src="js/submit.js?v=20260731d"></script>
   <script src="js/i18n.js"></script>
-  <script src="js/main.js?v=20260728a"></script>
+  <script src="js/main.js?v=20260731d"></script>
   <script src="js/footer.js?v=20260731b"></script>
   <script src="js/topics.js?v=20260721d"></script>
   <script src="js/reveal.js?v=20260717g"></script>
