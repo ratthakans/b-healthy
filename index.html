@@ -75,9 +75,10 @@
   <!-- ============ WELLNESS TOURISM — VIDEO ============ -->
   <section class="feature-hero" id="tourism">
     <div class="feature-hero__yt" aria-hidden="true">
-      <!-- Wanted video 7ku8NTUkChU ("Presentation BHealthy Review") but it has embedding
-           DISABLED (YouTube Error 153). Re-enable embedding in YouTube Studio to switch,
-           or replace this iframe with a self-hosted <video> loop. Using the working clip for now. -->
+      <!-- Note: 7ku8NTUkChU ("Presentation BHealthy Review") was previously recorded here
+           as un-embeddable (YouTube Error 153). That was a mis-diagnosis — 153 also fires
+           when an embed URL is opened directly, with no parent page to send a referrer.
+           Tested inside a real iframe it plays fine, so it can be swapped in if preferred. -->
       <iframe src="https://www.youtube-nocookie.com/embed/Suue3MVyzr0?autoplay=1&mute=1&loop=1&playlist=Suue3MVyzr0&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3" title="Wellness Tourism" allow="autoplay; encrypted-media" frameborder="0"></iframe>
     </div>
     <div class="feature-hero__overlay"></div>
@@ -126,7 +127,9 @@
 
   <!-- ============ WELLNESS WORKSHOP — VIDEO ============ -->
   <section class="feature-hero feature-hero--alt" id="workshop">
-    <img class="feature-hero__bg" src="images/photos/h-workshop2.jpg" alt="Wellness workshop" loading="lazy" />
+    <div class="feature-hero__yt" aria-hidden="true">
+      <iframe src="https://www.youtube-nocookie.com/embed/bflIX0NbiCE?autoplay=1&mute=1&loop=1&playlist=bflIX0NbiCE&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1&fs=0&iv_load_policy=3" title="Wellness Workshop" allow="autoplay; encrypted-media" frameborder="0"></iframe>
+    </div>
     <div class="feature-hero__overlay"></div>
     <div class="container feature-hero__content">
       <span class="feature-hero__word">Wellness</span>
