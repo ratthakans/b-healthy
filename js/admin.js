@@ -74,15 +74,53 @@
   $('signOut').addEventListener('click', async () => { await sb.auth.signOut(); showLogin(); });
 
   // ---------- tabs ----------
+  // Packages and Blog share the same list + editor; they differ only in which
+  // record types they show and what "+ New" starts you on. Articles used to be
+  // buried in the Packages list, findable only by changing the Type dropdown.
+  const TABS = {
+    packages: {
+      heading: 'Content',
+      types: ['retreat', 'workshop', 'membership', 'topic'],
+      newType: 'retreat',
+      search: 'Search by name or slug…'
+    },
+    blog: {
+      heading: 'Blog articles',
+      types: ['post'],
+      newType: 'post',
+      search: 'Search articles…'
+    }
+  };
+
   let currentTab = 'packages';
+
   function showTab(name) {
+    // Leaving the editor mid-edit would silently drop the work.
+    if (name !== currentTab && dirty && !confirm('Discard unsaved changes?')) {
+      document.querySelectorAll('#tabs .tab').forEach(b =>
+        b.classList.toggle('is-active', b.dataset.tab === currentTab));
+      return;
+    }
+    clearDirty();
     currentTab = name;
     document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('is-active', b.dataset.tab === name));
-    const isPkg = name === 'packages';
-    $('tab-customers').classList.toggle('hide', isPkg);
-    if (isPkg) { showList(); }
-    else { $('listView').classList.add('hide'); $('editorView').classList.add('hide'); loadLeads(); }
+
+    const cfg = TABS[name];
+    $('tab-customers').classList.toggle('hide', !!cfg);
+
+    if (cfg) {
+      $('listHeading').textContent = cfg.heading;
+      $('listSearch').placeholder = cfg.search;
+      $('listSearch').value = '';
+      $('newBtn').textContent = name === 'blog' ? '+ New article' : '+ New';
+      showList();
+    } else {
+      $('listView').classList.add('hide');
+      $('editorView').classList.add('hide');
+      loadLeads();
+    }
   }
+
   $('tabs').addEventListener('click', e => {
     const b = e.target.closest('.tab'); if (b) showTab(b.dataset.tab);
   });
@@ -206,13 +244,13 @@
         </div>
       </div>`;
     };
-    const GROUPS = [
-      { type: 'retreat', label: 'Retreats' },
-      { type: 'workshop', label: 'Workshops' },
-      { type: 'membership', label: 'Membership tiers' },
-      { type: 'topic', label: 'Homepage topic images' },
-      { type: 'post', label: 'Blog articles' }
-    ];
+    const LABELS = {
+      retreat: 'Retreats', workshop: 'Workshops', membership: 'Membership tiers',
+      topic: 'Homepage topic images', post: 'Blog articles'
+    };
+    // Only the types this tab owns — Packages and Blog share one list view.
+    const GROUPS = (TABS[currentTab] || TABS.packages).types
+      .map(type => ({ type, label: LABELS[type] || type }));
     let html = GROUPS.map(g => {
       const rows = rowsCache.filter(r => r.type === g.type);
       if (!rows.length) return '';
@@ -221,9 +259,18 @@
         ${rows.map(rowHtml).join('')}
       </section>`;
     }).join('');
-    const others = rowsCache.filter(r => !GROUPS.some(g => g.type === r.type));
+    // Unknown types only — never records that merely belong to the other tab.
+    const others = rowsCache.filter(r => !Object.keys(LABELS).includes(r.type));
     if (others.length) {
       html += `<section class="group"><div class="group__head"><span class="tag">Other</span><span class="group__count">${others.length}</span></div>${others.map(rowHtml).join('')}</section>`;
+    }
+    // A blank panel reads as "broken" rather than "nothing here yet" — say which.
+    if (!html) {
+      html = currentTab === 'blog'
+        ? `<div class="empty">No articles yet.<br>Click <strong>+ New article</strong> to write one, or
+             <strong>↧ Import from site</strong> to load the ten that ship with the code.</div>`
+        : `<div class="empty">Nothing here yet.<br>Click <strong>↧ Import from site</strong> to load the
+             packages, membership tiers and homepage topic photos currently on the site.</div>`;
     }
     $('list').innerHTML = html;
   }
@@ -633,7 +680,7 @@
   }
 
   // ---------- editor ----------
-  $('newBtn').addEventListener('click', () => openEditor(null));
+  $('newBtn').addEventListener('click', () => openEditor(null, (TABS[currentTab] || TABS.packages).newType));
   $('cancelBtn').addEventListener('click', () => {
     if (dirty && !confirm('Discard unsaved changes?')) return;
     clearDirty();
@@ -745,14 +792,16 @@
     }
   });
 
-  function openEditor(row) {
+  // presetType only applies to new records — it lets the Blog tab open the
+  // editor already in article mode instead of making you change the dropdown.
+  function openEditor(row, presetType) {
     clearMsg('editorMsg');
     const d = (row && row.data) || {};
     editingId = row ? row.id : null;
     $('editorTitle').textContent = row ? `Edit — ${row.name || row.id}` : 'New';
     $('f_id').value = row ? row.id : '';
     $('f_id').readOnly = !!row;
-    $('f_type').value = (row && row.type) || d.type || 'retreat';
+    $('f_type').value = (row && row.type) || d.type || presetType || 'retreat';
     $('f_status').value = (row && row.status) || 'published';
     $('f_sort').value = row ? row.sort : 0;
     $('f_name').value = d.name || '';
