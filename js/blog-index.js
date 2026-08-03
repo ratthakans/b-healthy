@@ -108,7 +108,7 @@ window.BLOG_POSTS = [
     "coverAltEn": "A woman sleeping peacefully in soft morning light"
   },
   {
-    "id": "elemental-aroma-oil",
+    "id": "thai-elements-aroma-oil",
     "category": "ภูมิปัญญาไทย",
     "categoryEn": "Thai Wisdom",
     "date": "2026-04-25",

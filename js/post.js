@@ -15,6 +15,13 @@
   const fromPath = (location.pathname.match(/\/blog\/([^/]+)\/?$/) || [])[1];
   const id = fromPath ? decodeURIComponent(fromPath) : params.get('id');
 
+  // This article was renamed: its old slug collided with the Elemental Aroma Oil
+  // workshop, and `id` is the primary key across every content type, so the two
+  // could not coexist. Links shared under the old slug still have to resolve.
+  const LEGACY_IDS = {
+    'elemental-aroma-oil': 'thai-elements-aroma-oil'
+  };
+
   // ?preview=1 renders the draft the admin just put in sessionStorage, so an
   // unpublished (or unsaved) article can be checked through the real article
   // page. Same-origin only, and never consulted without the flag.
@@ -30,7 +37,17 @@
 
   function render() {
     if (preview) { paint(preview, true); return; }
-    const found = (window.BLOG_POSTS || []).find(x => x.id === id);
+    const posts = window.BLOG_POSTS || [];
+    let found = posts.find(x => x.id === id);
+
+    // Renamed article: resolve the old slug and correct the address bar, but
+    // only once the new record is really loaded, so a slow fetch can't leave
+    // the URL pointing at something that isn't there.
+    if (!found && LEGACY_IDS[id]) {
+      found = posts.find(x => x.id === LEGACY_IDS[id]);
+      if (found) history.replaceState(null, '', '/blog/' + encodeURIComponent(found.id));
+    }
+
     if (!found) {
       root.innerHTML = `
         <section class="pkg-sec">

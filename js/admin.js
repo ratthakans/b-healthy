@@ -347,8 +347,26 @@
         en: {}
       });
     });
-    if (!rows.length) { showMsg('listMsg', 'err', 'No hard-coded packages found to import.'); return; }
-    if (!confirm(`Import ${rows.length} packages from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
+    if (!rows.length) { showMsg('listMsg', 'err', 'Nothing on the site to import.'); return; }
+
+    // `id` is the primary key across every type, so two records sharing a slug
+    // cannot both exist. Postgres rejects the whole upsert with "ON CONFLICT DO
+    // UPDATE command cannot affect row a second time", which says nothing about
+    // which slug is at fault — name it here instead.
+    const seen = {}, clashes = [];
+    rows.forEach(r => {
+      if (seen[r.id]) clashes.push(`"${r.id}" (${seen[r.id]} + ${r.type})`);
+      else seen[r.id] = r.type;
+    });
+    if (clashes.length) {
+      showMsg('listMsg', 'err',
+        `Import cancelled — the same slug is used twice: ${clashes.join(', ')}. ` +
+        `A slug has to be unique across retreats, workshops, membership, topics and articles. ` +
+        `Rename one of them, then import again.`);
+      return;
+    }
+
+    if (!confirm(`Import ${rows.length} records from the site into the database?\nExisting rows with the same ID will be overwritten.`)) return;
     const btn = $('importBtn'); btn.disabled = true; btn.textContent = 'Importing…';
     const { error } = await sb.from('packages').upsert(rows, { onConflict: 'id' });
     btn.disabled = false; btn.textContent = '↧ Import current packages';
