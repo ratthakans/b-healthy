@@ -600,7 +600,10 @@
       <label style="margin-top:8px">English${mk('en', b.en || '', 'English text')}</label>`;
   }
 
-  function renderBlocks() {
+  // Every change re-renders the whole list, which destroys the focused input.
+  // `focus` is a selector for where the caret should land afterwards, so adding
+  // a bullet or a block drops you straight into it instead of making you click.
+  function renderBlocks(focus) {
     $('blockList').innerHTML = postBlocks.map((b, i) => `
       <div class="rep" data-i="${i}">
         <div class="rep__head">
@@ -613,6 +616,17 @@
         </div>
         ${blockFields(b, i)}
       </div>`).join('');
+
+    if (!focus) return;
+    let el = $('blockList').querySelector(focus);
+    // A block moved to either end lands on an arrow that is now disabled, and a
+    // disabled control cannot take focus — fall back to something in the same
+    // block so the keyboard never gets dropped back to the body.
+    if (el && el.disabled) {
+      const rep = el.closest('.rep');
+      el = rep.querySelector('.blk__move:not([disabled])') || rep.querySelector('input, textarea');
+    }
+    if (el) { el.focus(); el.scrollIntoView({ block: 'nearest' }); }
   }
 
   $('blockList').addEventListener('input', e => {
@@ -638,9 +652,21 @@
     const rep = e.target.closest('.rep');
     const i = +rep.dataset.i;
     if (act === 'blk-del') { postBlocks.splice(i, 1); renderBlocks(); }
-    else if (act === 'blk-moveup' && i > 0) { postBlocks.splice(i - 1, 0, postBlocks.splice(i, 1)[0]); renderBlocks(); }
-    else if (act === 'blk-movedn' && i < postBlocks.length - 1) { postBlocks.splice(i + 1, 0, postBlocks.splice(i, 1)[0]); renderBlocks(); }
-    else if (act === 'li-add') { postBlocks[i].items = postBlocks[i].items || []; postBlocks[i].items.push({ th: '', en: '' }); renderBlocks(); }
+    // Keep the caret on the arrow that was clicked so a block can be moved
+    // several places without re-finding the button each time.
+    else if (act === 'blk-moveup' && i > 0) {
+      postBlocks.splice(i - 1, 0, postBlocks.splice(i, 1)[0]);
+      renderBlocks(`.rep[data-i="${i - 1}"] [data-act="blk-moveup"]`);
+    }
+    else if (act === 'blk-movedn' && i < postBlocks.length - 1) {
+      postBlocks.splice(i + 1, 0, postBlocks.splice(i, 1)[0]);
+      renderBlocks(`.rep[data-i="${i + 1}"] [data-act="blk-movedn"]`);
+    }
+    else if (act === 'li-add') {
+      postBlocks[i].items = postBlocks[i].items || [];
+      postBlocks[i].items.push({ th: '', en: '' });
+      renderBlocks(`.rep[data-i="${i}"] .blk-li:last-of-type [data-f="liTh"]`);
+    }
     else if (act === 'li-del') { postBlocks[i].items.splice(+e.target.closest('.blk-li').dataset.j, 1); renderBlocks(); }
     else if (act === 'blk-up') {
       pickAndUpload(url => { postBlocks[i].src = url; renderBlocks(); },
@@ -653,7 +679,10 @@
     postBlocks.push(kind === 'ul' ? { type: 'ul', items: [{ th: '', en: '' }] }
       : kind === 'img' ? { type: 'img', src: '', alt: '', altEn: '', caption: { th: '', en: '' } }
       : { type: kind, th: '', en: '' });
-    renderBlocks();
+    const last = postBlocks.length - 1;
+    renderBlocks(kind === 'ul' ? `.rep[data-i="${last}"] [data-f="liTh"]`
+      : kind === 'img' ? `.rep[data-i="${last}"] [data-f="alt"]`
+      : `.rep[data-i="${last}"] [data-f="th"]`);
   });
 
   // ---------- article object (shared by Save and Preview) ----------
