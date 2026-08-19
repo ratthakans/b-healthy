@@ -264,6 +264,26 @@
     if (others.length) {
       html += `<section class="group"><div class="group__head"><span class="tag">Other</span><span class="group__count">${others.length}</span></div>${others.map(rowHtml).join('')}</section>`;
     }
+    // The ten bundled articles live in code, not in the database. js/blog-store.js
+    // treats "the DB returned any published post" as "the DB is now the source of
+    // truth" and drops the bundled set wholesale — publish one article while the
+    // rest are missing here and the site goes from ten articles to one. Say so
+    // before that happens rather than after.
+    if (currentTab === 'blog') {
+      const inDb = new Set(rowsCache.filter(r => r.type === 'post').map(r => r.id));
+      const missing = (window.BLOG_POSTS || []).filter(p => !inDb.has(p.id));
+      if (missing.length) {
+        html = `<div class="warnbar">
+          <strong>The site is showing ${missing.length} article${missing.length > 1 ? 's' : ''} that ${missing.length > 1 ? 'are' : 'is'} not in the database yet.</strong><br>
+          They ship with the code as a fallback. As soon as any article here is
+          <strong>published</strong>, the website switches to the database and those
+          ${missing.length} disappear.<br>
+          Click <strong>↧ Import from site</strong> first — it adds them without touching
+          anything you have already written.
+        </div>` + html;
+      }
+    }
+
     // A blank panel reads as "broken" rather than "nothing here yet" — say which.
     if (!html) {
       html = currentTab === 'blog'
