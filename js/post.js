@@ -60,6 +60,9 @@
       if (window.bhApplyLang) window.bhApplyLang();
       return;
     }
+    // Logged from here, not on load: a legacy slug only resolves to its real
+    // article once the data is in, and the preview branch above must not count.
+    if (window.bhTrackView) window.bhTrackView({ kind: 'post', refId: found.id });
     paint(found, false);
   }
 

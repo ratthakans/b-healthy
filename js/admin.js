@@ -21,6 +21,8 @@
   }
 
   const sb = window.supabase.createClient(url, key);
+  // The Analytics tab (js/admin-stats.js) reads through the same session.
+  if (window.bhStatsInit) window.bhStatsInit(sb);
   let rowsCache = [];
 
   // ---------- helpers ----------
@@ -105,8 +107,12 @@
     currentTab = name;
     document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('is-active', b.dataset.tab === name));
 
+    // Packages and Blog share the list + editor; Customers and Analytics each
+    // have their own panel, so every panel is addressed by name rather than by
+    // "is it the list or not".
     const cfg = TABS[name];
-    $('tab-customers').classList.toggle('hide', !!cfg);
+    $('tab-customers').classList.toggle('hide', name !== 'customers');
+    $('tab-analytics').classList.toggle('hide', name !== 'analytics');
 
     if (cfg) {
       $('listHeading').textContent = cfg.heading;
@@ -117,7 +123,8 @@
     } else {
       $('listView').classList.add('hide');
       $('editorView').classList.add('hide');
-      loadLeads();
+      if (name === 'analytics') { if (window.bhStatsLoad) window.bhStatsLoad(); }
+      else loadLeads();
     }
   }
 

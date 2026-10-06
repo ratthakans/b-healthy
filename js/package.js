@@ -45,6 +45,10 @@
     return;
   }
 
+  // Logged once the package is resolved, so a legacy slug counts towards the
+  // record it redirects to rather than the old name.
+  if (window.bhTrackView) window.bhTrackView({ kind: 'package', refId: p.id });
+
   document.title = `${p.name} — B-Healthy`;
 
   // Per-package canonical: without it every package shares /package, and the

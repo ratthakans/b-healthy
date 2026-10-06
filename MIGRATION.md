@@ -149,7 +149,7 @@ No code changes are required for any of the above.
 
 ## SQL to run in Supabase (in order)
 
-All three are idempotent — safe to re-run.
+All four are idempotent — safe to re-run.
 
 1. `supabase-blog.sql` — widens the `packages.type` check constraint to allow
    `topic` and `post`. Until this runs, **the blog cannot be saved from
@@ -164,6 +164,10 @@ All three are idempotent — safe to re-run.
    `sort` so the grid stops reshuffling between page loads. Links shared before
    the rename keep working — `js/package.js` maps the old ids and rewrites the
    address bar.
+
+4. `supabase-analytics.sql` — creates the `page_views` table and the four
+   aggregate functions behind the **Analytics** tab. Independent of 1–3; until
+   it runs, that tab says so and nothing is counted.
 
 After (1), open `/admin.html` → **↧ Import current packages** to load the ten
 bundled articles into the database. From then on the site reads articles from
@@ -196,6 +200,41 @@ Two `vercel.json` gotchas, both of which cost a broken deploy once:
 - `vercel.json` is schema-validated and **rejects unknown keys**. Adding a
   `_comment` field fails the deployment *before the build starts*, so it
   shows up as an error with no build logs at all. Keep notes here instead.
+
+## Analytics — who is reading what
+
+`supabase-analytics.sql` + `js/track.js` + the **Analytics** tab in
+`/admin.html`. Self-hosted: the numbers live in the same Supabase project as
+everything else, so there is no third-party account to keep and no cookie
+banner to add.
+
+What a view record holds: the page, a random id the browser generated for
+itself, the referring **hostname** (not the full URL), device class and chosen
+language. No IP address, no cookie, nothing that identifies a person. The
+"People" figure counts those random browser ids, so one person on a phone and a
+laptop counts twice, and clearing site data makes someone new.
+
+Three things worth knowing before reading the numbers:
+
+- **Localhost is not counted.** `js/track.js` skips local hostnames and
+  headless browsers, so a day of development never lands in the report. Set
+  `window.BH_TRACK_LOCAL = true` in the console to log a deliberate test view.
+- **The site can write but not read.** RLS gives the publishable key INSERT
+  only; the four `bh_stats_*` functions do the counting in Postgres and are
+  granted to signed-in staff alone. That also means a determined person could
+  post junk views — it is a counter, not an audited ledger.
+- **Days are bucketed in Asia/Bangkok**, not UTC, so "today" matches the
+  person reading the screen.
+
+Detail pages log themselves: `post.html` and `package.html` carry
+`data-track="manual"` and call `bhTrackView()` once the article or package is
+resolved, so a legacy slug counts towards the record it redirects to and the
+`?preview=1` draft view is never counted.
+
+Vercel Web Analytics is off for this project and is a reasonable thing to turn
+on alongside this (Project → Analytics), but it reports into the Vercel
+dashboard rather than into /admin, and it cannot name an article the way this
+can.
 
 ## Still-open content items (swap anytime)
 
