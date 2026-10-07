@@ -110,6 +110,10 @@
     const ref = o.refId ? String(o.refId).slice(0, 200) : null;
     if (o.kind === 'post' && ref)    return send({ kind: 'post',    ref_id: ref, path: ('/blog/' + ref).slice(0, 300) });
     if (o.kind === 'package' && ref) return send({ kind: 'package', ref_id: ref, path: ('/package/' + ref).slice(0, 300) });
+    // 'gate' = the email card was shown, 'unlock' = an email was given. Same
+    // path as the article, different kind, so the dedupe above keeps them apart
+    // and the admin can put them side by side as a conversion rate.
+    if ((o.kind === 'gate' || o.kind === 'unlock') && ref) return send({ kind: o.kind, ref_id: ref, path: ('/blog/' + ref).slice(0, 300) });
     send({ kind: 'page', ref_id: null, path: pagePath() });
   };
 

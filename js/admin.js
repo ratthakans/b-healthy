@@ -133,9 +133,19 @@
   });
 
   // ---------- customers (form leads) ----------
-  let leadsCache = [], leadFilter = '*';
+  // Article signups arrive in the same table as sales enquiries but are a
+  // different kind of thing — one is a person asking to be called, the other is
+  // a reader on a list. Mixed together, 500 of the second bury 5 of the first.
+  let leadsCache = [], leadFilter = '*', leadType = '*';
 
   $('leadRefresh').addEventListener('click', loadLeads);
+  $('leadTypes').addEventListener('click', e => {
+    const b = e.target.closest('.prog__filter'); if (!b) return;
+    $('leadTypes').querySelectorAll('.prog__filter').forEach(x => x.classList.remove('is-active'));
+    b.classList.add('is-active');
+    leadType = b.dataset.ltype;
+    renderLeads();
+  });
   $('leadFilters').addEventListener('click', e => {
     const b = e.target.closest('.prog__filter'); if (!b) return;
     $('leadFilters').querySelectorAll('.prog__filter').forEach(x => x.classList.remove('is-active'));
@@ -169,9 +179,11 @@
   }
 
   function renderLeads() {
-    const rows = leadFilter === '*' ? leadsCache : leadsCache.filter(r => r.status === leadFilter);
+    const rows = leadsCache.filter(r =>
+      (leadFilter === '*' || r.status === leadFilter) &&
+      (leadType === '*' || (leadType === 'member' ? r.type === 'member' : r.type !== 'member')));
     if (!rows.length) {
-      $('leads').innerHTML = `<div class="empty">${leadsCache.length ? 'No leads with this status.' : 'No customer enquiries yet.<br>They appear here the moment someone submits a booking or contact form.'}</div>`;
+      $('leads').innerHTML = `<div class="empty">${leadsCache.length ? 'Nothing matches these filters.' : 'No customer enquiries yet.<br>They appear here the moment someone submits a booking or contact form.'}</div>`;
       return;
     }
     const STATUSES = ['new', 'contacted', 'won', 'lost'];
@@ -179,9 +191,9 @@
       <div class="lead" data-id="${r.id}">
         <div class="lead__top">
           <div class="lead__who">
-            <div class="lead__name">${esc(r.name || '(no name)')}${r.company ? ` <span class="lead__company">· ${esc(r.company)}</span>` : ''}</div>
+            <div class="lead__name">${esc(r.name || (r.type === 'member' ? (r.email || '(no email)') : '(no name)'))}${r.company ? ` <span class="lead__company">· ${esc(r.company)}</span>` : ''}</div>
             <div class="lead__meta">
-              <span class="tag tag--${r.type === 'contact' ? 'contact' : 'booking'}">${esc(r.type || 'lead')}</span>
+              <span class="tag tag--${r.type === 'member' ? 'member' : (r.type === 'contact' ? 'contact' : 'booking')}">${esc(r.type || 'lead')}</span>
               <span class="tag tag--${esc(r.status)}">${esc(r.status)}</span>
               <span>${fmtDate(r.created_at)}</span>
               ${r.package ? `<span>· ${esc(r.package)}</span>` : ''}
@@ -355,9 +367,12 @@
         name: `${label} (${g === 'wk' ? 'Workshop' : 'Retreats'})`,
         data: { id: `topic-${g}-${k}`, type: 'topic', group: g, key: k, name: label, images }, en: {} });
     });
-    // blog articles bundled in js/blog-index.js + js/blog-bodies.js — imported
-    // edited (and new ones added) from here instead of in code
-    (window.BLOG_POSTS || []).forEach((p, i) => {
+    // Articles are deliberately NOT importable any more. Their bodies used to
+    // come from js/blog-bodies.js, which is no longer served — a static file
+    // with every article in it would have handed out the gated ones for free.
+    // Without it this loop would overwrite every live article with an empty
+    // body, so it only runs where those bodies still exist.
+    (window.BLOG_BODIES ? (window.BLOG_POSTS || []) : []).forEach((p, i) => {
       rows.push({
         id: p.id, type: 'post', status: 'published', sort: i, name: p.title,
         data: {
@@ -749,6 +764,7 @@
       cover: $('f_post_cover').value.trim(),
       coverAlt: $('f_post_coverAlt').value.trim(),
       coverAltEn: $('f_post_coverAltEn').value.trim() || $('f_post_coverAlt').value.trim(),
+      gated: $('f_post_gated').checked,
       body
     };
   }
@@ -939,6 +955,7 @@
     $('postCoverStatus').textContent = '';
     $('f_post_coverAlt').value = d.coverAlt || '';
     $('f_post_coverAltEn').value = d.coverAltEn || '';
+    $('f_post_gated').checked = !!d.gated;
     postBlocks = Array.isArray(d.body) ? JSON.parse(JSON.stringify(d.body)) : [];
     renderBlocks();
     applyTypeMode();

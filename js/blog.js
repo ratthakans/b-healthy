@@ -19,6 +19,7 @@
         <div class="bcard__media">
           <img src="${esc(p.cover)}" alt="${esc(p.coverAlt)}" ${i > 2 ? 'loading="lazy"' : ''} />
           <span class="bcard__cat" data-en="${escAttr(p.categoryEn)}">${esc(p.category)}</span>
+          ${p.gated ? `<span class="bcard__lock" data-en="Members">สมาชิก</span>` : ''}
         </div>
         <div class="bcard__body">
           <p class="bcard__meta">

@@ -48,14 +48,17 @@
     const key = cfg.SUPABASE_ANON_KEY || '';
     if (!base || !key) return Promise.resolve(null);   // demo / fallback mode
 
-    const q = [
-      'status=eq.published',
-      'type=' + opts.type,
-      'select=' + (opts.select || 'id,type,sort,data'),
-    ];
+    // `from` reads a view instead of the table. A view has already decided
+    // which rows and which columns it hands out, so the status/type filters
+    // that `packages` needs would be wrong there, not merely redundant.
+    const source = opts.from || 'packages';
+    const q = ['select=' + (opts.select || 'id,type,sort,data')];
+    if (!opts.from) {
+      q.unshift('status=eq.published', 'type=' + opts.type);
+    }
     if (opts.order) q.push('order=' + opts.order);
 
-    return fetch(base + '/rest/v1/packages?' + q.join('&'), {
+    return fetch(base + '/rest/v1/' + source + '?' + q.join('&'), {
       headers: { apikey: key, Authorization: 'Bearer ' + key }
     })
       .then(r => (r.ok ? r.json() : Promise.reject(r.status)))

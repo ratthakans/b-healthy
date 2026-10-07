@@ -119,6 +119,49 @@
     }).join('');
   }
 
+  // Two numbers that only mean something next to each other: how many readers
+  // hit the card, and how many of them actually typed an email. A gated article
+  // with a lot of the first and little of the second is asking too much.
+  function gate(gates, unlocks) {
+    const el = $('statGate');
+    const got = {};
+    unlocks.forEach(u => { got[u.ref_id] = Number(u.visitors) || 0; });
+
+    const rows = gates
+      .map(g => {
+        const saw = Number(g.visitors) || 0;
+        const gave = got[g.ref_id] || 0;
+        return { id: g.ref_id, saw: saw, gave: gave, rate: saw ? (gave / saw) * 100 : 0 };
+      })
+      .sort((a, b) => b.saw - a.saw);
+
+    if (!rows.length) {
+      el.innerHTML = '<div class="blist__none">No gated article has been opened yet. Tick ' +
+        '\u201cต้องกรอกอีเมลก่อนอ่าน\u201d on an article in the Blog tab to start.</div>';
+      return;
+    }
+
+    const tot = rows.reduce((a, r) => ({ saw: a.saw + r.saw, gave: a.gave + r.gave }), { saw: 0, gave: 0 });
+    el.innerHTML = `
+      <table class="gtab">
+        <thead><tr><th>Article</th><th>Saw the card</th><th>Gave an email</th><th>Rate</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr>
+            <td>${esc(titleFor('post', r.id, '/blog/' + r.id))}</td>
+            <td>${nf(r.saw)}</td>
+            <td>${nf(r.gave)}</td>
+            <td class="rate ${r.rate >= 15 ? 'rate--hi' : (r.saw >= 20 ? 'rate--lo' : '')}">${r.saw ? r.rate.toFixed(0) + '%' : '—'}</td>
+          </tr>`).join('')}
+          <tr>
+            <td><strong>All gated articles</strong></td>
+            <td><strong>${nf(tot.saw)}</strong></td>
+            <td><strong>${nf(tot.gave)}</strong></td>
+            <td class="rate"><strong>${tot.saw ? ((tot.gave / tot.saw) * 100).toFixed(0) + '%' : '—'}</strong></td>
+          </tr>
+        </tbody>
+      </table>`;
+  }
+
   const pick = (rows, dim) => rows.filter(r => r.dim === dim)
     .sort((a, b) => Number(b.views) - Number(a.views)).slice(0, 8);
 
@@ -132,16 +175,18 @@
     msg.className = 'msg';
     $('statKpis').innerHTML = '<div class="empty" style="grid-column:1/-1">Loading…</div>';
 
-    const [totals, daily, pages, posts, pkgs, brk] = await Promise.all([
+    const [totals, daily, pages, posts, pkgs, brk, gates, unlocks] = await Promise.all([
       sb.rpc('bh_stats_totals', { p_days: days }),
       sb.rpc('bh_stats_daily', { p_days: days }),
       sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['page'], p_limit: 12 }),
       sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['post'], p_limit: 10 }),
       sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['package'], p_limit: 10 }),
-      sb.rpc('bh_stats_breakdown', { p_days: days })
+      sb.rpc('bh_stats_breakdown', { p_days: days }),
+      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['gate'], p_limit: 20 }),
+      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['unlock'], p_limit: 20 })
     ]);
 
-    const failed = [totals, daily, pages, posts, pkgs, brk].find(r => r.error);
+    const failed = [totals, daily, pages, posts, pkgs, brk, gates, unlocks].find(r => r.error);
     if (failed) {
       $('statKpis').innerHTML = '';
       const m = failed.error.message || '';
@@ -180,6 +225,7 @@
       empty: 'No referrers yet.',
       name: r => (r.label === 'direct' ? 'Direct / typed in' : r.label)
     });
+    gate(gates.data || [], unlocks.data || []);
     list('statDev', pick(b, 'device'), { empty: '—', name: r => DEVICE_NAMES[r.label] || r.label });
     list('statLang', pick(b, 'lang'), { empty: '—', name: r => LANG_NAMES[r.label] || r.label });
 

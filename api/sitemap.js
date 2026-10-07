@@ -38,8 +38,8 @@ const xmlEsc = (s) => String(s ?? "")
   .replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 
 // The bundled articles, so a DB outage still yields a complete sitemap.
-// Only the index is needed here — a sitemap entry is an id and a date, so the
-// article bodies (js/blog-bodies.js) are deliberately not loaded.
+// A sitemap entry is only an id and a date, so the index alone is enough —
+// which is just as well, since the bundled bodies no longer exist.
 function bundledPosts() {
   try {
     global.window = global.window || {};
@@ -52,11 +52,22 @@ function bundledPosts() {
 }
 
 async function livePosts() {
-  const url = SUPABASE_URL.replace(/\/$/, "") +
-    "/rest/v1/packages?type=eq.post&status=eq.published&select=id,data,updated_at";
-  const r = await fetch(url, {
+  // posts_public, not packages: anonymous reads of `post` rows were closed off
+  // when the article gate went in, so this key no longer sees the table. The
+  // view still lists every published article — a gated one just arrives with a
+  // short body, and a sitemap only wants the slug and the date anyway.
+  const base = SUPABASE_URL.replace(/\/$/, "");
+  const get = path => fetch(base + path, {
     headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY },
   });
+
+  // posts_public first: anonymous reads of `post` rows in `packages` are closed
+  // off once the article gate is in. Before that the view does not exist, and a
+  // sitemap missing every article is worse than one built from the table.
+  let r = await get("/rest/v1/posts_public?select=id,data,updated_at");
+  if (r.status === 404) {
+    r = await get("/rest/v1/packages?type=eq.post&status=eq.published&select=id,data,updated_at");
+  }
   if (!r.ok) throw new Error("supabase " + r.status);
   const rows = await r.json();
   if (!Array.isArray(rows)) throw new Error("unexpected payload");

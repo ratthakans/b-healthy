@@ -61,6 +61,11 @@
     .cnt{font-size:.72rem;color:var(--muted);float:right;font-weight:500}
     .cnt--over{color:var(--warn)}
     .dirty-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--warn);margin-left:7px;vertical-align:middle}
+    .gatebox{display:flex;gap:11px;align-items:flex-start;background:#fafbfd;border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-top:14px;cursor:pointer}
+    .gatebox input{width:auto;margin:2px 0 0;flex:none;accent-color:var(--blue)}
+    .gatebox strong{display:block;font-size:.88rem;color:var(--navy)}
+    .gatebox small{display:block;color:var(--muted);font-size:.78rem;line-height:1.55;margin-top:3px;font-weight:400}
+    .tag--gated{background:#fdf0e6;color:#c9770e}
     .warnbar{background:#fff7e6;border:1px solid #f0d49a;border-left:4px solid var(--warn);border-radius:var(--radius);padding:14px 16px;margin-bottom:18px;font-size:.88rem;line-height:1.6;color:#7a5a10}
     .warnbar strong{color:#5c430b}
     .warnbar code{background:rgba(0,0,0,.06);padding:1px 6px;border-radius:5px;font-size:.85em}
@@ -110,6 +115,7 @@
     .lead select{width:auto;padding:6px 10px;font-size:.78rem;font-weight:600;border-radius:999px}
     .tag--booking{background:#e6f0fb;color:var(--blue)}
     .tag--contact{background:#fdf0e6;color:#c9770e}
+    .tag--member{background:#efe9fb;color:#6b4fb5}
     .tag--new{background:#e6f0fb;color:var(--blue)}
     .tag--contacted{background:#fbf0dd;color:var(--warn)}
     .tag--won{background:#e7f6ef;color:var(--ok)}
@@ -158,6 +164,14 @@
     .blist__n{position:relative;font-size:.86rem;font-weight:700;color:var(--navy);white-space:nowrap}
     .blist__sub{font-weight:500;color:var(--muted);font-size:.74rem;margin-left:7px}
     .blist__none{color:var(--muted);font-size:.85rem;padding:6px 2px}
+    .gtab{width:100%;border-collapse:collapse;font-size:.86rem}
+    .gtab th{text-align:right;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 0 8px}
+    .gtab th:first-child{text-align:left}
+    .gtab td{padding:9px 0;border-top:1px solid var(--line);text-align:right;white-space:nowrap}
+    .gtab td:first-child{text-align:left;font-weight:600;color:var(--navy);white-space:normal;padding-right:14px}
+    .gtab .rate{font-weight:700}
+    .gtab .rate--hi{color:var(--ok)}
+    .gtab .rate--lo{color:var(--warn)}
     /* editor */
     .editor{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px clamp(18px,3vw,30px);margin-top:8px}
     .editor h2{font-size:1.2rem;color:var(--navy);margin-bottom:4px}
@@ -254,6 +268,11 @@
         <div class="bar">
           <h2>Customers</h2>
           <div class="sp"></div>
+          <div class="lfilters" id="leadTypes">
+            <button class="prog__filter is-active" data-ltype="*" type="button">Everyone</button>
+            <button class="prog__filter" data-ltype="enquiry" type="button">Enquiries</button>
+            <button class="prog__filter" data-ltype="member" type="button">Article signups</button>
+          </div>
           <div class="lfilters" id="leadFilters">
             <button class="prog__filter is-active" data-status="*">All</button>
             <button class="prog__filter" data-status="new">New</button>
@@ -287,6 +306,11 @@
         <div class="card">
           <h3 class="card__h">Views per day</h3>
           <div class="chart" id="statChart"></div>
+        </div>
+
+        <div class="card" id="statGateCard">
+          <h3 class="card__h">Article gate &mdash; who gives an email</h3>
+          <div id="statGate"></div>
         </div>
 
         <div class="cols">
@@ -367,6 +391,15 @@
               <label class="role-post">Author (English)<input id="f_post_authorEn" placeholder="B-Healthy Team" /></label>
               <label class="full role-post">เกริ่นนำ (ไทย) — แสดงบนการ์ดในหน้ารวม <span class="cnt" id="cnt_excerpt"></span><textarea id="f_post_excerpt"></textarea></label>
               <label class="full role-post">Excerpt (English)<textarea id="f_post_excerptEn"></textarea></label>
+              <div class="full role-post">
+                <label class="gatebox" for="f_post_gated">
+                  <input type="checkbox" id="f_post_gated" />
+                  <span>
+                    <strong>ต้องกรอกอีเมลก่อนอ่าน</strong>
+                    <small>ผู้อ่านจะเห็นปก หัวข้อ เกริ่นนำ และ 3 บล็อกแรก จากนั้นต้องกรอกอีเมลจึงจะอ่านต่อได้ — ส่วนที่เหลือไม่ถูกส่งออกจากเซิร์ฟเวอร์เลยจนกว่าจะปลดล็อก อีเมลที่ได้จะไปอยู่ในแท็บ Customers<br />Google จะเห็นเท่าที่ผู้อ่านเห็น บทความนี้จึงมีโอกาสติดอันดับน้อยลง — เลือกปิดเฉพาะบทความที่คุ้มค่ากับการแลกอีเมล</small>
+                  </span>
+                </label>
+              </div>
               <div class="full role-post">
                 <label>รูปปก</label>
                 <div class="up-hero">
@@ -491,12 +524,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js?v=20260718g"></script>
-  <script src="js/core.js?v=20260731f"></script>
+  <script src="js/core.js?v=20261007a"></script>
   <script src="js/packages.js?v=20260728a"></script>
   <script src="js/workshops-data.js?v=20260731i"></script>
   <script src="js/blog-index.js?v=20260731k"></script>
-  <script src="js/blog-bodies.js?v=20260731k"></script>
-  <script src="js/admin-stats.js?v=20261005a"></script>
-  <script src="js/admin.js?v=20261005a"></script>
+  <script src="js/admin-stats.js?v=20261007a"></script>
+  <script src="js/admin.js?v=20261007a"></script>
 </body>
 </html>
