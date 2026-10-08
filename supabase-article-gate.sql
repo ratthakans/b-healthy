@@ -21,10 +21,75 @@
 set search_path = public, extensions;
 create extension if not exists pgcrypto;
 
+-- ------------------------------------------------------------- how much is free
+-- Returns the opening of an article: as close to 20% of its length as the
+-- blocks allow. Counting blocks instead would be meaningless — one article's
+-- three blocks are a paragraph, another's are half the piece.
+--
+-- "Length" is characters of Thai body text, with a photo counted as 200 so an
+-- article that opens with two images does not give them away for nothing.
+--
+-- Two deliberate consequences:
+--   * The cut lands on whichever block boundary is NEAREST 20%, above or below.
+--     Taking the last boundary under 20% starved long pieces; taking the first
+--     one over it gave away up to half an article.
+--   * A teaser never ends on a heading. A headline with nothing beneath it is
+--     not a sample, it is a tease — so the cut walks back past it, and an
+--     article whose opening is a heading plus one long list ends up locked from
+--     the top. That is the intended outcome for a piece too short to sample.
+create or replace function public.bh_teaser(p_body jsonb)
+returns jsonb
+language sql immutable set search_path = public as $$
+  with src as (
+    select case when jsonb_typeof(p_body) = 'array' then p_body else '[]'::jsonb end as body
+  ),
+  b as (
+    select t.ord, t.value,
+           (case t.value->>'type'
+              when 'ul' then (
+                select coalesce(sum(length(coalesce(i.value->>'th', i.value->>'en', ''))), 0)
+                from jsonb_array_elements(
+                       case when jsonb_typeof(t.value->'items') = 'array'
+                            then t.value->'items' else '[]'::jsonb end) as i(value))
+              when 'img' then 200
+              else length(coalesce(t.value->>'th', t.value->>'en', ''))
+            end)::numeric as w
+    from src, jsonb_array_elements(src.body) with ordinality as t(value, ord)
+  ),
+  tot as (select coalesce(sum(w), 0) as total, count(*) as blocks from b),
+  cuts as (
+    select 0::bigint as n, 0::numeric as upto      -- giving nothing away is a candidate too
+    union all
+    select b.ord, sum(b.w) over (order by b.ord)
+    from b
+  ),
+  pick as (
+    select c.n from cuts c, tot
+    where tot.total > 0
+    order by abs(c.upto / tot.total - 0.20), c.n
+    limit 1
+  ),
+  trimmed as (
+    -- the largest cut at or below the chosen one that does not end on a heading
+    select coalesce(max(g.n), 0) as n
+    from generate_series(0, (select blocks from tot)) as g(n)
+    where g.n <= (select n from pick)
+      and (g.n = 0 or coalesce((select value->>'type' from b where b.ord = g.n), '') <> 'h2')
+  )
+  select coalesce(jsonb_agg(b.value order by b.ord), '[]'::jsonb)
+  from b, trimmed
+  where b.ord <= trimmed.n;
+$$;
+
+-- Left callable: it reads nothing, it only trims jsonb you already hold, and
+-- being able to ask "what would this article show?" is worth more than the
+-- nothing it hides.
+
 -- ----------------------------------------------------------------- the teaser
 -- Anonymous readers stop reading `packages` directly and read this instead.
--- A free article comes back whole; a gated one comes back with only its first
--- few blocks and a flag the front end uses to draw the email card.
+-- A free article comes back whole; a gated one comes back with roughly its
+-- first fifth (see bh_teaser above) and a flag the front end uses to draw the
+-- email card.
 -- Left without `security_invoker`, so it runs with the owner's rights. That is
 -- the whole mechanism: the policy below shuts anonymous readers out of `post`
 -- rows in `packages`, and this view is the one door back in — one that only
@@ -39,11 +104,7 @@ select
     when coalesce((p.data->>'gated')::boolean, false) then
       (p.data - 'body') || jsonb_build_object(
         'gated', true,
-        'body', case when jsonb_typeof(p.data->'body') = 'array' then coalesce((
-            select jsonb_agg(t.value order by t.ord)
-            from jsonb_array_elements(p.data->'body') with ordinality as t(value, ord)
-            where t.ord <= 3                       -- how much is free. One number, one place.
-          ), '[]'::jsonb) else '[]'::jsonb end)
+        'body', public.bh_teaser(p.data->'body'))
     else p.data
   end as data
 from public.packages p

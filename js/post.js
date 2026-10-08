@@ -116,9 +116,12 @@
       : `<p class="post__p post__p--wait" data-en="Loading the article…">กำลังโหลดบทความ…</p>`;
   }
 
-  function gateCard(p) {
+  // `bare` = nothing was free to show. The fade above the card exists to blur
+  // the sentence it interrupts; with no sentence there it would just smear the
+  // cover photo.
+  function gateCard(p, bare) {
     return `
-      <div class="post-gate" id="postGate">
+      <div class="post-gate${bare ? ' post-gate--bare' : ''}" id="postGate">
         <h3 class="post-gate__h" data-en="Keep reading — just leave your email">อ่านต่อฟรี เพียงทิ้งอีเมลไว้</h3>
         <p class="post-gate__sub" data-en="The rest of this article is open to readers on our list. No cost, no password.">ส่วนที่เหลือของบทความนี้เปิดให้ผู้ที่อยู่ในรายชื่อผู้อ่านของเรา ไม่มีค่าใช้จ่าย ไม่ต้องตั้งรหัสผ่าน</p>
         <form class="post-gate__form" id="gateForm" novalidate>
@@ -240,8 +243,8 @@
       </figure>
 
       <div class="container post__body${locked ? ' post__body--locked' : ''}" id="postBody">
-        ${bodyBlocks.length ? bodyBlocks.map(block).join('') : placeholder()}
-        ${locked ? gateCard(p) : ''}
+        ${bodyBlocks.length ? bodyBlocks.map(block).join('') : (locked ? '' : placeholder())}
+        ${locked ? gateCard(p, !bodyBlocks.length) : ''}
       </div>
 
       ${locked ? '' : `<div class="container post__cta">

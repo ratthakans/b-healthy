@@ -1239,6 +1239,8 @@ html { scroll-behavior: smooth; }
   background: linear-gradient(180deg, rgba(251,252,254,0), var(--cream) 88%);
   pointer-events: none;
 }
+.post-gate--bare { margin-top: 34px; }
+.post-gate--bare::before { display: none; }
 .post-gate__h { font-size: clamp(1.15rem, 2.4vw, 1.5rem); color: var(--navy); margin-bottom: 8px; }
 .post-gate__sub { color: var(--muted); font-weight: 300; line-height: 1.7; max-width: 440px; margin: 0 auto 20px; }
 .post-gate__form { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
