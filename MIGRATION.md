@@ -323,6 +323,30 @@ in Customers in the meantime. Sending to them needs the Wix → Resend domain
 verification finished first — and a list of people who gave you an email to
 receive articles is a list that expects articles.
 
+## Testing the SQL before it touches the live database
+
+`sql-test.mjs` runs every `.sql` file in this folder against a real Postgres —
+PGlite, the engine compiled to WebAssembly — with the `anon` and
+`authenticated` roles created and holding the table grants Supabase hands out
+by default. Every assertion runs *as anon*, so "anon cannot read this" is
+tested rather than assumed.
+
+```
+mkdir -p /tmp/bh-sqltest && cd /tmp/bh-sqltest
+npm init -y && npm i @electric-sql/pglite
+cp ~/Desktop/website/B-Healthy/sql-test.mjs .
+SQL_DIR=~/Desktop/website/B-Healthy node sql-test.mjs
+```
+
+The copy matters: node resolves the dependency from wherever the file sits.
+Point `ARTICLES=` at a dump of the live `post` rows to check the teaser rule
+against the real articles instead of the built-in fixture.
+
+It exists because two attempts at `supabase-article-gate.sql` failed in the
+Supabase SQL editor over things that cost a second to catch here — an `hmac`
+overload that does not exist, and a schema-qualified call to an extension that
+may live elsewhere. Run it before handing any new SQL over.
+
 ## Still-open content items (swap anytime)
 
 - Venue photos for the four retreat properties — Amphawa Hideaway Homestay,
