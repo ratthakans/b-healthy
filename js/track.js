@@ -32,16 +32,24 @@
 
   // Storage can throw outright (private mode, blocked site data). A visitor we
   // can't remember simply counts as a new one — never a broken page.
-  function stored(store, k) {
+  //
+  // The store arrives as a function because browsers that block site data
+  // throw on the `localStorage` property access itself, not on getItem. Passed
+  // by value it was read before this try block existed, the exception escaped
+  // the whole file, and bhTrackView was never defined — so those visitors
+  // vanished from the report entirely, which is the one thing this was not
+  // supposed to do.
+  function stored(get, k) {
     try {
+      const store = get();
       let v = store.getItem(k);
       if (!v) { v = mkid(); store.setItem(k, v); }
       return v;
     } catch (e) { return mkid(); }
   }
 
-  const visitorId = stored(window.localStorage, 'bh-vid');
-  const sessionId = stored(window.sessionStorage, 'bh-sid');
+  const visitorId = stored(() => localStorage, 'bh-vid');
+  const sessionId = stored(() => sessionStorage, 'bh-sid');
 
   function device() {
     const ua = navigator.userAgent;

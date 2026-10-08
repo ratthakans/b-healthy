@@ -149,7 +149,9 @@ No code changes are required for any of the above.
 
 ## SQL to run in Supabase (in order)
 
-All five are idempotent — safe to re-run.
+All five are idempotent, and safe to re-run in any order: no two files define
+the same function, so running one cannot undo another. `sql-test.mjs` runs
+every file twice and checks that the second pass changes nothing.
 
 1. `supabase-blog.sql` — widens the `packages.type` check constraint to allow
    `topic` and `post`. Until this runs, **the blog cannot be saved from
@@ -171,8 +173,8 @@ All five are idempotent — safe to re-run.
 
 5. `supabase-article-gate.sql` — the article gate: the `posts_public` view,
    the two token functions, and the RLS change that stops anonymous readers
-   seeing `post` rows in `packages` at all. Needs (1) and
-   `supabase-analytics.sql` to have run first.
+   seeing `post` rows in `packages` at all. Needs (1) and (4) to have run
+   first — it widens the `page_views.kind` constraint that (4) creates.
 
 After (1), open `/admin.html` → **↧ Import current packages** to load the ten
 bundled articles into the database. From then on the site reads articles from

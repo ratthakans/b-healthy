@@ -134,20 +134,31 @@
       </div>`;
   }
 
+  // Tab title and description follow whichever language i18n.js has active.
+  // Re-applied on toggle too — i18n only swaps elements, not <head> metadata.
+  //
+  // Bound once, from the article currently on screen. It used to be bound
+  // inside paint(), which the gate made run up to four times for one article
+  // — a listener each, every one of them rebuilding the same metadata on
+  // every click.
+  let shown = null;
+
+  function applyMeta() {
+    if (!shown) return;
+    const { post, isPreview } = shown;
+    const isEn = document.documentElement.lang === 'en';
+    document.title = `${isEn ? post.titleEn : post.title} — B-Healthy`;
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) desc.setAttribute('content', isEn ? post.excerptEn : post.excerpt);
+    if (!isPreview) structuredData(post, isEn);
+  }
+  document.getElementById('navLang')?.addEventListener('click', () => setTimeout(applyMeta, 0));
+
   // opts: { unlocked: <full body blocks>, pending: <token in hand, asking> }
   function paint(p, isPreview, opts) {
     const state = opts || {};
-  // Tab title and description follow whichever language i18n.js has active.
-  // Re-applied on toggle too — i18n only swaps elements, not <head> metadata.
-  const applyMeta = () => {
-    const isEn = document.documentElement.lang === 'en';
-    document.title = `${isEn ? p.titleEn : p.title} — B-Healthy`;
-    const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute('content', isEn ? p.excerptEn : p.excerpt);
-    if (!isPreview) structuredData(p, isEn);
-  };
+  shown = { post: p, isPreview: isPreview };
   applyMeta();
-  document.getElementById('navLang')?.addEventListener('click', () => setTimeout(applyMeta, 0));
   const ogTitle = document.querySelector('meta[property="og:title"]');
   if (ogTitle) ogTitle.setAttribute('content', p.titleEn);
   // Resolve against <base> (the site root), not location.href — on /blog/<slug>
@@ -297,7 +308,6 @@
       }
 
       btn.disabled = true;
-      const thWas = btn.textContent;
       btn.textContent = 'กำลังเปิด…';
       btn.setAttribute('data-en', 'Opening…');
       delete btn.__th;
@@ -312,7 +322,11 @@
         document.getElementById('postBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = thWas;
+        // The Thai label is written out rather than replayed from what was on
+        // screen: deleting __th makes i18n re-cache whatever is in the element
+        // as its Thai text, so restoring an English string here left the
+        // button stuck in English after the reader switched back to TH.
+        btn.textContent = 'อ่านบทความเต็ม';
         btn.setAttribute('data-en', 'Read the full article');
         delete btn.__th;
         const code = err && err.code;

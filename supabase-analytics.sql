@@ -19,6 +19,9 @@ create table if not exists public.page_views (
   -- Normalised by js/track.js so the same page never splits into several rows:
   -- '/', '/program', '/blog/<slug>', '/package/<id>'
   path       text not null check (char_length(path) between 1 and 300),
+  -- supabase-article-gate.sql widens this to include 'gate' and 'unlock'.
+  -- `create table if not exists` leaves an existing constraint alone, so
+  -- re-running this file cannot narrow it back.
   kind       text not null default 'page' check (kind in ('page', 'post', 'package')),
   ref_id     text check (char_length(ref_id) <= 200),   -- article slug / package id
 
@@ -71,15 +74,23 @@ create policy "staff read views" on public.page_views
 -- =============================================================================
 
 -- Totals for the window, plus the window before it so the UI can show a trend.
+--
+-- Only the three kinds that really are a page being looked at. The article
+-- gate logs two more, `gate` and `unlock`, which are events; counted here they
+-- would quietly inflate every headline number. This filter lives in this file
+-- and nowhere else: a second copy in supabase-article-gate.sql meant re-running
+-- this one silently undid it.
 create or replace function public.bh_stats_totals(p_days int default 30)
 returns table (views bigint, visitors bigint, prev_views bigint, prev_visitors bigint)
 language sql security definer set search_path = public stable as $$
   with cur as (
     select * from public.page_views
-    where created_at >= now() - make_interval(days => greatest(p_days, 1))
+    where kind in ('page', 'post', 'package')
+      and created_at >= now() - make_interval(days => greatest(p_days, 1))
   ), prev as (
     select * from public.page_views
-    where created_at >= now() - make_interval(days => greatest(p_days, 1) * 2)
+    where kind in ('page', 'post', 'package')
+      and created_at >= now() - make_interval(days => greatest(p_days, 1) * 2)
       and created_at <  now() - make_interval(days => greatest(p_days, 1))
   )
   select (select count(*)                  from cur)::bigint,
@@ -102,7 +113,8 @@ language sql security definer set search_path = public stable as $$
          interval '1 day'
        ) as g(d)
   left join public.page_views v
-    on v.created_at >= now() - make_interval(days => greatest(p_days, 1) + 1)
+    on v.kind in ('page', 'post', 'package')
+   and v.created_at >= now() - make_interval(days => greatest(p_days, 1) + 1)
    and (timezone('Asia/Bangkok', v.created_at))::date = g.d::date
   group by g.d
   order by g.d;

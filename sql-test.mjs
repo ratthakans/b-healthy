@@ -215,6 +215,14 @@ ok('nor in the daily chart', daily === 2, `daily=${daily}`);
 const g = (await db.query(`select * from public.bh_stats_top(30, array['gate'], 10)`)).rows;
 ok('but they are countable on their own', g.length === 1 && Number(g[0].views) === 1);
 
+// Re-running one file must not undo another. bh_stats_totals and
+// bh_stats_daily were defined in two files at once, so running the analytics
+// one a second time quietly restored counters that count gate and unlock
+// events as page views.
+for (const f of files) await db.exec(readFileSync(DIR + f, 'utf8'));
+const again = (await db.query(`select * from public.bh_stats_totals(30)`)).rows[0];
+ok('re-running every .sql file changes nothing', Number(again.views) === 2, `views=${again.views}`);
+
 console.log(`\n${pass} passed / ${fail} failed\n`);
 console.log('what the view would show:');
 summary.sort((a, b) => a[3] - b[3]).forEach(([id, n, t, p]) =>

@@ -6,7 +6,12 @@
 // ============================================================
 (function () {
   const KEY = 'bh-lang';
-  const get = () => localStorage.getItem(KEY) || 'en';
+  // Browsers that block site data throw on the property access itself, not on
+  // getItem — unguarded, that exception escaped before a single element was
+  // translated, so those visitors got the Thai copy whatever they picked and
+  // the toggle did nothing. Forgetting the preference is the acceptable loss.
+  const get = () => { try { return localStorage.getItem(KEY) || 'en'; } catch (e) { return 'en'; } };
+  const remember = l => { try { localStorage.setItem(KEY, l); } catch (e) {} };
 
   function apply(lang) {
     document.documentElement.lang = lang;
@@ -31,7 +36,7 @@
   }
 
   window.bhApplyLang = () => apply(get());
-  window.bhSetLang = (l) => { localStorage.setItem(KEY, l); apply(l); };
+  window.bhSetLang = (l) => { remember(l); apply(l); };
   window.bhToggleLang = () => window.bhSetLang(get() === 'th' ? 'en' : 'th');
 
   document.addEventListener('click', e => {

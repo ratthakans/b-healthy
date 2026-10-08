@@ -19,8 +19,21 @@
   const base = (cfg.SUPABASE_URL || '').replace(/\/$/, '');
   const key = cfg.SUPABASE_ANON_KEY || '';
 
-  function read() { try { return localStorage.getItem(KEY) || null; } catch (e) { return null; } }
-  function write(v) { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) {} }
+  // Some browsers refuse to remember anything — Safari in private mode, or any
+  // browser with site data blocked. Without this the reader would hand over
+  // their email, have it recorded, and still be told the unlock failed: the
+  // write throws, the read that follows finds nothing, and the card never
+  // goes away however many times they try. Holding the token in memory keeps
+  // the article open for this visit; only the coming back is lost.
+  let memo = null;
+
+  function read() {
+    try { return localStorage.getItem(KEY) || memo; } catch (e) { return memo; }
+  }
+  function write(v) {
+    memo = v;
+    try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) {}
+  }
 
   window.bhGateToken = read;
   window.bhGateForget = () => write(null);

@@ -182,8 +182,11 @@
       sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['post'], p_limit: 10 }),
       sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['package'], p_limit: 10 }),
       sb.rpc('bh_stats_breakdown', { p_days: days }),
-      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['gate'], p_limit: 20 }),
-      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['unlock'], p_limit: 20 })
+      // 200 is the ceiling bh_stats_top enforces. The footer below adds up the
+      // rows it is given and calls the result the site-wide rate, so a limit
+      // that quietly drops articles would quietly make that number wrong.
+      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['gate'], p_limit: 200 }),
+      sb.rpc('bh_stats_top', { p_days: days, p_kinds: ['unlock'], p_limit: 200 })
     ]);
 
     const failed = [totals, daily, pages, posts, pkgs, brk, gates, unlocks].find(r => r.error);
