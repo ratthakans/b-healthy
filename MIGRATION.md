@@ -251,12 +251,25 @@ the Blog tab. Off by default: an article is only gated when someone ticks
 returned the full text of every article, and the bundled `js/blog-bodies.js`
 served the same text as a static file. A gate written in JavaScript would have
 been a curtain: View Source, and the article is there. So the cut happens in
-Postgres instead. `posts_public` is a view that hands a gated article its first
-**three blocks** and a `gated` flag; the rest is never sent. The anon policy on
-`packages` now excludes `type = 'post'`, so there is no way around the view.
+Postgres instead. `posts_public` is a view that hands a gated article roughly
+its **first 20%** and a `gated` flag; the rest is never sent. The anon policy
+on `packages` now excludes `type = 'post'`, so there is no way around the view.
 
-Change how much is free by editing the `t.ord <= 3` line in the view — it is
-deliberately the only place that number appears.
+`bh_teaser()` decides where to cut. It measures length in characters of Thai
+body text (a photo counts as 200, so an article opening on images does not give
+them away for nothing), then takes whichever block boundary is **nearest** 20%,
+above or below. Both simpler rules were wrong against the real articles:
+stopping at the last boundary under 20% starved the long pieces down to 8%, and
+taking the first one over it handed out as much as 52%.
+
+A teaser never ends on a heading — a headline with nothing beneath it is not a
+sample — so the cut walks back past one. An article that opens with a heading
+and one long list therefore shows nothing at all and is locked from the top,
+which is the right answer for a piece too short to sample. Across the 21
+articles live today that averages 18% free, at most 36%, with two locked from
+the top.
+
+Change the share by editing `0.20` in `bh_teaser` — it appears once.
 
 **The token.** `bh_unlock(email, slug)` records the reader in `submissions` as
 `type = 'member'` and returns a string signed with HMAC-SHA256.
@@ -282,7 +295,7 @@ a way around the gate: the same SQL that creates the view also closes
 fallback comes back empty.
 
 **What it costs in SEO.** Google sees exactly what a signed-out reader sees:
-cover, headline, excerpt and three blocks. The page carries
+cover, headline, excerpt and the teaser. The page carries
 `isAccessibleForFree: false` so this reads as a declared paywall rather than
 cloaking, but a gated article will not rank on text it no longer shows. Gate
 the few articles worth an email; leave the rest open.
