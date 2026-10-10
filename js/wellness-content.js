@@ -117,6 +117,48 @@
     // Used when the reader says "let B-Healthy suggest".
     BY_DIRECTION: { calm: 'sound', energy: 'yoga', focus: 'aroma', rest: 'sound', reset: 'tea' },
     // A preference maps to an experience too, and seconds the recommendation.
-    BY_PREF: { tea: 'tea', aroma: 'aroma', sound: 'sound', movement: 'yoga', quiet: 'sound' }
+    BY_PREF: { tea: 'tea', aroma: 'aroma', sound: 'sound', movement: 'yoga', quiet: 'sound' },
+
+    // ---- 07 THE OFFER ---------------------------------------------------
+    // Everything about the giveaway lives here. Change the words, the sizes
+    // or the turnaround without touching wellness.js.
+    //
+    // Why a taster and not a workshop: a workshop is THB 39,000–43,900 for a
+    // class of 10–30. It is priced per organisation, not per seat, so giving
+    // one away to an individual who answered a quiz means handing a stranger
+    // forty thousand baht of trainer, materials and travel — and that person
+    // is usually not the one who signs anything.
+    //
+    // So the offer splits on team size. Someone with a team gets a 60–90
+    // minute taster cut from the three-hour class, which costs half a
+    // trainer's day and only happens for a real prospect. Someone without one
+    // is not turned away empty-handed; they get the online session. Nobody
+    // leaves with nothing, and nobody leaves with THB 40,000.
+    OFFER: {
+      enabled: true,
+      codePrefix: 'BH',
+      replyWithin: t('ภายใน 2 วันทำการ', 'within 2 working days'),
+      // The dividing line. Below it, the online session; on or above it, the
+      // on-site taster for the team.
+      teamThreshold: '10-30',
+      title: t('และมีอีกอย่างสำหรับคุณ', 'And one more thing'),
+      lead: t('ผลประเมินนี้บอกเรื่องของคุณคนเดียว แต่ในทีมคุณมีคนที่กำลังเจอแบบเดียวกันอีกกี่คน',
+              'This guide is about you. How many people on your team are in the same place?'),
+      teamOffer: t('เวิร์กช็อปทดลองให้ทีมของคุณ 60–90 นาที ไม่มีค่าใช้จ่าย',
+                   'A 60–90 minute taster workshop for your team, at no cost'),
+      soloOffer: t('มินิเซสชันออนไลน์ 45 นาที ไม่มีค่าใช้จ่าย จัดเดือนละครั้ง',
+                   'A free 45-minute online session, once a month'),
+      sizes: [
+        { v: 'lt10',  label: t('น้อยกว่า 10 คน', 'Fewer than 10') },
+        { v: '10-30', label: t('10–30 คน', '10–30') },
+        { v: '31-100', label: t('31–100 คน', '31–100') },
+        { v: '100+',  label: t('มากกว่า 100 คน', 'More than 100') }
+      ],
+      cta: t('รับสิทธิ์', 'Claim it'),
+      doneTeam: t('เก็บรหัสนี้ไว้ ทีมของเราจะติดต่อกลับเพื่อนัดวันและจำนวนคน',
+                  'Keep this code. Our team will be in touch to agree a date and numbers.'),
+      doneSolo: t('เก็บรหัสนี้ไว้ ทีมของเราจะติดต่อกลับพร้อมรอบที่ใกล้ที่สุด',
+                  'Keep this code. Our team will be in touch with the next session date.')
+    }
   };
 })();

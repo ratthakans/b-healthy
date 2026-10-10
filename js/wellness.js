@@ -24,7 +24,7 @@
   const say = o => (o ? (isEn() ? (o.en || o.th) : o.th) : '');
 
   // --- state ------------------------------------------------------------
-  let answers = {}, step = -1, result = null, sending = false;
+  let answers = {}, step = -1, result = null, claim = null, sending = false;
 
   function load() {
     try {
@@ -34,11 +34,12 @@
         answers = o.answers || {};
         step = typeof o.step === 'number' ? o.step : -1;
         result = o.result || null;
+        claim = o.claim || null;
       }
     } catch (e) { /* storage blocked — the quiz still works, it just forgets */ }
   }
   function save() {
-    try { sessionStorage.setItem(KEY, JSON.stringify({ answers: answers, step: step, result: result })); }
+    try { sessionStorage.setItem(KEY, JSON.stringify({ answers: answers, step: step, result: result, claim: claim })); }
     catch (e) {}
   }
 
@@ -260,7 +261,8 @@
       return;
     }
 
-    result = { primary: r.primary, secondary: r.secondary, totals: r.totals, name: name };
+    result = { primary: r.primary, secondary: r.secondary, totals: r.totals,
+               name: name, email: email, phone: phone };
     step = D.STEPS.length + 1;
     save();
     render();
@@ -332,8 +334,10 @@
           <article class="wc-block wc-next">
             <h2 class="wc-block__h"><span class="wc-num">06</span><span data-en="Want to go deeper?">อยากรู้ลึกกว่านี้ไหม</span></h2>
             <p data-en="This check reads your week. The B-Healthy Element Workshop reads your ธาตุเจ้าเรือน — a deeper balance assessment and a blend put together for you.">แบบประเมินนี้อ่านจังหวะชีวิตช่วงนี้ของคุณ ส่วน B-Healthy Element Workshop คือการตรวจธาตุเจ้าเรือน วิเคราะห์สมดุลเชิงลึก และจัดสูตรเฉพาะบุคคล</p>
-            <a class="btn btn--primary" id="wcNext" href="contact.html" data-en="Talk to us about the workshop">คุยกับเราเรื่องเวิร์กช็อป</a>
+            ${pendingOffer() ? '' : `<a class="btn btn--primary" id="wcNext" href="contact.html" data-en="Talk to us about the workshop">คุยกับเราเรื่องเวิร์กช็อป</a>`}
           </article>
+
+          ${C.OFFER && C.OFFER.enabled ? offerBlock() : ''}
 
           <div class="wc-foot">
             <button class="btn btn--ghost" id="wcPrint" type="button" data-en="Save or print this guide">บันทึกหรือพิมพ์ผลนี้</button>
@@ -345,14 +349,122 @@
     done();
 
     // Carries the result into the contact form, so the team opens the
-    // conversation already knowing what the person said.
+    // conversation already knowing what the person said. Absent while the
+    // free-workshop offer is still unanswered — two buttons side by side are
+    // two asks, and the offer is the one that converts.
     const next = document.getElementById('wcNext');
-    next.href = 'contact.html?subject=' + encodeURIComponent('Element Workshop — ' + p.toUpperCase() + ' / ' + s.toUpperCase());
+    if (next) next.href = 'contact.html?subject=' + encodeURIComponent('Element Workshop — ' + p.toUpperCase() + ' / ' + s.toUpperCase());
 
+    bindOffer();
     document.getElementById('wcPrint').addEventListener('click', () => window.print());
     document.getElementById('wcAgain').addEventListener('click', () => {
-      answers = {}; result = null; step = -1; save(); render();
+      answers = {}; result = null; claim = null; step = -1; save(); render();
       window.scrollTo({ top: 0 });
+    });
+  }
+
+  // --- 07 the offer -----------------------------------------------------
+  // Asked for AFTER the guide, never before: the company name and the head
+  // count are what qualify the lead, and people hand those over far more
+  // readily once they have already been given something.
+  function offerBlock() {
+    const o = C.OFFER;
+    if (claim) {
+      const team = claim.size !== 'lt10';
+      return `
+        <article class="wc-block wc-offer wc-offer--done">
+          <h2 class="wc-block__h"><span class="wc-num">07</span><span data-en="Your code">รหัสรับสิทธิ์ของคุณ</span></h2>
+          <p class="wc-code">${esc(claim.code)}</p>
+          <p>${esc(say(team ? o.doneTeam : o.doneSolo))}</p>
+          <p class="wc-note">${esc(say(team ? o.teamOffer : o.soloOffer))} · ${esc(say(o.replyWithin))}</p>
+        </article>`;
+    }
+    return `
+      <article class="wc-block wc-offer">
+        <h2 class="wc-block__h"><span class="wc-num">07</span><span>${esc(say(o.title))}</span></h2>
+        <p class="wc-lead">${esc(say(o.lead))}</p>
+        <ul class="wc-offer__list">
+          <li>${esc(say(o.teamOffer))}</li>
+          <li>${esc(say(o.soloOffer))}</li>
+        </ul>
+        <form class="form wc-offer__form" id="wcClaim" novalidate>
+          <div class="form__row">
+            <label><span data-en="Company or organisation">บริษัท / องค์กร</span> <span>*</span>
+              <input id="wcCo" type="text" autocomplete="organization" required /></label>
+            <label><span data-en="How many people on your team">ทีมคุณมีกี่คน</span> <span>*</span>
+              <select id="wcSize" required>
+                <option value="" data-en="Please choose">กรุณาเลือก</option>
+                ${o.sizes.map(x => `<option value="${esc(x.v)}">${esc(say(x.label))}</option>`).join('')}
+              </select></label>
+          </div>
+          <label class="form__full"><span data-en="Which one would you like?">อยากได้เวิร์กช็อปไหน</span>
+            <select id="wcWant">
+              ${Object.keys(C.PACKAGES).map(k => `<option value="${esc(k)}"${k === suggestedKey() ? ' selected' : ''}>${esc(say(C.PACKAGES[k].label))}</option>`).join('')}
+            </select></label>
+          <p class="wc-err" id="wcClaimErr" role="alert"></p>
+          <button class="btn btn--primary" type="submit" id="wcClaimBtn">${esc(say(o.cta))}</button>
+        </form>
+      </article>`;
+  }
+
+  // True while the offer is on screen and nobody has taken it yet.
+  function pendingOffer() {
+    return !!(C.OFFER && C.OFFER.enabled && !claim);
+  }
+
+  function suggestedKey() {
+    if (answers.interest === 'recommend') return C.BY_DIRECTION[result.primary];
+    return C.PACKAGES[answers.interest] ? answers.interest : C.BY_DIRECTION[result.primary];
+  }
+
+  function bindOffer() {
+    const form = document.getElementById('wcClaim');
+    if (!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const co = document.getElementById('wcCo').value.trim();
+      const size = document.getElementById('wcSize').value;
+      const want = document.getElementById('wcWant').value;
+      if (!co) return msg('wcClaimErr', 'กรุณากรอกชื่อบริษัทหรือองค์กร', 'Please enter your company or organisation.');
+      if (!size) return msg('wcClaimErr', 'กรุณาเลือกจำนวนคนในทีม', 'Please choose your team size.');
+
+      const btn = document.getElementById('wcClaimBtn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก…';
+      btn.setAttribute('data-en', 'Saving…');
+      delete btn.__th;
+      done();
+
+      const code = C.OFFER.codePrefix + '-' +
+        (Date.now().toString(36) + Math.random().toString(36).slice(2, 6)).slice(-6).toUpperCase();
+
+      const body = {
+        name: result.name, email: result.email, phone: result.phone,
+        company: co,
+        subject: 'Free workshop claim — ' + want + ' (' + size + ')',
+        claim_code: code, team_size: size, workshop: want,
+        // Carried so a claim row still makes sense on its own in the admin.
+        primary: result.primary, secondary: result.secondary,
+        claim_for: result.email, claimed_at: new Date().toISOString()
+      };
+
+      let res = { ok: false };
+      try { res = await window.bhSubmit('workshop-claim', body); } catch (err) { res = { ok: false }; }
+
+      if (!res || !res.ok) {
+        btn.disabled = false;
+        btn.textContent = say(C.OFFER.cta);
+        btn.setAttribute('data-en', C.OFFER.cta.en);
+        delete btn.__th;
+        msg('wcClaimErr', 'บันทึกไม่สำเร็จ กรุณาลองใหม่ หรือติดต่อเราทาง LINE @bhealthyme',
+            "Couldn't save — please try again, or reach us on LINE @bhealthyme");
+        return;
+      }
+
+      claim = { code: code, size: size, workshop: want, company: co };
+      save();
+      renderResult();
+      document.querySelector('.wc-offer').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   }
 

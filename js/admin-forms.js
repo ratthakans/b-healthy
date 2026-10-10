@@ -14,7 +14,7 @@
   const $ = id => document.getElementById(id);
   const esc = window.bhEsc;
 
-  let sb = null, rows = [], filter = '*';
+  let sb = null, rows = [], claims = {}, filter = '*';
 
   window.bhFormsInit = client => { sb = client; };
 
@@ -49,9 +49,13 @@
     if (!sb) return;
     $('formMsg').className = 'msg';
     $('forms').innerHTML = '<div class="empty">Loading…</div>';
+    // Both kinds in one read. A claim is a separate row because the browser
+    // may only INSERT into submissions, never UPDATE — so the free-workshop
+    // form cannot amend the assessment it came from. They are stitched back
+    // together here, by the email the claim carries in claim_for.
     const { data, error } = await sb.from('submissions')
-      .select('id,created_at,name,email,phone,subject,payload,status')
-      .eq('type', 'wellness')
+      .select('id,created_at,type,name,email,phone,company,subject,payload,status')
+      .in('type', ['wellness', 'workshop-claim'])
       .order('created_at', { ascending: false });
     if (error) {
       $('forms').innerHTML = '';
@@ -59,7 +63,23 @@
       $('formMsg').className = 'msg msg--err show';
       return;
     }
-    rows = data || [];
+    const all = data || [];
+    claims = {};
+    all.filter(r => r.type === 'workshop-claim').forEach(r => {
+      const key = ((r.payload || {}).claim_for || r.email || '').toLowerCase();
+      // Someone can claim twice; the first one through is the one that counts.
+      if (key && !claims[key]) claims[key] = r;
+    });
+    rows = all.filter(r => r.type === 'wellness');
+
+    // A claim with no assessment behind it still has to be visible — it is a
+    // real person waiting for a phone call.
+    const seen = new Set(rows.map(r => (r.email || '').toLowerCase()));
+    all.filter(r => r.type === 'workshop-claim' &&
+                    !seen.has(((r.payload || {}).claim_for || r.email || '').toLowerCase()))
+       .forEach(r => rows.push(Object.assign({}, r, { _orphanClaim: true })));
+    rows.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
     renderFilters();
     render();
   }
@@ -70,16 +90,20 @@
       const p = (r.payload || {}).primary;
       if (p) counts[p] = (counts[p] || 0) + 1;
     });
+    const claimed = rows.filter(r => claims[(r.email || '').toLowerCase()] || r._orphanClaim).length;
     $('formFilters').innerHTML =
       `<button class="prog__filter${filter === '*' ? ' is-active' : ''}" data-dir="*" type="button">All (${rows.length})</button>` +
+      `<button class="prog__filter${filter === '!claim' ? ' is-active' : ''}" data-dir="!claim" type="button">Claimed (${claimed})</button>` +
       DIRS().map(d => `<button class="prog__filter${filter === d ? ' is-active' : ''}" data-dir="${esc(d)}" type="button">${esc(((D().DIRECTION_LABEL || {})[d] || {}).en || d)} (${counts[d] || 0})</button>`).join('');
   }
 
   function render() {
-    const list = filter === '*' ? rows : rows.filter(r => (r.payload || {}).primary === filter);
+    const list = filter === '*' ? rows
+      : filter === '!claim' ? rows.filter(r => claims[(r.email || '').toLowerCase()] || r._orphanClaim)
+      : rows.filter(r => (r.payload || {}).primary === filter);
     if (!list.length) {
       $('forms').innerHTML = `<div class="empty">${rows.length
-        ? 'No one with this direction yet.'
+        ? (filter === '!claim' ? 'Nobody has claimed the free workshop yet.' : 'No one with this direction yet.')
         : 'Nobody has completed the wellness check yet.<br>It lives at <code>/wellness-check</code> — share that link to start collecting.'}</div>`;
       return;
     }
@@ -91,6 +115,9 @@
       const a = p.answers || {};
       const sc = p.scores || {};
       const max = Math.max(1, ...DIRS().map(d => Number(sc[d]) || 0));
+      const cl = r._orphanClaim ? r : claims[(r.email || '').toLowerCase()];
+      const clp = cl ? (cl.payload || {}) : null;
+      const SIZE = { 'lt10': 'under 10', '10-30': '10–30', '31-100': '31–100', '100+': '100+' };
       return `
       <div class="lead" data-id="${r.id}">
         <div class="lead__top">
@@ -113,6 +140,14 @@
           ${r.email ? `<span>✉️ <a href="mailto:${esc(r.email)}">${esc(r.email)}</a></span>` : ''}
           ${p.consent_at ? `<span title="Consent given at this moment">✅ consent ${esc(fmtDate(p.consent_at))}</span>` : '<span class="fm-noconsent">⚠️ no consent recorded</span>'}
         </div>
+        ${clp ? `<div class="fm-claim">
+          <span class="fm-claim__code">${esc(clp.claim_code || '—')}</span>
+          <span class="fm-claim__what"><b>${esc(clp.workshop || '?')}</b>
+            · ${esc(cl.company || '(no company)')}
+            · ${esc(SIZE[clp.team_size] || clp.team_size || '?')}
+            ${clp.team_size === 'lt10' ? '<em>online session</em>' : '<em>on-site taster</em>'}</span>
+          <span class="fm-claim__when">${esc(fmtDate(cl.created_at))}</span>
+        </div>` : ''}
         <div class="fm-scores">
           ${DIRS().slice().sort((x, y) => (Number(sc[y]) || 0) - (Number(sc[x]) || 0)).map(d => `
             <span class="fm-score"><b>${esc(((D().DIRECTION_LABEL || {})[d] || {}).en || d)}</b>
@@ -132,7 +167,8 @@
   // ---- CSV: one row per person, every answer and score flattened ---------
   function csv() {
     const QORDER = ['feeling', 'energy', 'desired', 'pain', 'work_style', 'work_type', 'age_group', 'pref', 'interest'];
-    const head = ['date', 'name', 'email', 'phone', 'status', 'primary', 'secondary']
+    const head = ['date', 'name', 'email', 'phone', 'status', 'primary', 'secondary',
+                  'claim_code', 'company', 'team_size', 'workshop_wanted']
       .concat(DIRS().map(d => 'score_' + d))
       .concat(QORDER);
     const cell = v => {
@@ -141,7 +177,10 @@
     };
     const body = rows.map(r => {
       const p = r.payload || {}, a = p.answers || {}, sc = p.scores || {};
-      return [r.created_at, r.name, r.email, r.phone, r.status, p.primary, p.secondary]
+      const cl = r._orphanClaim ? r : claims[(r.email || '').toLowerCase()];
+      const clp = cl ? (cl.payload || {}) : {};
+      return [r.created_at, r.name, r.email, r.phone, r.status, p.primary, p.secondary,
+              clp.claim_code, cl && cl.company, clp.team_size, clp.workshop]
         .concat(DIRS().map(d => sc[d]))
         .concat(QORDER.map(q => label(q, a[q])))
         .map(cell).join(',');

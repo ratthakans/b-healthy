@@ -1307,6 +1307,19 @@ html { scroll-behavior: smooth; }
 .wc-exp__card strong { color: var(--navy); font-size: 1.02rem; }
 .wc-exp__card span { color: var(--brand-blue); font-size: .85rem; font-weight: 600; }
 
+.wc-offer { background: var(--grad-mint); border-radius: 20px; padding: 30px clamp(20px, 4vw, 34px); margin-top: 34px; border-top: 0; }
+.wc-offer__list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin: 16px 0 22px; }
+.wc-offer__list li { position: relative; padding-left: 26px; color: var(--ink); font-weight: 400; line-height: 1.7; }
+.wc-offer__list li::before { content: "✓"; position: absolute; left: 0; color: var(--brand-cyan); font-weight: 700; }
+.wc-offer__form { margin-top: 4px; }
+.wc-offer__form .btn { margin-top: 4px; }
+.wc-offer--done { text-align: center; }
+.wc-code {
+  font-family: var(--font-en); font-weight: 800; font-size: clamp(1.6rem, 5vw, 2.3rem);
+  letter-spacing: .14em; color: var(--navy); background: #fff;
+  border: 2px dashed var(--brand-cyan); border-radius: 14px;
+  padding: 16px 20px; margin: 4px 0 18px; display: inline-block;
+}
 .wc-next { background: var(--grad-warm); border-radius: 20px; padding: 30px clamp(20px, 4vw, 34px); margin-top: 34px; border-top: 0; }
 .wc-next .btn { margin-top: 18px; }
 .wc-foot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }

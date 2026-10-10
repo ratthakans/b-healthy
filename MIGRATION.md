@@ -382,6 +382,49 @@ publishes a `v=spf1` record on `pzentsmart.com`, a domain may have only one,
 and a second makes both invalid, at which point every pzentsmart.com email
 starts failing authentication.
 
+## The free workshop offer
+
+Block 07 of the guide, after the result. Every word, size band and rule is in
+`BH_WELLNESS_CONTENT.OFFER` in `js/wellness-content.js`; `enabled: false`
+turns the whole thing off without touching anything else.
+
+**Why it is a taster and not a workshop.** A workshop is THB 39,000–43,900
+for a class of 10–30 — priced per organisation, not per seat. Giving one away
+to whoever finished a quiz means handing a stranger forty thousand baht of
+trainer, materials and travel, and that person is usually not the one who
+signs anything. So the offer splits on team size: 10 or more gets a 60–90
+minute taster cut from the three-hour class, which costs half a trainer's day
+and only happens for a real prospect; fewer than 10 gets a monthly online
+session. Nobody leaves empty-handed, nobody leaves with THB 40,000.
+
+The company name and head count are asked **here**, not in the assessment.
+They are what qualify the lead, and people give them up far more readily once
+they have already been handed something.
+
+**In the database.** A claim is its own `submissions` row, `type =
+'workshop-claim'`, carrying `claim_code`, `team_size`, `workshop` and
+`claim_for` (the email of the assessment it belongs to). It has to be a
+separate row because the browser may only INSERT into `submissions`, never
+UPDATE — so the claim form cannot amend the assessment it came from. The Form
+tab stitches them back together by email and shows a green claim strip on the
+matching row; a claim with no assessment behind it still gets its own card,
+because it is still a person waiting for a phone call.
+
+**Two things this does NOT have**, both needing a small SQL function because
+the browser cannot read `submissions` back:
+
+- **No hard cap.** Nothing stops one person taking the quiz five times with
+  five addresses and collecting five codes. The offer is fairly
+  self-limiting — a fake claim costs one phone call, not a workshop — but a
+  real limit needs an RPC that counts before it inserts.
+- **No live "X places left".** Scarcity raises conversion, and the counter
+  would need the same RPC. Say the number in the copy if you want it now.
+
+**The part that is not code.** No email is sent — the code appears on screen
+and the copy promises contact `within 2 working days`. If nobody calls, the
+giveaway does more damage than having no giveaway at all. Claims arrive in
+`/admin.html` → **Form** → **Claimed**, and somebody has to be looking.
+
 ## Still-open content items (swap anytime)
 
 - Venue photos for the four retreat properties — Amphawa Hideaway Homestay,
