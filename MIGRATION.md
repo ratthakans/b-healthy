@@ -37,10 +37,15 @@ Submissions appear in Supabase → **Table Editor → submissions**.
 
 ---
 
-## Lead emails (Resend) — email the sales team on every submission
+## Lead emails (Resend) — built, and deliberately switched off
 
-Every "จองแพ็กเกจ / Book package" and contact-form submission is emailed to the
-team by the serverless function [`api/lead.js`](api/lead.js) via
+> **This does not run today.** No email is sent by this site; enquiries are
+> read in `/admin.html` → Customers. See "Lead email — deliberately off"
+> further down for what that means day to day. The rest of this section is
+> how to turn it on if that ever changes.
+
+Every "จองแพ็กเกจ / Book package" and contact-form submission *would be* emailed
+to the team by the serverless function [`api/lead.js`](api/lead.js) via
 [Resend](https://resend.com). No build step, no npm install — it calls Resend's
 REST API with the built-in `fetch`.
 
@@ -53,9 +58,12 @@ The customer's own email is set as **Reply-To**, so the team can reply directly.
 
 **One-time setup (3 steps):**
 
-1. **Verify the sending domain** — Resend → **Domains** → Add `pzentsmart.com`,
-   then add the DNS records it shows (SPF/DKIM) at your domain registrar. Wait
-   for "Verified".
+1. **Verify a sending SUBdomain** — Resend → **Domains** → Add
+   `send.pzentsmart.com`, **not** `pzentsmart.com`, then add the DNS records it
+   shows at Wix. Google Workspace already publishes a `v=spf1` record on the
+   root; a domain may have only one, and a second makes both invalid — every
+   pzentsmart.com email would start failing authentication. A subdomain carries
+   its own SPF and leaves the live mail alone. Set `LEAD_FROM` to match.
 2. **Create an API key** — Resend → **API Keys** → Create → copy it (`re_...`).
 3. **Add it to Vercel** — Vercel → Project → **Settings → Environment
    Variables** → add `RESEND_API_KEY` = the key → **Redeploy**.
@@ -68,9 +76,9 @@ LEAD_CC     kalyarak@pzentsmart.com, marketing@pzentsmart.com
 LEAD_FROM   B-Healthy <no-reply@pzentsmart.com>   # domain must be verified in Resend
 ```
 
-Until `RESEND_API_KEY` is set, the site still works (the thank-you still shows)
-— it just doesn't send the email yet. Supabase storage (below) is independent
-and optional; both run if configured.
+Until `RESEND_API_KEY` is set — which is the current, intended state — the site
+still works and the thank-you still shows, because Supabase took the lead.
+`js/submit.js` only shows the retry message when *no* sink accepted it.
 
 ---
 
@@ -318,12 +326,9 @@ side by side per article as a conversion rate. They are excluded from "Page
 views" and the daily chart — they are events, not visits. Signups appear in
 Customers under **Article signups**, separate from sales enquiries.
 
-**Still outstanding:** nobody who signs up receives anything, because
-`RESEND_API_KEY` is still unset (`/api/lead` answers
-`{"ok":false,"error":"Email service not configured"}`). The addresses collect
-in Customers in the meantime. Sending to them needs the Wix → Resend domain
-verification finished first — and a list of people who gave you an email to
-receive articles is a list that expects articles.
+**Nobody who signs up is emailed, by choice** — see "Lead email" below. The
+addresses collect in Customers for the team to work from, and the consent line
+on the card says exactly that rather than promising a newsletter.
 
 ## Testing the SQL before it touches the live database
 
@@ -349,38 +354,33 @@ Supabase SQL editor over things that cost a second to catch here — an `hmac`
 overload that does not exist, and a schema-qualified call to an extension that
 may live elsewhere. Run it before handing any new SQL over.
 
-## Lead email — the DNS records to add at Wix
+## Lead email — deliberately off
 
-`send.pzentsmart.com` is registered in Resend (region ap-northeast-1) and is
-waiting on DNS. Add these four records in the Wix DNS editor for
-**pzentsmart.com**. The host names are written relative to the zone, which is
-what Wix expects.
+Nobody is emailed by this site. `RESEND_API_KEY` is not set, so `/api/lead`
+answers `{"ok":false,"error":"Email service not configured"}` on every
+submission. That is a decision, not an outage.
 
-| Type | Host | Value | Priority |
-|------|------|-------|----------|
-| TXT | `resend._domainkey.send` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD7VolaGAug8lUfrP24g7FQewiwKAg3avpnelY3VHhBfRzgwfZLssKlBZ6rqoxmpRqEGef8bygkHr95a1RCXoYe2GXTkDomc00fgRRQWV6og/JKtdP24c5/H1wPMnuBLocEN1anqzSSmo1sQ6f8nnhbDJ0mVkvdlwVhEDT1KWa/GQIDAQAB` | — |
-| MX | `send.send` | `feedback-smtp.ap-northeast-1.amazonses.com` | 10 |
-| TXT | `send.send` | `v=spf1 include:amazonses.com ~all` | — |
-| CNAME | `rsend.send` | `send.forge.rmta.net` | — |
+What it means in practice:
 
-**Do not touch the root `v=spf1` record.** Google Workspace publishes one on
-`pzentsmart.com` and a domain may have only one: a second makes both invalid
-and every pzentsmart.com email starts failing authentication. That is the
-whole reason this is a `send.` subdomain — the SPF above lands on
-`send.send.pzentsmart.com` and the live mail is untouched.
+- Enquiries and article signups still land in Supabase and are read in
+  `/admin.html` → **Customers**. Someone has to look there; no inbox will
+  ping. This is the one thing to be disciplined about — a booking enquiry that
+  sits unread for a week is worse than no form at all.
+- The visitor still sees a thank-you, correctly: `js/submit.js` counts a
+  submission as delivered if *any* sink took it, and Supabase did. It only
+  shows the retry message when nothing got through at all.
+- The article gate's consent line says B-Healthy keeps the address in order to
+  make contact, and points at `b-healthy@pzentsmart.com` / LINE `@bhealthyme`
+  for deletion. It no longer promises newsletters, and the opt-out does not
+  depend on an email we never send. Inbound mail on pzentsmart.com works
+  normally — only sending is off.
 
-Then, in order:
-
-1. Resend → Domains → `send.pzentsmart.com` → **Verify** (DNS can take an hour).
-2. Vercel → b-healthy → Settings → Environment Variables → add `RESEND_API_KEY`
-   (Production), then redeploy. Nothing else is needed: `api/lead.js` now
-   defaults `LEAD_FROM` to `B-Healthy <no-reply@send.pzentsmart.com>`.
-3. Check: submit the contact form on the live site and confirm it reaches
-   `b-healthy@pzentsmart.com`.
-
-Until step 2, `/api/lead` answers
-`{"ok":false,"error":"Email service not configured"}` and enquiries land only
-in Supabase — the Customers tab still shows them, but nobody is told.
+**If you ever do want email**, two things matter. `api/lead.js` needs
+`RESEND_API_KEY` in Vercel and nothing else. And the sending domain must be a
+subdomain — `send.pzentsmart.com` — never the root: Google Workspace already
+publishes a `v=spf1` record on `pzentsmart.com`, a domain may have only one,
+and a second makes both invalid, at which point every pzentsmart.com email
+starts failing authentication.
 
 ## Still-open content items (swap anytime)
 

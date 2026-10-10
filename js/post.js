@@ -130,7 +130,7 @@
           <button class="btn btn--primary" type="submit" id="gateBtn" data-en="Read the full article">อ่านบทความเต็ม</button>
         </form>
         <p class="post-gate__msg" id="gateMsg" role="status"></p>
-        <p class="post-gate__fine" data-en="By entering your email you agree that B-Healthy may keep it to send you articles and workplace-wellbeing news. You can opt out at any time by replying to any of our emails.">การกรอกอีเมลถือว่าคุณยินยอมให้ B-Healthy เก็บอีเมลไว้ส่งบทความและข่าวสารด้านสุขภาวะองค์กร ยกเลิกได้ทุกเมื่อโดยตอบกลับอีเมลฉบับใดก็ได้ของเรา</p>
+        <p class="post-gate__fine" data-en="By entering your email you agree that B-Healthy may keep it in order to contact you about workplace wellbeing. Ask us to delete it at any time at b-healthy@pzentsmart.com or on LINE @bhealthyme.">การกรอกอีเมลถือว่าคุณยินยอมให้ B-Healthy เก็บอีเมลไว้ติดต่อเรื่องสุขภาวะองค์กร ขอให้ลบออกได้ทุกเมื่อที่ b-healthy@pzentsmart.com หรือ LINE @bhealthyme</p>
       </div>`;
   }
 

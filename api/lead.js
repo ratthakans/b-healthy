@@ -5,25 +5,28 @@
 // via Resend (https://resend.com). No npm dependency: it calls Resend's
 // REST API directly with the built-in fetch (Node 18+ on Vercel).
 //
+// DORMANT BY CHOICE. RESEND_API_KEY is not set, so this answers
+// {"ok":false,"error":"Email service not configured"} and nobody is emailed.
+// js/submit.js already treats that as one sink failing: enquiries still reach
+// Supabase and the visitor still sees a thank-you, which is accurate. Leads
+// are read in /admin.html → Customers, not in an inbox. The file is kept so
+// email is one env var away if that ever changes — see MIGRATION.md for the
+// SPF trap that comes with it.
+//
 // Required env var (Vercel → Project → Settings → Environment Variables):
 //   RESEND_API_KEY   — your Resend API key (starts with "re_")
 //
 // Optional env vars (sensible defaults below, override anytime):
 //   LEAD_TO      default: b-healthy@pzentsmart.com
 //   LEAD_CC      default: kalyarak@pzentsmart.com, marketing@pzentsmart.com
-//   LEAD_FROM    default: B-Healthy <no-reply@send.pzentsmart.com>
+//   LEAD_FROM    default: B-Healthy <no-reply@pzentsmart.com>
 //                (the domain here MUST be verified in Resend)
 // ============================================================
 
 const TO = process.env.LEAD_TO || "b-healthy@pzentsmart.com";
 const CC = (process.env.LEAD_CC || "kalyarak@pzentsmart.com, marketing@pzentsmart.com")
   .split(",").map(s => s.trim()).filter(Boolean);
-// send.pzentsmart.com, not the root. Verifying the root would mean adding a
-// second `v=spf1` TXT alongside the one Google Workspace already publishes
-// there, and two SPF records make both invalid — every pzentsmart.com mail
-// would start failing authentication. A sending subdomain carries its own SPF
-// and leaves the live mail alone.
-const FROM = process.env.LEAD_FROM || "B-Healthy <no-reply@send.pzentsmart.com>";
+const FROM = process.env.LEAD_FROM || "B-Healthy <no-reply@pzentsmart.com>";
 
 const esc = (s) => String(s ?? "")
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
