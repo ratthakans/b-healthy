@@ -349,6 +349,39 @@ Supabase SQL editor over things that cost a second to catch here — an `hmac`
 overload that does not exist, and a schema-qualified call to an extension that
 may live elsewhere. Run it before handing any new SQL over.
 
+## Lead email — the DNS records to add at Wix
+
+`send.pzentsmart.com` is registered in Resend (region ap-northeast-1) and is
+waiting on DNS. Add these four records in the Wix DNS editor for
+**pzentsmart.com**. The host names are written relative to the zone, which is
+what Wix expects.
+
+| Type | Host | Value | Priority |
+|------|------|-------|----------|
+| TXT | `resend._domainkey.send` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD7VolaGAug8lUfrP24g7FQewiwKAg3avpnelY3VHhBfRzgwfZLssKlBZ6rqoxmpRqEGef8bygkHr95a1RCXoYe2GXTkDomc00fgRRQWV6og/JKtdP24c5/H1wPMnuBLocEN1anqzSSmo1sQ6f8nnhbDJ0mVkvdlwVhEDT1KWa/GQIDAQAB` | — |
+| MX | `send.send` | `feedback-smtp.ap-northeast-1.amazonses.com` | 10 |
+| TXT | `send.send` | `v=spf1 include:amazonses.com ~all` | — |
+| CNAME | `rsend.send` | `send.forge.rmta.net` | — |
+
+**Do not touch the root `v=spf1` record.** Google Workspace publishes one on
+`pzentsmart.com` and a domain may have only one: a second makes both invalid
+and every pzentsmart.com email starts failing authentication. That is the
+whole reason this is a `send.` subdomain — the SPF above lands on
+`send.send.pzentsmart.com` and the live mail is untouched.
+
+Then, in order:
+
+1. Resend → Domains → `send.pzentsmart.com` → **Verify** (DNS can take an hour).
+2. Vercel → b-healthy → Settings → Environment Variables → add `RESEND_API_KEY`
+   (Production), then redeploy. Nothing else is needed: `api/lead.js` now
+   defaults `LEAD_FROM` to `B-Healthy <no-reply@send.pzentsmart.com>`.
+3. Check: submit the contact form on the live site and confirm it reaches
+   `b-healthy@pzentsmart.com`.
+
+Until step 2, `/api/lead` answers
+`{"ok":false,"error":"Email service not configured"}` and enquiries land only
+in Supabase — the Customers tab still shows them, but nobody is told.
+
 ## Still-open content items (swap anytime)
 
 - Venue photos for the four retreat properties — Amphawa Hideaway Homestay,

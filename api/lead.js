@@ -11,14 +11,19 @@
 // Optional env vars (sensible defaults below, override anytime):
 //   LEAD_TO      default: b-healthy@pzentsmart.com
 //   LEAD_CC      default: kalyarak@pzentsmart.com, marketing@pzentsmart.com
-//   LEAD_FROM    default: B-Healthy <no-reply@pzentsmart.com>
+//   LEAD_FROM    default: B-Healthy <no-reply@send.pzentsmart.com>
 //                (the domain here MUST be verified in Resend)
 // ============================================================
 
 const TO = process.env.LEAD_TO || "b-healthy@pzentsmart.com";
 const CC = (process.env.LEAD_CC || "kalyarak@pzentsmart.com, marketing@pzentsmart.com")
   .split(",").map(s => s.trim()).filter(Boolean);
-const FROM = process.env.LEAD_FROM || "B-Healthy <no-reply@pzentsmart.com>";
+// send.pzentsmart.com, not the root. Verifying the root would mean adding a
+// second `v=spf1` TXT alongside the one Google Workspace already publishes
+// there, and two SPF records make both invalid — every pzentsmart.com mail
+// would start failing authentication. A sending subdomain carries its own SPF
+// and leaves the live mail alone.
+const FROM = process.env.LEAD_FROM || "B-Healthy <no-reply@send.pzentsmart.com>";
 
 const esc = (s) => String(s ?? "")
   .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
