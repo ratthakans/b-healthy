@@ -29,6 +29,7 @@ const PAGES = [
   ["/workshops", "0.9"],
   ["/membership", "0.9"],
   ["/blog", "0.8"],
+  ["/wellness-check", "0.8"],
   ["/about", "0.7"],
   ["/contact", "0.7"],
 ];

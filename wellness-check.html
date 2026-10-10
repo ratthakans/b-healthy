@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Package — B-Healthy</title>
+  <title>Personal Wellness Check — B-Healthy</title>
+  <meta name="description" content="แบบประเมินสุขภาวะส่วนบุคคลจาก B-Healthy — 9 คำถาม ใช้เวลา 2 นาที ได้ทิศทางสุขภาวะและคำแนะนำที่เหมาะกับจังหวะชีวิตของคุณ" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Albert+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
@@ -11,15 +12,14 @@
   <link rel="apple-touch-icon" href="images/logo.svg" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="B-Healthy" />
-  <meta property="og:title" content="B-Healthy — Corporate Wellness" />
-  <meta property="og:description" content="ดูแลสุขภาพพนักงานแบบองค์รวม — Retreats, Workshops และ Membership สำหรับองค์กร" />
+  <meta property="og:title" content="Personal Wellness Check — B-Healthy" />
+  <meta property="og:description" content="9 คำถาม สำหรับจังหวะชีวิตของคุณ ไม่ใช่ของทุกคน" />
   <meta property="og:image" content="https://www.b-healthy.co/images/hero-beach.jpg" />
   <meta name="twitter:card" content="summary_large_image" />
-  <!-- The site also answers on b-healthy-ten.vercel.app; canonical keeps ranking on one host. -->
-  <link rel="canonical" href="https://www.b-healthy.co/package" />
+  <link rel="canonical" href="https://www.b-healthy.co/wellness-check" />
   <link rel="stylesheet" href="css/styles.css?v=20261010b" />
 </head>
-<body data-track="manual">
+<body>
 
   <!-- NAV -->
   <header class="nav nav--solid" id="nav">
@@ -40,7 +40,7 @@
     </div>
   </header>
 
-  <main id="pkg"><!-- rendered by JS --></main>
+  <main id="wcRoot"><!-- rendered by js/wellness.js --></main>
 
   <footer class="footer" id="footer"></footer>
 
@@ -49,12 +49,10 @@
   <script src="js/core.js?v=20261007a"></script>
   <script src="js/submit.js?v=20260731d"></script>
   <script src="js/i18n.js?v=20261008a"></script>
-  <script src="js/packages.js?v=20260728a"></script>
-  <script src="js/workshops-data.js?v=20260731i"></script>
   <script src="js/site.js?v=20260728a"></script>
   <script src="js/footer.js?v=20260731b"></script>
-  <script src="js/package.js?v=20260731i"></script>
-  <script src="js/store.js?v=20260731g"></script>
-  <script src="js/reveal.js?v=20260717g"></script>
+  <script src="js/wellness-data.js?v=20261010a"></script>
+  <script src="js/wellness-content.js?v=20261010a"></script>
+  <script src="js/wellness.js?v=20261010a"></script>
 </body>
 </html>

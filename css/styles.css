@@ -1221,6 +1221,115 @@ html { scroll-behavior: smooth; }
 }
 .post__fig { margin: 34px 0; }
 
+/* ---- personal wellness check ------------------------------------------- */
+.wc-hero { padding: clamp(80px, 11vw, 140px) 0 clamp(60px, 8vw, 96px); background: var(--grad-cool); }
+.wc-hero__inner { max-width: 760px; text-align: center; }
+.wc-kicker {
+  display: inline-block; font-family: var(--font-en); font-weight: 600; font-size: .74rem;
+  letter-spacing: .14em; text-transform: uppercase; color: #fff; background: var(--pill-grad);
+  padding: 7px 18px; border-radius: 999px; margin-bottom: 20px;
+}
+.wc-hero__title { font-size: clamp(1.7rem, 4.2vw, 2.8rem); color: var(--navy); line-height: 1.25; margin-bottom: 16px; }
+.wc-hero__sub { color: var(--muted); font-weight: 300; line-height: 1.85; max-width: 580px; margin: 0 auto 30px; }
+.wc-start { font-size: 1rem; padding: 15px 38px; }
+.wc-note { color: var(--muted); font-size: .78rem; line-height: 1.7; max-width: 520px; margin: 26px auto 0; }
+
+.wc-sec { padding: clamp(50px, 7vw, 84px) 0 clamp(70px, 9vw, 110px); }
+.wc-wrap { max-width: 680px; }
+.wc-bar { height: 4px; border-radius: 999px; background: rgba(18,40,76,.08); overflow: hidden; }
+.wc-bar span { display: block; height: 100%; background: var(--pill-grad); border-radius: 999px; transition: width .35s var(--ease); }
+.wc-count { font-family: var(--font-en); font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+.wc-title { font-size: clamp(1.35rem, 3vw, 1.9rem); color: var(--navy); line-height: 1.35; }
+.wc-title--lg { font-size: clamp(1.7rem, 4vw, 2.4rem); margin-bottom: 34px; }
+.wc-hint { color: var(--muted); font-weight: 300; font-size: .9rem; line-height: 1.75; margin-top: 8px; }
+
+.wc-q { border: 0; padding: 0; margin: 30px 0 0; }
+.wc-q__label { font-size: 1rem; font-weight: 500; color: var(--ink); margin-bottom: 14px; padding: 0; }
+.wc-opts { display: flex; flex-direction: column; gap: 9px; }
+.wc-opt {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  padding: 15px 18px; border: 1.5px solid var(--line); border-radius: 14px;
+  background: #fff; cursor: pointer; font-weight: 300; line-height: 1.5;
+  transition: border-color .15s, background .15s, transform .12s var(--ease);
+}
+.wc-opt:hover { border-color: var(--brand-cyan); }
+.wc-opt:active { transform: scale(.995); }
+.wc-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.wc-opt::before {
+  content: ""; flex: none; width: 19px; height: 19px; border-radius: 50%;
+  border: 1.5px solid var(--line); transition: border-color .15s, box-shadow .15s;
+}
+.wc-opt.is-on { border-color: var(--brand-cyan); background: #f2fbfc; font-weight: 400; }
+.wc-opt.is-on::before { border-color: var(--brand-cyan); box-shadow: inset 0 0 0 4.5px var(--brand-cyan); }
+/* The real radio is hidden, so the ring has to be drawn on the label it
+   lives in — otherwise keyboard users move through the options blind. */
+.wc-opt:has(input:focus-visible) { outline: 2px solid var(--brand-blue); outline-offset: 2px; border-color: var(--brand-blue); }
+.wc-opt input:focus-visible + span { text-decoration: underline; }
+
+.wc-err { color: var(--coral); font-size: .88rem; font-weight: 500; margin-top: 16px; display: none; }
+.wc-err.show, .wc-err:not(:empty) { display: block; }
+.wc-nav { display: flex; gap: 10px; align-items: center; margin-top: 30px; }
+.wc-nav .btn--primary { margin-left: auto; }
+
+/* ---- the guide ---- */
+.wc-result .wc-kicker { margin-bottom: 14px; }
+.wc-block { padding: 30px 0; border-top: 1px solid var(--line); }
+.wc-block:first-of-type { border-top: 0; padding-top: 0; }
+.wc-block__h { display: flex; align-items: baseline; gap: 14px; font-size: 1.1rem; color: var(--navy); margin-bottom: 16px; }
+.wc-num { font-family: var(--font-en); font-weight: 700; font-size: .78rem; letter-spacing: .1em; color: var(--brand-cyan); }
+.wc-block p { color: var(--ink); font-weight: 300; line-height: 1.9; }
+.wc-lead { font-size: 1.07rem; font-weight: 400 !important; color: var(--navy) !important; margin-bottom: 12px; }
+
+.wc-dir { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+.wc-dir > div { flex: 1 1 200px; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); }
+.wc-dir__main { background: var(--grad-mint); }
+.wc-dir__tag { display: block; font-family: var(--font-en); font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.wc-dir strong { font-size: 1.3rem; color: var(--navy); }
+
+.wc-scores { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.wc-scores li { display: flex; align-items: center; gap: 12px; font-size: .88rem; }
+.wc-scores__n { flex: 0 0 92px; color: var(--muted); }
+.wc-scores__bar { flex: 1; height: 7px; border-radius: 999px; background: rgba(18,40,76,.07); overflow: hidden; }
+.wc-scores__bar i { display: block; height: 100%; background: var(--pill-grad); border-radius: 999px; }
+.wc-scores__v { flex: 0 0 30px; text-align: right; font-weight: 600; color: var(--navy); }
+
+.wc-match { display: grid; grid-template-columns: 136px 1fr; gap: 12px 18px; }
+.wc-match dt { font-weight: 600; color: var(--navy); font-size: .9rem; }
+.wc-match dd { color: var(--ink); font-weight: 300; line-height: 1.75; }
+
+.wc-exp { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.wc-exp__card {
+  display: flex; flex-direction: column; gap: 8px; padding: 20px;
+  border: 1px solid var(--line); border-radius: 16px; background: #fff;
+  text-decoration: none; transition: border-color .18s, transform .18s var(--ease), box-shadow .18s;
+}
+.wc-exp__card:hover { border-color: var(--brand-cyan); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.wc-exp__card strong { color: var(--navy); font-size: 1.02rem; }
+.wc-exp__card span { color: var(--brand-blue); font-size: .85rem; font-weight: 600; }
+
+.wc-next { background: var(--grad-warm); border-radius: 20px; padding: 30px clamp(20px, 4vw, 34px); margin-top: 34px; border-top: 0; }
+.wc-next .btn { margin-top: 18px; }
+.wc-foot { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+
+@media (max-width: 560px) {
+  .wc-match { grid-template-columns: 1fr; gap: 4px 0; }
+  .wc-match dd { margin-bottom: 12px; }
+  .wc-nav { flex-direction: column-reverse; align-items: stretch; }
+  .wc-nav .btn { width: 100%; margin-left: 0; }
+  .wc-foot .btn { width: 100%; }
+}
+
+/* Printing the guide is the substitute for emailing it, so it has to come
+   out clean: no nav, no footer, no buttons, no dead links. */
+@media print {
+  .nav, .footer, .wc-foot, .wc-next .btn, .wc-bar, .wc-count { display: none !important; }
+  .wc-sec { padding: 0; }
+  .wc-wrap { max-width: none; }
+  .wc-block { break-inside: avoid; }
+  .wc-exp__card span { display: none; }
+  body { background: #fff; }
+}
+
 /* ---- article gate -------------------------------------------------------
    The teaser stops mid-thought on purpose, so the last paragraph fades out
    rather than ending in a hard edge — the cut should read as "there is more",

@@ -23,6 +23,7 @@
   const sb = window.supabase.createClient(url, key);
   // The Analytics tab (js/admin-stats.js) reads through the same session.
   if (window.bhStatsInit) window.bhStatsInit(sb);
+  if (window.bhFormsInit) window.bhFormsInit(sb);
   let rowsCache = [];
 
   // ---------- helpers ----------
@@ -113,6 +114,7 @@
     const cfg = TABS[name];
     $('tab-customers').classList.toggle('hide', name !== 'customers');
     $('tab-analytics').classList.toggle('hide', name !== 'analytics');
+    $('tab-forms').classList.toggle('hide', name !== 'forms');
 
     if (cfg) {
       $('listHeading').textContent = cfg.heading;
@@ -124,6 +126,7 @@
       $('listView').classList.add('hide');
       $('editorView').classList.add('hide');
       if (name === 'analytics') { if (window.bhStatsLoad) window.bhStatsLoad(); }
+      else if (name === 'forms') { if (window.bhFormsLoad) window.bhFormsLoad(); }
       else loadLeads();
     }
   }

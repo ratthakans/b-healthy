@@ -116,6 +116,20 @@
     .tag--booking{background:#e6f0fb;color:var(--blue)}
     .tag--contact{background:#fdf0e6;color:#c9770e}
     .tag--member{background:#efe9fb;color:#6b4fb5}
+    .tag--dir{background:#e3f7f8;color:#0f9ba3}
+    .tag--dir2{background:#eef1f7;color:var(--muted)}
+    .fm-noconsent{color:var(--danger);font-weight:600}
+    .fm-scores{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+    .fm-score{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--muted);background:#fafbfd;border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+    .fm-score b{color:var(--navy);font-weight:600}
+    .fm-score i{display:block;flex:none;height:4px;border-radius:999px;background:var(--blue)}
+    .fm-score em{font-style:normal;font-weight:700;color:var(--navy)}
+    .fm-det{margin-top:11px}
+    .fm-det summary{font-size:.8rem}
+    .fm-ans{display:grid;grid-template-columns:minmax(160px,1fr) 1fr;gap:6px 16px;font-size:.84rem;padding-bottom:4px}
+    .fm-ans dt{color:var(--muted)}
+    .fm-ans dd{color:var(--ink);font-weight:600}
+    @media(max-width:640px){.fm-ans{grid-template-columns:1fr;gap:2px}.fm-ans dd{margin-bottom:9px}}
     .tag--new{background:#e6f0fb;color:var(--blue)}
     .tag--contacted{background:#fbf0dd;color:var(--warn)}
     .tag--won{background:#e7f6ef;color:var(--ok)}
@@ -260,6 +274,7 @@
         <button class="tab is-active" data-tab="packages" type="button">Packages</button>
         <button class="tab" data-tab="blog" type="button">Blog</button>
         <button class="tab" data-tab="customers" type="button">Customers</button>
+        <button class="tab" data-tab="forms" type="button">Form</button>
         <button class="tab" data-tab="analytics" type="button">Analytics</button>
       </div>
 
@@ -284,6 +299,19 @@
         </div>
         <div class="msg" id="leadMsg"></div>
         <div id="leads"></div>
+      </div>
+
+      <!-- ============ TAB: FORM (wellness check) ============ -->
+      <div id="tab-forms" class="hide">
+        <div class="bar">
+          <h2>Wellness Check</h2>
+          <div class="sp"></div>
+          <div class="lfilters" id="formFilters"></div>
+          <button class="btn btn--soft btn--sm" id="formExport">&#8595; CSV</button>
+          <button class="btn btn--soft btn--sm" id="formRefresh">&#8635; Refresh</button>
+        </div>
+        <div class="msg" id="formMsg"></div>
+        <div id="forms"></div>
       </div>
 
       <!-- ============ TAB: ANALYTICS ============ -->
@@ -528,7 +556,9 @@
   <script src="js/packages.js?v=20260728a"></script>
   <script src="js/workshops-data.js?v=20260731i"></script>
   <script src="js/blog-index.js?v=20260731k"></script>
+  <script src="js/wellness-data.js?v=20261010a"></script>
+  <script src="js/admin-forms.js?v=20261010a"></script>
   <script src="js/admin-stats.js?v=20261008a"></script>
-  <script src="js/admin.js?v=20261008a"></script>
+  <script src="js/admin.js?v=20261010a"></script>
 </body>
 </html>
