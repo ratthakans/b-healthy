@@ -157,10 +157,14 @@ No code changes are required for any of the above.
 
 ## SQL to run in Supabase (in order)
 
-All five are idempotent, and safe to re-run in any order: no two files define
+All seven are idempotent, and safe to re-run in any order: no two files define
 the same function, so running one cannot undo another. `sql-test.mjs` runs
 every file twice and checks that the second pass changes nothing.
 
+0. `supabase-staff.sql` + `supabase-harden-rls.sql` — **run these first, and
+   edit the e-mail list in the first one before you do.** See "Who counts as
+   staff" below. Until they have run, anyone who registers an account against
+   this project can read every customer lead and rewrite the site.
 1. `supabase-blog.sql` — widens the `packages.type` check constraint to allow
    `topic` and `post`. Until this runs, **the blog cannot be saved from
    /admin.html at all**, and "Import current packages" silently drops the
@@ -329,6 +333,53 @@ Customers under **Article signups**, separate from sales enquiries.
 **Nobody who signs up is emailed, by choice** — see "Lead email" below. The
 addresses collect in Customers for the team to work from, and the consent line
 on the card says exactly that rather than promising a newsletter.
+
+## Who counts as staff
+
+Checked on 2026-10-13 and all three were true at once:
+
+```
+Authentication → disable_signup   false      (anyone could register)
+public.is_staff()                 missing
+public.staff                      missing
+```
+
+Every "staff" policy written by `supabase-packages.sql` and
+`supabase-submissions.sql` said `to authenticated using (true)`. That reads as
+*staff* and means *anyone holding a login*. With sign-up open those are not the
+same sentence: a stranger could register, and then read every enquiry, every
+article sign-up and every wellness answer — names, phones, and what people said
+about their own health — and edit or delete any package or article. The
+publishable key is in the page source; that was the whole lock.
+
+**The fix, in order:**
+
+1. Supabase → Authentication → Sign In / Providers → Email → turn **off**
+   "Allow new users to sign up". Ten seconds, stops the bleeding.
+2. Edit the e-mail list in `supabase-staff.sql` to the account you sign in to
+   `/admin.html` with, then run it.
+3. Run `supabase-harden-rls.sql`.
+
+Both files refuse to run rather than leave you locked out of your own admin:
+`supabase-staff.sql` raises if the list ends up empty, and the harden file
+raises if the staff table is missing or empty — **before** it drops a single
+policy. Tested: with no staff recorded, both stop and all three original
+`submissions` policies are still in place afterwards.
+
+**What changed, and what deliberately did not.** `authenticated` is replaced by
+`public.is_staff()` on `packages`, `submissions`, `page_views` and the
+`package-images` bucket. The four `bh_stats_*` functions carry the check
+*inside* themselves, because PostgREST hands every signed-in caller the same
+role — a grant cannot tell a member from an employee. Nothing public moves:
+reading published packages, submitting a form, logging a page view, the
+`posts_public` teasers and the article-gate functions all behave exactly as
+before.
+
+**Once this has run, an open sign-up is harmless** — a new account can do what
+an anonymous visitor can do and nothing more. That is also what makes member
+accounts possible later: the next step is a `profiles` table and letting a
+member read their own `submissions` rows, which cannot be built until
+"logged in" and "works here" are different things.
 
 ## Testing the SQL before it touches the live database
 

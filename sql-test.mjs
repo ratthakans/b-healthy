@@ -49,15 +49,48 @@ const anonThrows = async (sql, params) => {
 };
 
 // ---- Supabase-shaped preamble -------------------------------------------
+// auth.users and auth.uid() are Supabase's, not Postgres's. Stubbed here so
+// is_staff() — and therefore every policy that calls it — can be exercised.
+const STAFF_ID = '11111111-1111-1111-1111-111111111111';
+const MEMBER_ID = '22222222-2222-2222-2222-222222222222';
+const STAFF_EMAIL = 'CHANGE-ME@example.com';   // matches supabase-staff.sql as shipped
+
 await db.exec(`
   create role anon nologin;
   create role authenticated nologin;
   grant usage on schema public to anon, authenticated;
   alter default privileges in schema public grant all on tables to anon, authenticated;
+
+  create schema if not exists auth;
+  create table auth.users (id uuid primary key, email text);
+  insert into auth.users (id, email) values
+    ('${STAFF_ID}', '${STAFF_EMAIL}'),
+    ('${MEMBER_ID}', 'member@example.com');
+  create or replace function auth.uid() returns uuid language sql stable as $fn$
+    select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+  $fn$;
+  grant usage on schema auth to anon, authenticated;
+  grant execute on function auth.uid() to anon, authenticated;
 `);
 
-const files = ['supabase-packages.sql', 'supabase-blog.sql', 'supabase-submissions.sql',
-               'supabase-analytics.sql', 'supabase-article-gate.sql'];
+// Signed in, but not on the staff list — the account an open sign-up hands out.
+const asMember = async (sql, params) => {
+  await db.exec(`set role authenticated; set request.jwt.claim.sub = '${MEMBER_ID}';`);
+  try { return await db.query(sql, params); }
+  finally { await db.exec(`reset role; set request.jwt.claim.sub = '';`); }
+};
+const memberThrows = async (sql, params) => {
+  try { await asMember(sql, params); return null; } catch (e) { return e.message; }
+};
+const asStaff = async (sql, params) => {
+  await db.exec(`set role authenticated; set request.jwt.claim.sub = '${STAFF_ID}';`);
+  try { return await db.query(sql, params); }
+  finally { await db.exec(`reset role; set request.jwt.claim.sub = '';`); }
+};
+
+const files = ['supabase-staff.sql', 'supabase-packages.sql', 'supabase-blog.sql',
+               'supabase-submissions.sql', 'supabase-analytics.sql',
+               'supabase-article-gate.sql', 'supabase-harden-rls.sql'];
 for (const f of files) {
   try {
     await db.exec(readFileSync(DIR + f, 'utf8'));
@@ -136,7 +169,15 @@ for (const r of rows) {
       [r.id, r.id, JSON.stringify(r.data)]);
   } catch (e) { console.log('  insert failed for ' + r.id + ': ' + String(e.message).slice(0, 160)); throw e; }
 }
-const GATED = rows[0].id, FREE = rows[rows.length - 1].id;
+await db.query(
+  `insert into public.packages (id, type, status, sort, name, data, en)
+   values ('test-retreat', 'retreat', 'published', 0, 'Test Retreat', '{}'::jsonb, '{}'::jsonb)`);
+
+// Pick two articles that are NOT already gated upstream. Feeding this a live
+// export, some of them are — and a teaser trimmed twice is not a fair test.
+const ungated = rows.filter(r => !((r.data || {}).gated));
+if (ungated.length < 2) throw new Error('need two ungated articles in the fixture');
+const GATED = ungated[0].id, FREE = ungated[ungated.length - 1].id;
 await db.query(`update public.packages set data = data || '{"gated":true}'::jsonb where id = $1`, [GATED]);
 
 // ---- what anonymous readers can and cannot reach --------------------------
@@ -154,8 +195,9 @@ ok('gated article is cut to its teaser',
    `${gatedRow.data.body.length} of ${fullGated.length}`);
 ok('gated article carries the flag', gatedRow.data.gated === true);
 ok('free article is whole',
-   freeRow.data.body.length === rows.find(r => r.id === FREE).data.body.length);
-ok('free article carries no flag', freeRow.data.gated === undefined);
+   freeRow.data.body.length === (rows.find(r => r.id === FREE).data.body || []).length,
+   `${freeRow.data.body.length} vs ${(rows.find(r => r.id === FREE).data.body || []).length}`);
+ok('free article carries no flag', !freeRow.data.gated, JSON.stringify(freeRow.data.gated));
 
 ok('anon cannot read the signing key', (await anonThrows('select * from public.app_secrets')) !== null
    || (await asAnon('select * from public.app_secrets')).rows.length === 0);
@@ -202,17 +244,66 @@ ok('an expired token returns null',
 const drafted = (await asAnon(`select public.bh_article_body('does-not-exist', $1) as b`, [tok])).rows[0].b;
 ok('an unknown slug returns null', drafted === null);
 
+// ---- a member is not staff ------------------------------------------------
+// This is the hole the harden file closes: sign-up was open and every "staff"
+// policy said `to authenticated`, so any stranger with an account could read
+// the customer list and rewrite the site.
+ok('is_staff says no to a member', (await asMember('select public.is_staff() as s')).rows[0].s === false);
+ok('is_staff says yes to staff', (await asStaff('select public.is_staff() as s')).rows[0].s === true);
+
+const mSubs = await asMember('select id from public.submissions');
+ok('a member cannot read customer submissions', mSubs.rows.length === 0, `got ${mSubs.rows.length}`);
+ok('staff can read customer submissions', (await asStaff('select id from public.submissions')).rows.length > 0);
+
+const mPkg = await asMember(`select id from public.packages where type = 'post'`);
+ok('a member cannot read articles in packages', mPkg.rows.length === 0, `got ${mPkg.rows.length}`);
+
+await asMember(`insert into public.packages (id, type, status, sort, name, data, en)
+                values ('member-was-here', 'retreat', 'published', 0, 'x', '{}'::jsonb, '{}'::jsonb)`).catch(() => {});
+ok('a member cannot add a package',
+   (await db.query(`select id from public.packages where id = 'member-was-here'`)).rows.length === 0);
+
+await asMember(`update public.packages set name = 'defaced' where type = 'retreat'`).catch(() => {});
+ok('a member cannot edit a package',
+   (await db.query(`select id from public.packages where name = 'defaced'`)).rows.length === 0);
+
+await asMember(`delete from public.submissions`).catch(() => {});
+ok('a member cannot delete customer data',
+   (await db.query(`select count(*)::int c from public.submissions`)).rows[0].c > 0);
+
+const mViews = await asMember('select id from public.page_views');
+ok('a member cannot read the visit log', mViews.rows.length === 0, `got ${mViews.rows.length}`);
+
+ok('a member cannot call the analytics functions',
+   (await memberThrows('select * from public.bh_stats_totals(30)')) !== null);
+ok('staff can call the analytics functions',
+   (await asStaff('select * from public.bh_stats_totals(30)')).rows.length === 1);
+
+// ---- and the public still works -------------------------------------------
+ok('anon can still read published packages',
+   (await asAnon(`select id from public.packages where type = 'retreat'`)).rows.length > 0);
+ok('anon can still read the article teasers',
+   (await asAnon('select id from public.posts_public')).rows.length > 0);
+const anonIns = await anonThrows(
+  `insert into public.submissions (type, email, status) values ('contact', 'x@y.co', 'new')`);
+ok('anon can still submit a form', anonIns === null, anonIns || '');
+const viewIns = await anonThrows(
+  `insert into public.page_views (path, kind, visitor_id, session_id) values ('/', 'page', 'vqqqqqqq', 'sqqqqqqq')`);
+ok('anon can still log a page view', viewIns === null, viewIns || '');
+// ...and takes it back out, so the counts below stay about the counts below.
+await db.query(`delete from public.page_views where visitor_id = 'vqqqqqqq'`);
+
 // ---- analytics still adds up ---------------------------------------------
 await db.exec(`insert into public.page_views (path, kind, visitor_id, session_id)
   values ('/blog/a','post','v1111111','s1111111'),
          ('/blog/a','gate','v1111111','s1111111'),
          ('/blog/a','unlock','v1111111','s1111111'),
          ('/','page','v2222222','s2222222');`);
-const tot = (await db.query(`select * from public.bh_stats_totals(30)`)).rows[0];
+const tot = (await asStaff(`select * from public.bh_stats_totals(30)`)).rows[0];
 ok('gate and unlock are not counted as page views', Number(tot.views) === 2, `views=${tot.views}`);
-const daily = (await db.query(`select sum(views)::int s from public.bh_stats_daily(30)`)).rows[0].s;
+const daily = (await asStaff(`select sum(views)::int s from public.bh_stats_daily(30)`)).rows[0].s;
 ok('nor in the daily chart', daily === 2, `daily=${daily}`);
-const g = (await db.query(`select * from public.bh_stats_top(30, array['gate'], 10)`)).rows;
+const g = (await asStaff(`select * from public.bh_stats_top(30, array['gate'], 10)`)).rows;
 ok('but they are countable on their own', g.length === 1 && Number(g[0].views) === 1);
 
 // Re-running one file must not undo another. bh_stats_totals and
@@ -220,7 +311,7 @@ ok('but they are countable on their own', g.length === 1 && Number(g[0].views) =
 // one a second time quietly restored counters that count gate and unlock
 // events as page views.
 for (const f of files) await db.exec(readFileSync(DIR + f, 'utf8'));
-const again = (await db.query(`select * from public.bh_stats_totals(30)`)).rows[0];
+const again = (await asStaff(`select * from public.bh_stats_totals(30)`)).rows[0];
 ok('re-running every .sql file changes nothing', Number(again.views) === 2, `views=${again.views}`);
 
 console.log(`\n${pass} passed / ${fail} failed\n`);

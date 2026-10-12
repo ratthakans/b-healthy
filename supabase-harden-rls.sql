@@ -1,36 +1,42 @@
--- ============================================================
--- B-Healthy — SECURITY HARDENING (run after the other SQL files)
+-- =============================================================================
+-- B-Healthy — stop "logged in" from meaning "staff"
+-- RUN supabase-staff.sql FIRST. Idempotent: safe to re-run.
 --
--- WHY: the current policies grant access to ANY logged-in user
--- ("to authenticated using (true)"). Supabase e-mail sign-up is
--- open by default, so anyone could register an account and then
--- read every customer lead and edit every package.
+-- WHAT WAS WRONG, concretely, as of 2026-10-13:
 --
--- This locks everything to an explicit staff allow-list.
--- Run in: Supabase → SQL Editor → New query → Run
--- ============================================================
+--   Authentication → disable_signup = false   (anyone could register)
+--   public.is_staff()                          did not exist
+--   public.staff                               did not exist
+--
+-- and every policy written by supabase-packages.sql and
+-- supabase-submissions.sql said `to authenticated using (true)`. Put together,
+-- anyone on the internet could sign up against this project and then read every
+-- customer lead — names, phones, e-mails, and since the wellness check, what
+-- people said about their own health — and edit or delete every package and
+-- article. The publishable key is in the page source; that was the whole lock.
+--
+-- This file replaces `authenticated` with `public.is_staff()` everywhere it was
+-- standing in for staff. After it runs, an open sign-up is harmless: a new
+-- account can do exactly what an anonymous visitor can do, and nothing more —
+-- which is also what makes member accounts possible later.
+--
+-- It does NOT touch the policies that are meant to be public: reading
+-- published packages, inserting a form submission, logging a page view, or the
+-- posts_public view behind the article gate.
+-- =============================================================================
 
--- 1) Allow-list table -----------------------------------------------------
-create table if not exists public.staff (
-  user_id    uuid primary key references auth.users(id) on delete cascade,
-  email      text,
-  created_at timestamptz not null default now()
-);
-alter table public.staff enable row level security;
--- (no policies = nobody can read/write it from the browser; manage it here in SQL)
+-- Refuse to run at all rather than lock the owner out of their own admin.
+do $$
+begin
+  if to_regclass('public.staff') is null or to_regprocedure('public.is_staff()') is null then
+    raise exception 'Run supabase-staff.sql first — it creates the staff list this file depends on. Nothing has been changed.';
+  end if;
+  if not exists (select 1 from public.staff) then
+    raise exception 'The staff list is empty. Add your admin e-mail in supabase-staff.sql and run that first, or this would remove your own access. Nothing has been changed.';
+  end if;
+end $$;
 
-create or replace function public.is_staff() returns boolean
-language sql stable security definer set search_path = public as $$
-  select exists (select 1 from public.staff where user_id = auth.uid());
-$$;
-
--- 2) >>> ADD YOUR STAFF ACCOUNT HERE <<< ----------------------------------
---     Change the e-mail to the one you created in Authentication → Users.
-insert into public.staff (user_id, email)
-select id, email from auth.users where email = 'CHANGE-ME@example.com'
-on conflict (user_id) do nothing;
-
--- 3) Packages: staff only -------------------------------------------------
+-- ------------------------------------------------------------ packages
 drop policy if exists "staff read all packages" on public.packages;
 create policy "staff read all packages" on public.packages
   for select to authenticated using (public.is_staff());
@@ -47,8 +53,9 @@ drop policy if exists "staff delete packages" on public.packages;
 create policy "staff delete packages" on public.packages
   for delete to authenticated using (public.is_staff());
 
--- 4) Customer leads: staff only ------------------------------------------
---    (run supabase-submissions.sql first, or this block will error)
+-- ----------------------------------------------------- customer submissions
+-- Enquiries, article sign-ups, wellness answers and workshop claims all live
+-- here. This is the table that mattered most.
 drop policy if exists "staff read submissions" on public.submissions;
 create policy "staff read submissions" on public.submissions
   for select to authenticated using (public.is_staff());
@@ -61,22 +68,43 @@ drop policy if exists "staff delete submissions" on public.submissions;
 create policy "staff delete submissions" on public.submissions
   for delete to authenticated using (public.is_staff());
 
--- 5) Image uploads: staff only -------------------------------------------
-drop policy if exists "staff upload package images" on storage.objects;
-create policy "staff upload package images" on storage.objects
-  for insert to authenticated with check (bucket_id = 'package-images' and public.is_staff());
+-- ---------------------------------------------------------------- page views
+-- The raw visit log: a row per view with a browser id. Aggregates are one
+-- thing, handing someone the log is another.
+drop policy if exists "staff read views" on public.page_views;
+create policy "staff read views" on public.page_views
+  for select to authenticated using (public.is_staff());
 
-drop policy if exists "staff update package images" on storage.objects;
-create policy "staff update package images" on storage.objects
-  for update to authenticated using (bucket_id = 'package-images' and public.is_staff());
+-- ------------------------------------------------------------ image uploads
+-- storage.objects only exists on a real Supabase project, so this is wrapped:
+-- the same file still runs against a plain Postgres for testing.
+do $$
+begin
+  if to_regclass('storage.objects') is null then
+    raise notice 'storage.objects not present — skipping upload policies';
+    return;
+  end if;
 
-drop policy if exists "staff delete package images" on storage.objects;
-create policy "staff delete package images" on storage.objects
-  for delete to authenticated using (bucket_id = 'package-images' and public.is_staff());
+  execute $p$ drop policy if exists "staff upload package images" on storage.objects $p$;
+  execute $p$ create policy "staff upload package images" on storage.objects
+    for insert to authenticated with check (bucket_id = 'package-images' and public.is_staff()) $p$;
 
--- ============================================================
--- ALSO DO THIS IN THE DASHBOARD (defence in depth):
---   Authentication → Sign In / Providers → Email → turn OFF "Allow new users to sign up"
--- Then new staff are added by you in Authentication → Users,
--- plus one INSERT into public.staff (step 2 above).
--- ============================================================
+  execute $p$ drop policy if exists "staff update package images" on storage.objects $p$;
+  execute $p$ create policy "staff update package images" on storage.objects
+    for update to authenticated using (bucket_id = 'package-images' and public.is_staff()) $p$;
+
+  execute $p$ drop policy if exists "staff delete package images" on storage.objects $p$;
+  execute $p$ create policy "staff delete package images" on storage.objects
+    for delete to authenticated using (bucket_id = 'package-images' and public.is_staff()) $p$;
+end $$;
+
+-- =============================================================================
+-- The analytics functions are NOT redefined here.
+--
+-- They carry their own staff check, inside supabase-analytics.sql, where they
+-- are defined. Two files defining one function is how a previous fix got
+-- silently undone by re-running the other one.
+-- =============================================================================
+
+select 'Done. `authenticated` no longer means staff.' as result,
+       (select count(*) from public.staff) as "staff accounts";
