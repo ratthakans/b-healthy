@@ -66,7 +66,10 @@ await db.exec(`
     id uuid primary key, email text, encrypted_password text,
     raw_user_meta_data jsonb default '{}'::jsonb,
     created_at timestamptz default now(), updated_at timestamptz,
-    last_sign_in_at timestamptz);
+    last_sign_in_at timestamptz, email_confirmed_at timestamptz, banned_until timestamptz);
+  create unique index on auth.users (lower(email));
+  create table auth.identities (id uuid primary key default gen_random_uuid(), user_id uuid,
+    provider text, identity_data jsonb, updated_at timestamptz);
   create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid);
   create table auth.refresh_tokens (id bigserial primary key, user_id varchar(255), revoked boolean default false);
   insert into auth.users (id, email) values
@@ -407,6 +410,84 @@ ok('...which takes their profile and signed-in submissions with it',
 ok('...but not anything sent before signing in under the same e-mail',
    (await db.query(`select count(*)::int c from public.submissions where email = 'newbie@example.com' and user_id is null`)).rows[0].c === 1);
 ok('anon cannot call delete', (await anonThrows('select public.bh_delete_my_account()')) !== null);
+
+// ---- staff managing a member ---------------------------------------------
+const M2 = '55555555-5555-5555-5555-555555555555';
+await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, 'two@example.com',
+  '{"full_name":"สมาชิก สอง","phone":"0811112222"}'::jsonb)`, [M2]);
+await db.query(`insert into auth.identities (user_id, provider, identity_data) values ($1, 'email', '{"email":"two@example.com","sub":"x"}'::jsonb)`, [M2]);
+
+ok('the member list reports suspension',
+   'banned_until' in (await asStaff('select * from public.bh_staff_members() limit 1')).rows[0]);
+
+await asStaff(`update public.profiles set full_name = 'แก้โดยทีม', phone = '0899990000' where id = $1`, [M2]);
+ok('staff can edit a member\'s details',
+   (await db.query('select full_name, phone from public.profiles where id = $1', [M2])).rows[0].full_name === 'แก้โดยทีม');
+ok('...but not the must-change flag',
+   (await userThrows(STAFF_ID, `update public.profiles set must_change_password = true where id = $1`, [M2])) !== null);
+
+const newMail = (await asStaff(`select public.bh_admin_set_email($1, '  Two.New@Example.com ') as e`, [M2])).rows[0].e;
+ok('staff can change a member\'s e-mail', newMail === 'two.new@example.com',  newMail);
+ok('...in auth.users', (await db.query('select email from auth.users where id = $1', [M2])).rows[0].email === 'two.new@example.com');
+ok('...and in the e-mail identity too',
+   (await db.query(`select identity_data->>'email' e from auth.identities where user_id = $1`, [M2])).rows[0].e === 'two.new@example.com');
+ok('an e-mail another account uses is refused',
+   (await userThrows(STAFF_ID, `select public.bh_admin_set_email($1, 'member@example.com')`, [M2])) !== null);
+ok('a malformed e-mail is refused',
+   (await userThrows(STAFF_ID, `select public.bh_admin_set_email($1, 'not-an-email')`, [M2])) !== null);
+ok("a staff account's e-mail is not changed from here",
+   (await userThrows(STAFF_ID, `select public.bh_admin_set_email($1, 'x@y.co')`, [STAFF_ID])) !== null);
+ok('a member cannot change e-mails',
+   (await userThrows(MEMBER_ID, `select public.bh_admin_set_email($1, 'z@y.co')`, [M2])) !== null);
+
+// attach: only ownerless rows with the member's own address, only the ids picked
+const pre = await db.query(`insert into public.submissions (type, email, status) values
+  ('wellness', 'two.new@example.com', 'new'),
+  ('contact',  'TWO.NEW@example.com', 'new'),
+  ('wellness', 'someone.else@example.com', 'new') returning id`);
+const [a1, a2, a3] = pre.rows.map(r => Number(r.id));
+const n = (await asStaff('select public.bh_admin_attach_submissions($1, $2::bigint[]) n', [M2, [a1, a3]])).rows[0].n;
+ok('staff attach only what matches the member\'s e-mail', n === 1, `attached ${n}`);
+ok('...the matching row is now theirs',
+   (await db.query('select user_id from public.submissions where id = $1', [a1])).rows[0].user_id === M2);
+ok("...someone else's row was left alone",
+   (await db.query('select user_id from public.submissions where id = $1', [a3])).rows[0].user_id === null);
+ok('...and a row nobody picked was left alone too',
+   (await db.query('select user_id from public.submissions where id = $1', [a2])).rows[0].user_id === null);
+ok('the member now sees it on their account',
+   (await asUser(M2, 'select id from public.submissions')).rows.some(r => Number(r.id) === a1));
+ok('a member cannot attach rows',
+   (await userThrows(MEMBER_ID, 'select public.bh_admin_attach_submissions($1, $2::bigint[])', [MEMBER_ID, [a2]])) !== null);
+
+// suspend
+await db.query(`insert into auth.sessions (user_id) values ($1)`, [M2]);
+await asStaff('select public.bh_admin_set_suspended($1, true)', [M2]);
+const ban = (await db.query('select banned_until from auth.users where id = $1', [M2])).rows[0].banned_until;
+ok('staff can suspend a member', ban && new Date(ban).getFullYear() === 2999, String(ban));
+ok('...which signs them out now, not in an hour',
+   (await db.query('select count(*)::int c from auth.sessions where user_id = $1', [M2])).rows[0].c === 0);
+await asStaff('select public.bh_admin_set_suspended($1, false)', [M2]);
+ok('...and lift it', (await db.query('select banned_until from auth.users where id = $1', [M2])).rows[0].banned_until === null);
+ok('staff cannot be suspended from here',
+   (await userThrows(STAFF_ID, 'select public.bh_admin_set_suspended($1, true)', [STAFF_ID])) !== null);
+ok('a member cannot suspend anyone',
+   (await userThrows(MEMBER_ID, 'select public.bh_admin_set_suspended($1, true)', [M2])) !== null);
+
+// delete
+ok('a member cannot delete someone else',
+   (await userThrows(MEMBER_ID, 'select public.bh_admin_delete_member($1)', [M2])) !== null);
+ok('staff cannot be deleted from here',
+   (await userThrows(STAFF_ID, 'select public.bh_admin_delete_member($1)', [STAFF_ID])) !== null);
+await asStaff('select public.bh_admin_delete_member($1)', [M2]);
+ok('staff can delete a member',
+   (await db.query('select count(*)::int c from auth.users where id = $1', [M2])).rows[0].c === 0);
+ok('...with their profile and their submissions',
+   (await db.query('select count(*)::int c from public.profiles where id = $1', [M2])).rows[0].c === 0 &&
+   (await db.query('select count(*)::int c from public.submissions where id = $1', [a1])).rows[0].c === 0);
+ok('...leaving rows that were never attached',
+   (await db.query('select count(*)::int c from public.submissions where id = $1', [a2])).rows[0].c === 1);
+ok('the internal guard is not callable by anyone directly',
+   (await userThrows(STAFF_ID, 'select public.bh_assert_member_target($1)', [MEMBER_ID])) !== null);
 
 // ---- analytics still adds up ---------------------------------------------
 await db.exec(`insert into public.page_views (path, kind, visitor_id, session_id)

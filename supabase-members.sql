@@ -185,12 +185,15 @@ grant execute on function public.bh_delete_my_account() to authenticated;
 
 -- ======================================================== staff-only tools
 
--- Who has an account. The e-mail and last sign-in live in auth.users, which no
--- API role can read, so staff get them through here and nowhere else.
-create or replace function public.bh_staff_members()
+-- Who has an account. The e-mail, last sign-in and suspension live in
+-- auth.users, which no API role can read, so staff get them through here.
+-- Dropped first because its columns grew (banned_until), and Postgres will
+-- not change a function's result shape through CREATE OR REPLACE.
+drop function if exists public.bh_staff_members();
+create function public.bh_staff_members()
 returns table (id uuid, email text, created_at timestamptz, last_sign_in_at timestamptz,
                full_name text, phone text, company text, must_change_password boolean,
-               is_staff boolean)
+               is_staff boolean, banned_until timestamptz)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not public.is_staff() then
@@ -199,7 +202,8 @@ begin
   return query
   select u.id, u.email::text, u.created_at, u.last_sign_in_at,
          p.full_name, p.phone, p.company, coalesce(p.must_change_password, false),
-         exists (select 1 from public.staff s where s.user_id = u.id)
+         exists (select 1 from public.staff s where s.user_id = u.id),
+         u.banned_until
     from auth.users u
     left join public.profiles p on p.id = u.id
    order by u.created_at desc;
@@ -266,6 +270,139 @@ begin
 end $$;
 revoke all on function public.bh_issue_temp_password(uuid) from public, anon;
 grant execute on function public.bh_issue_temp_password(uuid) to authenticated;
+
+-- ===================================================== managing a member
+-- Every tool below is staff-only, and none of them will touch a staff
+-- account: removing, suspending or re-addressing the people who run the admin
+-- is done in the Supabase dashboard, where it is deliberate, never from a
+-- button one stolen staff session could press.
+
+create or replace function public.bh_assert_member_target(p_user uuid)
+returns void
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.is_staff() then
+    raise exception 'staff only' using errcode = '42501';
+  end if;
+  if exists (select 1 from public.staff where user_id = p_user) then
+    raise exception 'this is a staff account — change it in the Supabase dashboard' using errcode = '42501';
+  end if;
+  if not exists (select 1 from auth.users where id = p_user) then
+    raise exception 'no such member' using errcode = '22023';
+  end if;
+end $$;
+revoke all on function public.bh_assert_member_target(uuid) from public, anon, authenticated;
+
+-- Name, phone and company: the same three columns a member may edit
+-- themselves (the column grant above), now by staff too.
+drop policy if exists "staff updates profiles" on public.profiles;
+create policy "staff updates profiles" on public.profiles
+  for update to authenticated using (public.is_staff()) with check (public.is_staff());
+
+-- A new e-mail, which a member cannot set for themselves: Supabase would send
+-- a confirmation to it, and that mail is refused. The account page tells
+-- members to ask the team; this is what the team presses.
+--
+-- auth.identities carries its own copy of the address for the e-mail login
+-- method. Left stale, the account would sign in under one address and report
+-- another, so both are changed together.
+create or replace function public.bh_admin_set_email(p_user uuid, p_email text)
+returns text
+language plpgsql security definer set search_path = public as $$
+declare v_email text := lower(btrim(coalesce(p_email, '')));
+begin
+  perform public.bh_assert_member_target(p_user);
+  if char_length(v_email) > 200
+     or v_email !~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' then
+    raise exception 'that e-mail does not look right' using errcode = '22023';
+  end if;
+  if exists (select 1 from auth.users where lower(email) = v_email and id <> p_user) then
+    raise exception 'another account already uses that e-mail' using errcode = '23505';
+  end if;
+
+  update auth.users
+     set email = v_email, email_confirmed_at = coalesce(email_confirmed_at, now()), updated_at = now()
+   where id = p_user;
+
+  begin
+    if to_regclass('auth.identities') is not null then
+      execute $q$ update auth.identities
+                    set identity_data = coalesce(identity_data, '{}'::jsonb) || jsonb_build_object('email', $2::text),
+                        updated_at = now()
+                  where user_id = $1 and provider = 'email' $q$
+        using p_user, v_email;
+    end if;
+  exception when others then
+    raise warning 'bh_admin_set_email: identity not updated for %: %', p_user, sqlerrm;
+  end;
+  return v_email;
+end $$;
+revoke all on function public.bh_admin_set_email(uuid, text) from public, anon;
+grant execute on function public.bh_admin_set_email(uuid, text) to authenticated;
+
+-- Attach what someone sent before they had an account. Never automatic — an
+-- unconfirmed e-mail proves nothing — so staff pick the rows by hand after
+-- confirming identity by phone. The function still only accepts rows that
+-- have no owner and carry the member's current e-mail, so a mis-click cannot
+-- hand one person's wellness answers to another.
+create or replace function public.bh_admin_attach_submissions(p_user uuid, p_ids bigint[])
+returns int
+language plpgsql security definer set search_path = public as $$
+declare v_email text; v_n int;
+begin
+  perform public.bh_assert_member_target(p_user);
+  select lower(email) into v_email from auth.users where id = p_user;
+  update public.submissions
+     set user_id = p_user
+   where id = any (p_ids) and user_id is null and lower(email) = v_email;
+  get diagnostics v_n = row_count;
+  return v_n;
+end $$;
+revoke all on function public.bh_admin_attach_submissions(uuid, bigint[]) from public, anon;
+grant execute on function public.bh_admin_attach_submissions(uuid, bigint[]) to authenticated;
+
+-- Suspend: the account stays, with everything in it, but cannot sign in.
+-- Supabase Auth refuses both sign-in and token refresh while banned_until is
+-- in the future; current sessions are revoked as well so it takes effect now,
+-- not within the hour. Year 2999 rather than 'infinity', which Auth's own
+-- timestamp handling does not read.
+create or replace function public.bh_admin_set_suspended(p_user uuid, p_on boolean)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public.bh_assert_member_target(p_user);
+  update auth.users
+     set banned_until = case when p_on then timestamptz '2999-12-31 00:00:00+00' end,
+         updated_at = now()
+   where id = p_user;
+  if p_on then
+    begin
+      if to_regclass('auth.sessions') is not null then
+        execute 'delete from auth.sessions where user_id = $1' using p_user;
+      end if;
+      if to_regclass('auth.refresh_tokens') is not null then
+        execute 'update auth.refresh_tokens set revoked = true where user_id = $1' using p_user::text;
+      end if;
+    exception when others then
+      raise warning 'bh_admin_set_suspended: sessions not revoked for %: %', p_user, sqlerrm;
+    end;
+  end if;
+end $$;
+revoke all on function public.bh_admin_set_suspended(uuid, boolean) from public, anon;
+grant execute on function public.bh_admin_set_suspended(uuid, boolean) to authenticated;
+
+-- Delete on someone's behalf — a PDPA request by phone, a spam account. The
+-- same cascade as a member deleting themselves: profile and everything
+-- submitted while signed in go with it.
+create or replace function public.bh_admin_delete_member(p_user uuid)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public.bh_assert_member_target(p_user);
+  delete from auth.users where id = p_user;
+end $$;
+revoke all on function public.bh_admin_delete_member(uuid) from public, anon;
+grant execute on function public.bh_admin_delete_member(uuid) to authenticated;
 
 select 'Member accounts ready.' as result,
        (select count(*) from public.profiles) as profiles;

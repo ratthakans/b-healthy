@@ -425,6 +425,32 @@ bcrypt at cost 10 — the same format Supabase Auth stores. This is widely done
 but not an interface Supabase documents; the supported alternative is a
 serverless function holding the service-role key.
 
+**What staff can do about a member** — admin → Members → **Manage**:
+
+- Edit name, phone and company.
+- **Change the e-mail.** Members cannot, because Supabase would send a
+  confirmation to the new address and that mail is refused; the account page
+  tells them to ask the team, and this is what the team presses. The address
+  is changed in `auth.users` and in the e-mail identity together, or the
+  account would sign in under one address and report another.
+- **Attach what they sent before signing up.** The panel lists rows with the
+  same e-mail and no owner; staff tick them by hand *after* confirming
+  identity by phone. Never automatic, because an unconfirmed e-mail proves
+  nothing. The database only accepts rows that still carry the member's
+  current address and have no owner, so a mis-click cannot hand one person's
+  wellness answers to another. (LIKE treats `_` and `%` as wildcards and both
+  occur in e-mail addresses — the search escapes them, or `john_doe@` would
+  also find `johnXdoe@`.)
+- **Issue a temporary password**, **suspend** (they are signed out at once and
+  cannot sign in until it is lifted; nothing is deleted), **delete** (type the
+  member's e-mail to confirm).
+
+None of these will touch a **staff** account. Re-addressing, suspending or
+removing the people who run the admin is done in the Supabase dashboard,
+deliberately — never from a button one stolen staff session could press. For
+the same reason, making someone staff stays a SQL statement in
+`supabase-staff.sql`.
+
 **What a member gets.** Gated articles open in full without the e-mail card.
 The wellness check fills in their name, phone and e-mail (the e-mail fixed, so
 the result lands on the right account). Their guide and workshop codes are on

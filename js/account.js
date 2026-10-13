@@ -176,6 +176,8 @@
       return ['อีเมลนี้มีบัญชีอยู่แล้ว', 'This email already has an account.', 'login'];
     if (c === 'weak_password' || /should be at least|weak/i.test(m))
       return ['รหัสผ่านสั้นหรือคาดเดาง่ายเกินไป ลองให้ยาวขึ้น', 'That password is too short or too easy to guess — try a longer one.'];
+    if (c === 'user_banned' || /banned/i.test(m))
+      return ['บัญชีนี้ถูกระงับชั่วคราว กรุณาติดต่อทีม B-Healthy', 'This account is suspended — please contact the B-Healthy team.'];
     if (c === 'invalid_credentials' || /invalid login/i.test(m))
       return ['อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'Wrong email or password.'];
     if (c === 'same_password')

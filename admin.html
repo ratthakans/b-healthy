@@ -136,6 +136,30 @@
     .mem-row .tag{margin-left:6px}
     .mem-overlay{position:fixed;inset:0;background:rgba(18,40,76,.55);display:grid;place-items:center;z-index:50;padding:20px}
     .mem-overlay[hidden]{display:none}
+    .mem-overlay--top{z-index:60}
+    .mem-modal.mem-panel{max-width:720px;max-height:calc(100vh - 40px);overflow:auto;padding:24px 26px}
+    .mp-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:6px}
+    .mp-head h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .mp-head h3:focus{outline:none}
+    .mp-x{background:#eef1f7;border:0;border-radius:50%;width:34px;height:34px;font-size:1.3rem;line-height:1;cursor:pointer;color:var(--ink);flex:none}
+    .mp-sec{border-top:1px solid var(--line);padding:16px 0 4px}
+    .mp-sec h4{font-size:.86rem;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .mp-sec .hint{margin-bottom:10px;line-height:1.6}
+    .mp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .mp-grid label{margin:0}
+    .mp-act{grid-column:1/-1}
+    .mp-inline{display:flex;gap:8px;flex-wrap:wrap}
+    .mp-inline input{flex:1;min-width:200px}
+    .mp-row{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:16px}
+    .mp-danger h4{color:var(--danger)}
+    .mp-attach{background:#fffaf0;margin:0 -26px;padding:16px 26px 12px}
+    .mem-subs{list-style:none;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .mem-subs li,.mem-subs label{display:flex;align-items:center;gap:10px;font-size:.84rem;margin:0;font-weight:400}
+    .mem-subs input{width:auto}
+    .mem-subs__k{font-weight:700;color:var(--navy);min-width:120px}
+    .mem-subs__v{flex:1;color:var(--ink)}
+    .mem-subs__d{color:var(--muted);font-size:.78rem;white-space:nowrap}
+    @media(max-width:640px){.mp-grid{grid-template-columns:1fr}.mem-panel{padding:20px}.mp-attach{margin:0 -20px;padding:16px 20px 12px}}
     .mem-modal{background:#fff;border-radius:18px;padding:26px;max-width:440px;width:100%;box-shadow:0 30px 60px -20px rgba(0,0,0,.45)}
     .mem-modal h3{color:var(--navy);font-size:1.05rem;margin-bottom:14px}
     .mem-pw{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.7rem;font-weight:800;letter-spacing:.14em;text-align:center;color:var(--navy);background:#f4f7fb;border:2px dashed var(--teal);border-radius:12px;padding:16px;margin-bottom:12px;user-select:all}
@@ -352,8 +376,11 @@
         <div class="msg" id="memMsg"></div>
         <div id="memReq"></div>
         <div id="memList"></div>
-        <div id="memTemp" class="mem-overlay" hidden></div>
+        <div id="memTemp" class="mem-overlay mem-overlay--top" hidden></div>
       </div>
+      <!-- Outside #tab-members on purpose: that tab has its own click handler,
+           and a panel button bubbling into it would fire twice. -->
+      <div id="memPanel" class="mem-overlay" hidden></div>
 
       <!-- ============ TAB: ANALYTICS ============ -->
       <div id="tab-analytics" class="hide">
@@ -599,7 +626,7 @@
   <script src="js/blog-index.js?v=20260731k"></script>
   <script src="js/wellness-data.js?v=20261010a"></script>
   <script src="js/admin-forms.js?v=20261010b"></script>
-  <script src="js/admin-members.js?v=20261013a"></script>
+  <script src="js/admin-members.js?v=20261014a"></script>
   <script src="js/admin-stats.js?v=20261008a"></script>
   <script src="js/admin.js?v=20261013a"></script>
 </body>
