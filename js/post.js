@@ -147,6 +147,10 @@
           <button class="btn btn--primary" type="submit" id="gateBtn" data-en="Read the full article">อ่านบทความเต็ม</button>
         </form>
         <p class="post-gate__msg" id="gateMsg" role="status"></p>
+        ${(window.BH_CONFIG || {}).MEMBERS ? `
+        <p class="post-gate__or" aria-hidden="true"><span data-en="or">หรือ</span></p>
+        <a class="btn btn--ghost post-gate__join" href="account.html?next=${encodeURIComponent('/blog/' + p.id)}#signup"
+           data-en="Create a free account — read every article">สมัครสมาชิกฟรี อ่านได้ทุกบทความ</a>` : ''}
         <p class="post-gate__member"><span data-en="Already a member?">มีบัญชีอยู่แล้ว?</span>
           <a href="account.html?next=${encodeURIComponent('/blog/' + p.id)}#login" data-en="Sign in to read">เข้าสู่ระบบเพื่ออ่าน</a></p>
         <p class="post-gate__fine" data-en="By entering your email you agree that B-Healthy may keep it in order to contact you about workplace wellbeing. Ask us to delete it at any time at b-healthy@pzentsmart.com or on LINE @bhealthyme.">การกรอกอีเมลถือว่าคุณยินยอมให้ B-Healthy เก็บอีเมลไว้ติดต่อเรื่องสุขภาวะองค์กร ขอให้ลบออกได้ทุกเมื่อที่ b-healthy@pzentsmart.com หรือ LINE @bhealthyme</p>

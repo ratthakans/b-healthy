@@ -42,6 +42,7 @@
   }
   function store(s) {
     memo = s;
+    if (s) { try { localStorage.setItem('bh-known', '1'); } catch (e) {} }
     if (!storageWorks) return;
     try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); }
     catch (e) {}
@@ -221,11 +222,18 @@
     const u = user();
     // "คุณ" is how Thai addresses anyone; typed into the name it is not a name.
     const first = u && u.name ? u.name.trim().replace(/^คุณ\s*/, '').split(/\s+/)[0] : '';
-    const th = u ? (first || 'บัญชีของฉัน') : 'เข้าสู่ระบบ';
-    const en = u ? (first || 'My account') : 'Sign in';
-    a.textContent = th;
-    a.setAttribute('data-en', en);
+    // The rest of the menu is English in both languages (Retreats, Blog,
+    // Contact), so this link is too. And it says what clicking it does:
+    // someone who has never had an account here is offered one; someone who
+    // has is offered their way back in.
+    let known = false;
+    try { known = localStorage.getItem('bh-known') === '1'; } catch (e) {}
+    const label = u ? (first || 'My account') : (known ? 'Sign in' : 'Sign up');
+    a.textContent = label;
+    a.removeAttribute('data-en');
     delete a.__th;
+    a.href = u ? 'account.html' : (known ? 'account.html#login' : 'account.html#signup');
+    a.classList.toggle('nav__acct--join', !u && !known);
     if (location.pathname.replace(/\.html$/, '').endsWith('/account')) a.classList.add('is-active');
     if (window.bhApplyLang) window.bhApplyLang();
   }

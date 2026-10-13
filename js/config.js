@@ -8,9 +8,9 @@ window.BH_CONFIG = {
   SUPABASE_URL: "https://gngibdrjcnshyqkomkjs.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_8JnUdebfbaiZmmBEKu2LkQ_4U_x3OKk",  // publishable key — safe to expose (RLS-protected)
 
-  // Show "Sign in" in the menu. Off until supabase-members.sql has run AND
-  // Authentication → Email → "Confirm email" is switched off — before then a
-  // visitor could sign up and wait forever for a mail Supabase will not send.
-  // /account itself works either way, so it can be tried before it is shown.
-  MEMBERS: false
+  // Every way in to sign-up: the menu link, the article card, the blog page
+  // and the wellness check. On since 2026-10-14, once supabase-members.sql had
+  // run and "Confirm email" was off. Set false to hide them all again without
+  // touching an account — /account itself keeps working either way.
+  MEMBERS: true
 };

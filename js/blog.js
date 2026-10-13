@@ -49,8 +49,31 @@
     delete emptyEl.__th;                         // i18n caches the old copy on first apply
   }
 
+  paintJoin(posts);
+
   // apply current language to freshly rendered cards/filters
   if (window.bhApplyLang) window.bhApplyLang();
+  }
+
+  // Some cards say "Email to read". Say, once, above all of them, what the
+  // easier way is — and say nothing to someone already signed in. In English
+  // it says "account", never "membership": Membership is the corporate
+  // product two items along in the menu, and "Membership is free" read as if
+  // that were.
+  function paintJoin(posts) {
+    const cfg = window.BH_CONFIG || {};
+    let bar = document.getElementById('blogJoin');
+    const want = cfg.MEMBERS && posts.some(p => p.gated) && !(window.bhAuth && window.bhAuth.user());
+    if (!want) { if (bar) bar.remove(); return; }
+    if (bar) return;
+    bar = document.createElement('div');
+    bar.id = 'blogJoin';
+    bar.className = 'blog-join';
+    bar.innerHTML = `
+      <p><strong data-en="Some articles need a free account.">บางบทความสำหรับสมาชิก</strong>
+         <span data-en="One account opens every one of them.">สมัครฟรี แล้วอ่านได้ทุกบทความ</span></p>
+      <a class="btn btn--primary btn--sm" href="account.html?next=%2Fblog#signup" data-en="Create a free account">สมัครสมาชิกฟรี</a>`;
+    filtersEl.parentNode.insertBefore(bar, filtersEl);
   }
 
   // Filter clicks — bound once via delegation (cards re-queried live)

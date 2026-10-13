@@ -1300,6 +1300,22 @@ html { scroll-behavior: smooth; }
 .ac-del .form__full { max-width: 340px; }
 
 .nav__acct { white-space: nowrap; }
+/* "Sign up", for people who have never had an account here: the one nav
+   item asking for something, so it gets a little more than plain text. */
+.nav__acct--join { color: var(--brand-blue) !important; font-weight: 600; }
+
+.blog-join { display: flex; align-items: center; justify-content: space-between; gap: 14px 20px; flex-wrap: wrap;
+  background: var(--grad-mint); border-radius: 16px; padding: 16px 20px; margin: 0 0 22px; }
+.blog-join p { color: var(--ink); line-height: 1.6; }
+.blog-join strong { color: var(--navy); margin-right: 6px; }
+
+.wc-acct { background: #f6f9fd; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 6px; margin: -6px 0 20px; }
+.wc-acct .form__check { margin-bottom: 8px; }
+.wc-acct__toggle span { color: var(--ink) !important; font-weight: 500; }
+.wc-acct__fields { padding-top: 6px; }
+.wc-acct__fields .form__full { margin-bottom: 14px; }
+.wc-signin { margin: -4px 0 16px; font-size: .9rem; }
+.wc-signin a { color: var(--brand-blue); font-weight: 600; }
 
 @media (max-width: 640px) {
   .ac-grid { grid-template-columns: 1fr; }
@@ -1461,6 +1477,9 @@ html { scroll-behavior: smooth; }
 .post-gate__msg { display: none; margin-top: 14px; font-size: .88rem; font-weight: 500; }
 .post-gate__msg.show { display: block; }
 .post-gate__msg--err { color: var(--coral); }
+.post-gate__or { display: flex; align-items: center; gap: 12px; margin: 18px 0 12px; color: var(--muted); font-size: .8rem; }
+.post-gate__or::before, .post-gate__or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.post-gate__join { width: 100%; max-width: 420px; }
 .post-gate__member { margin-top: 14px; font-size: .88rem; color: var(--muted); }
 .post-gate__member a { color: var(--brand-blue); font-weight: 600; text-decoration: none; margin-left: 4px; }
 .post-gate__member a:hover { text-decoration: underline; }

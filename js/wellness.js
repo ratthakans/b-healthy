@@ -200,6 +200,17 @@
               <input type="checkbox" id="wcConsent" />
               <span data-en="I agree that B-Healthy may keep my answers and contact details in order to prepare this guide and to contact me about workplace wellbeing. My answers describe how I feel, which is health-related information. I can ask for it to be deleted at any time at b-healthy@pzentsmart.com.">ข้าพเจ้ายินยอมให้ B-Healthy เก็บคำตอบและข้อมูลติดต่อ เพื่อจัดทำผลประเมินนี้และติดต่อเรื่องสุขภาวะองค์กร โดยเข้าใจว่าคำตอบเกี่ยวกับความรู้สึกและสภาพร่างกายเป็นข้อมูลด้านสุขภาพ และขอให้ลบข้อมูลได้ทุกเมื่อที่ b-healthy@pzentsmart.com</span>
             </label>
+            ${offerAccount() ? `
+            <div class="wc-acct">
+              <label class="form__check wc-acct__toggle">
+                <input type="checkbox" id="wcMakeAcct" />
+                <span data-en="Also create a member account for me — keep this guide, read every article, and delete the account myself any time.">สร้างบัญชีสมาชิกให้ฉันด้วย — เก็บผลประเมินนี้ไว้ อ่านได้ทุกบทความ และลบบัญชีเองได้ทุกเมื่อ</span>
+              </label>
+              <div class="wc-acct__fields" id="wcAcctFields" hidden>
+                ${window.bhAuthUI.pwField('wcPw', 'ตั้งรหัสผ่าน', 'Choose a password', 'new-password', '<p class="pwf__hint" id="wcPw-hint"></p>')}
+                ${window.bhAuthUI.pwField('wcPw2', 'ยืนยันรหัสผ่าน', 'Confirm password', 'new-password', '<p class="pwf__hint" id="wcPw2-hint" aria-live="polite"></p>')}
+              </div>
+            </div>` : ''}
             <p class="wc-err" id="wcErr" role="alert"></p>
             <div class="wc-nav">
               <button type="button" class="btn btn--ghost" id="wcBack" data-en="Back">ย้อนกลับ</button>
@@ -213,6 +224,29 @@
     document.getElementById('wcBack').addEventListener('click', () => { step--; save(); render(); });
     document.getElementById('wcLead').addEventListener('submit', submit);
     prefillFromAccount();
+
+    // Name, e-mail, phone and consent are already on this form, so an account
+    // costs the reader one password, typed twice — not a second form later.
+    checkPassword = null;
+    const tick = document.getElementById('wcMakeAcct');
+    if (tick) {
+      window.bhAuthUI.bind(root);
+      tick.addEventListener('change', () => {
+        const box = document.getElementById('wcAcctFields');
+        box.hidden = !tick.checked;
+        if (tick.checked) {
+          if (!checkPassword) checkPassword = window.bhAuthUI.wireNewPassword('wcPw', 'wcPw2');
+          document.getElementById('wcPw').focus();
+        }
+      });
+    }
+  }
+
+  // Offered only when sign-up is switched on and nobody is signed in yet.
+  let checkPassword = null;
+  function offerAccount() {
+    const cfg = window.BH_CONFIG || {};
+    return !!(cfg.MEMBERS && window.bhAuth && window.bhAuthUI && !window.bhAuth.user());
   }
 
   // A signed-in member is not asked for what we already hold. The email is
@@ -249,6 +283,41 @@
     // Health-related answers are sensitive personal data under PDPA s.26, so
     // consent is an explicit act, never a pre-ticked box or small print.
     if (!consent) return msg('wcErr', 'กรุณายืนยันความยินยอมก่อนส่ง', 'Please confirm your consent before sending.');
+
+    // Make the account first, so the result is saved as theirs. If that
+    // fails, nothing is sent: they asked for an account, and quietly sending
+    // the guide without one would leave them believing they had it.
+    const tick = document.getElementById('wcMakeAcct');
+    if (tick && tick.checked) {
+      const bad = checkPassword && checkPassword();
+      if (bad) { msg('wcErr', bad[0], bad[1]); bad[2].focus(); return; }
+      window.bhAuthUI.hidePasswords(root);
+      const btn = document.getElementById('wcSend');
+      sending = true; btn.disabled = true;
+      try {
+        await window.bhAuth.signUp({ full_name: name, email: email, phone: phone,
+                                     password: document.getElementById('wcPw').value, consent: true });
+      } catch (err) {
+        sending = false; btn.disabled = false;
+        const [th, en, action] = window.bhAuthUI.explain(err);
+        if (action === 'login') {
+          // Their answers are kept in this tab, so signing in and coming back
+          // lands them on this very step with everything filled in.
+          msg('wcErr', 'อีเมลนี้มีบัญชีอยู่แล้ว — เข้าสู่ระบบก่อน (คำตอบของคุณยังอยู่) หรือเอาติ๊กสร้างบัญชีออกเพื่อดูผลเลย',
+              'This email already has an account — sign in first (your answers are kept), or untick "create an account" to see your guide now.');
+          // A sibling of the message, not inside it: the message carries
+          // data-en and i18n would wipe a link placed within it.
+          if (!document.getElementById('wcSignIn')) {
+            document.getElementById('wcErr').insertAdjacentHTML('afterend',
+              `<p class="wc-signin"><a id="wcSignIn" href="account.html?next=%2Fwellness-check#login" data-en="Sign in and come back here">เข้าสู่ระบบแล้วกลับมาที่นี่</a></p>`);
+            done();
+          }
+          return;
+        }
+        return msg('wcErr', th, en);
+      }
+      sending = false; btn.disabled = false;
+    }
 
     const r = score();
     const btn = document.getElementById('wcSend');
