@@ -71,10 +71,18 @@
   }
 
   // --- the guide --------------------------------------------------------
+  // The workshop that answers "what kind of activity". Answers saved before
+  // the options were broadened named a product directly, so a bare package
+  // key still works.
+  function pickPackage() {
+    const i = answers.interest;
+    if (i === 'handson') return answers.pref === 'aroma' ? 'aroma' : 'tea';
+    const k = (C.BY_INTEREST || {})[i] || i;
+    return C.PACKAGES[k] ? k : C.BY_DIRECTION[result.primary];
+  }
+
   function experiences() {
-    const pick = answers.interest === 'recommend'
-      ? C.BY_DIRECTION[result.primary]
-      : (C.PACKAGES[answers.interest] ? answers.interest : C.BY_DIRECTION[result.primary]);
+    const pick = pickPackage();
     const second = C.BY_PREF[answers.pref];
     const keys = second && second !== pick ? [pick, second] : [pick];
     return keys.map(k => C.PACKAGES[k]).filter(Boolean);
@@ -122,7 +130,7 @@
         </div>
       </section>`;
     done();
-    document.getElementById('wcStart').addEventListener('click', () => { step = 0; save(); render(); });
+    document.getElementById('wcStart').addEventListener('click', () => go(0));
   }
 
   function renderStep() {
@@ -159,7 +167,7 @@
     }));
 
     const back = document.getElementById('wcBack');
-    if (back) back.addEventListener('click', () => { step--; save(); render(); });
+    if (back) back.addEventListener('click', () => go(step - 1));
 
     document.getElementById('wcForm').addEventListener('submit', e => {
       e.preventDefault();
@@ -170,7 +178,7 @@
         if (el) el.closest('.wc-q').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-      step++; save(); render();
+      go(step + 1);
     });
   }
 
@@ -221,7 +229,7 @@
       </section>`;
     done();
 
-    document.getElementById('wcBack').addEventListener('click', () => { step--; save(); render(); });
+    document.getElementById('wcBack').addEventListener('click', () => go(step - 1));
     document.getElementById('wcLead').addEventListener('submit', submit);
     prefillFromAccount();
 
@@ -353,9 +361,7 @@
 
     result = { primary: r.primary, secondary: r.secondary, totals: r.totals,
                name: name, email: email, phone: phone };
-    step = D.STEPS.length + 1;
-    save();
-    render();
+    go(D.STEPS.length + 1);
   }
 
   function renderResult() {
@@ -378,21 +384,30 @@
 
           <article class="wc-block">
             <h2 class="wc-block__h"><span class="wc-num">02</span><span data-en="Your wellness direction">ทิศทางสุขภาวะของคุณ</span></h2>
+            <p class="wc-lead">${isEn()
+              ? `From your answers, what you need most right now is <strong>${esc(say(D.DIRECTION_LABEL[p]))}</strong>, followed by <strong>${esc(say(D.DIRECTION_LABEL[s]))}</strong>.`
+              : `จากคำตอบของคุณ ตอนนี้สิ่งที่คุณต้องการมากที่สุดคือ <strong>${esc(say(D.DIRECTION_LABEL[p]))}</strong> รองลงมาคือ <strong>${esc(say(D.DIRECTION_LABEL[s]))}</strong>`}</p>
             <div class="wc-dir">
               <div class="wc-dir__main">
-                <span class="wc-dir__tag" data-en="Primary">หลัก</span>
+                <span class="wc-dir__tag" data-en="What you need most">ต้องการมากที่สุด</span>
                 <strong>${esc(say(D.DIRECTION_LABEL[p]))}</strong>
+                <p class="wc-dir__note">${esc(say(C.DIRECTION[p].note))}</p>
               </div>
               <div class="wc-dir__sub">
-                <span class="wc-dir__tag" data-en="Secondary">รอง</span>
+                <span class="wc-dir__tag" data-en="Next">รองลงมา</span>
                 <strong>${esc(say(D.DIRECTION_LABEL[s]))}</strong>
+                <p class="wc-dir__note">${esc(say(C.DIRECTION[s].note))}</p>
               </div>
             </div>
+            <p class="wc-scores__cap" data-en="The longer the bar, the more your answers point that way.">แถบยิ่งยาว แปลว่าคำตอบของคุณชี้ไปทางนั้นมาก</p>
             <ul class="wc-scores">
-              ${D.DIRECTIONS.slice().sort((a, b) => result.totals[b] - result.totals[a]).map(d => `
+              ${D.DIRECTIONS.slice().sort((a, b) => result.totals[b] - result.totals[a]).map(d => {
+                const r = result.totals[d] / max;
+                const lv = r >= 0.67 ? ['มาก', 'High'] : r >= 0.34 ? ['ปานกลาง', 'Medium'] : ['น้อย', 'Low'];
+                return `
                 <li><span class="wc-scores__n">${esc(say(D.DIRECTION_LABEL[d]))}</span>
-                  <span class="wc-scores__bar"><i style="width:${Math.round((result.totals[d] / max) * 100)}%"></i></span>
-                  <span class="wc-scores__v">${esc(result.totals[d])}</span></li>`).join('')}
+                  <span class="wc-scores__bar"><i style="width:${Math.round(r * 100)}%"></i></span>
+                  <span class="wc-scores__v">${esc(isEn() ? lv[1] : lv[0])}</span></li>`; }).join('')}
             </ul>
           </article>
 
@@ -403,17 +418,17 @@
           </article>
 
           <article class="wc-block">
-            <h2 class="wc-block__h"><span class="wc-num">04</span><span data-en="Your wellness match">สิ่งที่เหมาะกับคุณ</span></h2>
+            <h2 class="wc-block__h"><span class="wc-num">04</span><span data-en="Recommendations for you">คำแนะนำที่เหมาะกับคุณ</span></h2>
             <dl class="wc-match">
-              <dt data-en="Tea">ชา</dt><dd>${esc(say(m.tea))}</dd>
-              <dt data-en="Aroma">กลิ่น</dt><dd>${esc(say(m.aroma))}</dd>
-              <dt data-en="A simple ritual">กิจวัตรสั้น ๆ</dt><dd>${esc(say(m.ritual))}</dd>
-              ${tip ? `<dt data-en="For your working week">สำหรับจังหวะงานของคุณ</dt><dd>${esc(say(tip))}</dd>` : ''}
+              <dt data-en="Tea">ชาที่แนะนำ</dt><dd>${esc(say(m.tea))}</dd>
+              <dt data-en="Scent">กลิ่นที่แนะนำ</dt><dd>${esc(say(m.aroma))}</dd>
+              <dt data-en="Try every day">ลองทำทุกวัน</dt><dd>${esc(say(m.ritual))}</dd>
+              ${tip ? `<dt data-en="While you work">ระหว่างทำงาน</dt><dd>${esc(say(tip))}</dd>` : ''}
             </dl>
           </article>
 
           <article class="wc-block">
-            <h2 class="wc-block__h"><span class="wc-num">05</span><span data-en="Your experience match">ประสบการณ์ที่เหมาะกับคุณ</span></h2>
+            <h2 class="wc-block__h"><span class="wc-num">05</span><span data-en="Wellness activities for you">กิจกรรมสุขภาพที่เหมาะกับคุณ</span></h2>
             <div class="wc-exp">
               ${exp.map(x => `<a class="wc-exp__card" href="package.html?id=${encodeURIComponent(x.id)}">
                 <strong>${esc(say(x.label))}</strong>
@@ -422,8 +437,8 @@
           </article>
 
           <article class="wc-block wc-next">
-            <h2 class="wc-block__h"><span class="wc-num">06</span><span data-en="Want to go deeper?">อยากรู้ลึกกว่านี้ไหม</span></h2>
-            <p data-en="This check reads your week. The B-Healthy Element Workshop reads your ธาตุเจ้าเรือน — a deeper balance assessment and a blend put together for you.">แบบประเมินนี้อ่านจังหวะชีวิตช่วงนี้ของคุณ ส่วน B-Healthy Element Workshop คือการตรวจธาตุเจ้าเรือน วิเคราะห์สมดุลเชิงลึก และจัดสูตรเฉพาะบุคคล</p>
+            <h2 class="wc-block__h"><span class="wc-num">06</span><span data-en="Discover your body element">รู้จักธาตุเจ้าเรือนของคุณ</span></h2>
+            <p data-en="This check looks at how you are right now. To go deeper, into your body element (ธาตุเจ้าเรือน), the B-Healthy Element Workshop checks your element, looks at your balance, and puts together a blend made for you.">แบบประเมินนี้ดูจากสิ่งที่คุณเป็นในช่วงนี้ ถ้าอยากรู้ลึกถึงธาตุเจ้าเรือนของคุณ B-Healthy Element Workshop จะตรวจธาตุ วิเคราะห์สมดุลของร่างกาย และจัดสูตรที่เหมาะกับคุณโดยเฉพาะ</p>
             ${pendingOffer() ? '' : `<a class="btn btn--primary" id="wcNext" href="contact.html" data-en="Talk to us about the workshop">คุยกับเราเรื่องเวิร์กช็อป</a>`}
           </article>
 
@@ -502,10 +517,7 @@
     return !!(C.OFFER && C.OFFER.enabled && !claim);
   }
 
-  function suggestedKey() {
-    if (answers.interest === 'recommend') return C.BY_DIRECTION[result.primary];
-    return C.PACKAGES[answers.interest] ? answers.interest : C.BY_DIRECTION[result.primary];
-  }
+  function suggestedKey() { return pickPackage(); }
 
   function bindOffer() {
     const form = document.getElementById('wcClaim');
@@ -569,6 +581,20 @@
     done();
   }
   function done() { if (window.bhApplyLang) window.bhApplyLang(); }
+
+  // Moving to another screen: render it, then start the reader at its top.
+  // Without this the page kept its scroll position, so pressing Continue at
+  // the bottom of one step landed at the bottom of the next.
+  function go(n) {
+    step = n; save(); render();
+    const h = root.querySelector('.wc-title');
+    if (!h) return;
+    const nav = document.querySelector('.nav');
+    const y = h.getBoundingClientRect().top + window.scrollY - (nav ? nav.offsetHeight : 0) - 24;
+    window.scrollTo({ top: Math.max(0, y) });
+    h.setAttribute('tabindex', '-1');
+    h.focus({ preventScroll: true });
+  }
 
   function render() {
     if (result && step > D.STEPS.length) return renderResult();

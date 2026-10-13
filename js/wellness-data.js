@@ -28,11 +28,11 @@
     DIRECTIONS: ['calm', 'energy', 'focus', 'rest', 'reset'],
 
     DIRECTION_LABEL: {
-      calm:   t('ความสงบ', 'Calm'),
-      energy: t('พลังงาน', 'Energy'),
-      focus:  t('สมาธิ', 'Focus'),
-      rest:   t('การพักฟื้น', 'Rest'),
-      reset:  t('การตั้งต้นใหม่', 'Reset')
+      calm:   t('ใจสงบ', 'Calm'),
+      energy: t('เติมพลัง', 'Energy'),
+      focus:  t('สมาธิ คิดได้ชัด', 'Focus'),
+      rest:   t('พักฟื้นร่างกาย', 'Rest and recovery'),
+      reset:  t('ปรับสมดุลใหม่', 'Reset')
     },
 
     // One screen per entry. Grouping the context questions keeps this at seven
@@ -66,22 +66,22 @@
         weight: 25,
         q: t('ตอนนี้คุณรู้สึกแบบไหนมากที่สุด', 'Which is closest to how you feel right now?'),
         options: [
-          { v: 'tired',   label: t('เหนื่อยล้า', 'Worn out'),                     score: { rest: 3, energy: 2, reset: 1 } },
-          { v: 'tense',   label: t('ตึงเครียด', 'Tense'),                         score: { calm: 3, rest: 1, reset: 1 } },
-          { v: 'foggy',   label: t('สมองแน่น คิดเยอะ', 'Head full, thinking a lot'), score: { focus: 3, calm: 1, reset: 1 } },
-          { v: 'lowenergy', label: t('พลังงานต่ำ', 'Low on energy'),              score: { energy: 3, rest: 2 } },
-          { v: 'okay',    label: t('โดยรวมโอเค', 'Generally okay'),               score: { calm: 1, energy: 1, focus: 1, rest: 1, reset: 1 } }
+          { v: 'tired',   label: t('เหนื่อยล้า พักแล้วก็ยังไม่หาย', 'Worn out, even after resting'), score: { rest: 3, energy: 2, reset: 1 } },
+          { v: 'tense',   label: t('ตึงเครียด ผ่อนคลายได้ยาก', 'Tense, hard to unwind'), score: { calm: 3, rest: 1, reset: 1 } },
+          { v: 'foggy',   label: t('คิดเยอะ สมองไม่ได้พักเลย', 'Thinking all the time, my head never rests'), score: { focus: 3, calm: 1, reset: 1 } },
+          { v: 'lowenergy', label: t('แรงน้อย ไม่พอกับสิ่งที่ต้องทำ', 'Low on energy for what the day asks'), score: { energy: 3, rest: 2 } },
+          { v: 'okay',    label: t('โดยรวมโอเค อยากดูแลตัวเองต่อไป', 'Generally okay, and want to keep it that way'), score: { calm: 1, energy: 1, focus: 1, rest: 1, reset: 1 } }
         ]
       },
       energy: {
         weight: 20,
-        q: t('พลังงานของคุณช่วงนี้เป็นแบบไหน', 'How has your energy been lately?'),
+        q: t('ช่วงนี้พลังงานของคุณเป็นแบบไหน', 'How has your energy been lately?'),
         options: [
-          { v: 'steady', label: t('ดีสม่ำเสมอ', 'Steady and good'),               score: { energy: 1, focus: 1 } },
-          { v: 'dips',   label: t('ตกบางช่วง', 'Dips at certain hours'),          score: { energy: 2, focus: 2, rest: 1 } },
-          { v: 'swings', label: t('ขึ้นลงไม่แน่นอน', 'Up and down'),              score: { reset: 3, calm: 2, energy: 1 } },
-          { v: 'burns',  label: t('หมดเร็ว', 'Runs out quickly'),                 score: { energy: 3, rest: 2, reset: 1 } },
-          { v: 'drained', label: t('ล้าเกือบทั้งวัน', 'Tired most of the day'),   score: { rest: 3, reset: 2, energy: 1 } }
+          { v: 'steady', label: t('ดี สม่ำเสมอทั้งวัน', 'Good and steady all day'), score: { energy: 1, focus: 1 } },
+          { v: 'dips',   label: t('มีบางช่วงของวันที่แรงตก', 'Drops at certain times of day'), score: { energy: 2, focus: 2, rest: 1 } },
+          { v: 'swings', label: t('ขึ้น ๆ ลง ๆ คาดเดาไม่ได้', 'Up and down, hard to predict'), score: { reset: 3, calm: 2, energy: 1 } },
+          { v: 'burns',  label: t('เริ่มวันได้ดี แต่หมดแรงเร็ว', 'Start well, run out quickly'), score: { energy: 3, rest: 2, reset: 1 } },
+          { v: 'drained', label: t('เหนื่อยล้าเกือบทั้งวัน', 'Tired most of the day'), score: { rest: 3, reset: 2, energy: 1 } }
         ]
       },
       desired: {
@@ -91,45 +91,45 @@
           { v: 'calm',   label: t('ความสงบ ใจเบาลง', 'Calm — a lighter mind'),        score: { calm: 3 } },
           { v: 'energy', label: t('พลังงาน มีแรงมากขึ้น', 'Energy — more in the tank'), score: { energy: 3 } },
           { v: 'focus',  label: t('สมาธิ คิดได้ชัดขึ้น', 'Focus — a clearer head'),    score: { focus: 3 } },
-          { v: 'rest',   label: t('การพัก ได้ฟื้นจริง ๆ', 'Rest — to actually recover'), score: { rest: 3 } },
-          { v: 'reset',  label: t('ตั้งสมดุลใหม่ทั้งหมด', 'A full reset'),             score: { reset: 3 } }
+          { v: 'rest',   label: t('ได้พักผ่อนเต็มที่ ร่างกายฟื้นตัว', 'Proper rest, so my body can recover'), score: { rest: 3 } },
+          { v: 'reset',  label: t('เริ่มต้นใหม่ ปรับสมดุลชีวิตให้ลงตัว', 'A fresh start, a life back in balance'), score: { reset: 3 } }
         ]
       },
       pain: {
         weight: 15,
-        q: t('อะไรกระทบสมดุลของคุณมากที่สุด', 'What affects your balance the most?'),
+        q: t('อะไรทำให้คุณเสียสมดุลมากที่สุด', 'What affects your balance the most?'),
         options: [
-          { v: 'sleep',    label: t('การนอน', 'Sleep'),                     score: { rest: 3, calm: 2, energy: 1 } },
-          { v: 'stress',   label: t('ความเครียด', 'Stress'),                score: { calm: 3, reset: 2, rest: 1 } },
-          { v: 'workload', label: t('ปริมาณงาน', 'Workload'),               score: { focus: 3, reset: 2, calm: 1 } },
-          { v: 'physical', label: t('ความล้าทางร่างกาย', 'Physical fatigue'), score: { rest: 3, energy: 2 } },
+          { v: 'sleep',    label: t('นอนไม่พอ หรือนอนหลับไม่สนิท', 'Too little sleep, or poor sleep'), score: { rest: 3, calm: 2, energy: 1 } },
+          { v: 'stress',   label: t('ความเครียดสะสม', 'Built-up stress'), score: { calm: 3, reset: 2, rest: 1 } },
+          { v: 'workload', label: t('งานเยอะเกินไป', 'Too much work'), score: { focus: 3, reset: 2, calm: 1 } },
+          { v: 'physical', label: t('ร่างกายเหนื่อยล้า ปวดเมื่อย', 'A tired, aching body'), score: { rest: 3, energy: 2 } },
           { v: 'metime',   label: t('ไม่มีเวลาให้ตัวเอง', 'No time for yourself'), score: { reset: 3, calm: 2 } }
         ]
       },
 
       // ---------- tags only: context and taste, never score ----------
       work_style: {
-        q: t('รูปแบบการทำงาน', 'How you work'),
+        q: t('รูปแบบการทำงานของคุณ', 'How you work'),
         options: [
-          { v: 'office',    label: t('เข้าออฟฟิศ', 'In the office') },
-          { v: 'hybrid',    label: t('ไฮบริด', 'Hybrid') },
+          { v: 'office',    label: t('เข้าออฟฟิศทุกวัน', 'In the office every day') },
+          { v: 'hybrid',    label: t('ไฮบริด สลับเข้าออฟฟิศกับทำงานที่บ้าน', 'Hybrid, office and home') },
           { v: 'wfh',       label: t('ทำงานที่บ้าน', 'From home') },
           { v: 'freelance', label: t('ฟรีแลนซ์', 'Freelance') },
-          { v: 'shift',     label: t('เป็นกะ / เวลายืดหยุ่น', 'Shift or flexible hours') }
+          { v: 'shift',     label: t('ทำงานเป็นกะ หรือเวลาไม่แน่นอน', 'Shifts or irregular hours') }
         ]
       },
       work_type: {
-        q: t('ลักษณะงานหลัก', 'What your work mostly involves'),
+        q: t('งานของคุณส่วนใหญ่เป็นแบบไหน', 'What your work mostly involves'),
         options: [
-          { v: 'screen',   label: t('อยู่หน้าจอ', 'A screen') },
-          { v: 'people',   label: t('พบปะผู้คน', 'Meeting people') },
-          { v: 'travel',   label: t('เดินทาง', 'Travelling') },
-          { v: 'physical', label: t('ใช้ร่างกาย', 'Physical work') },
+          { v: 'screen',   label: t('นั่งทำงานหน้าจอ', 'Sitting at a screen') },
+          { v: 'people',   label: t('พบปะ พูดคุยกับผู้คน', 'Meeting and talking to people') },
+          { v: 'travel',   label: t('เดินทางบ่อย', 'Travelling a lot') },
+          { v: 'physical', label: t('ใช้แรงกาย', 'Physical work') },
           { v: 'decide',   label: t('บริหาร ตัดสินใจ', 'Managing and deciding') }
         ]
       },
       age_group: {
-        q: t('ช่วงอายุ', 'Age'),
+        q: t('ช่วงอายุของคุณ', 'Your age'),
         options: [
           { v: '18-24', label: t('18–24') }, { v: '25-34', label: t('25–34') },
           { v: '35-44', label: t('35–44') }, { v: '45-54', label: t('45–54') },
@@ -137,23 +137,36 @@
         ]
       },
       pref: {
-        q: t('เวลาพัก คุณชอบแบบไหน', 'When you rest, what do you reach for?'),
+        q: t('เวลาพัก คุณชอบทำอะไร', 'When you rest, what do you like to do?'),
         options: [
-          { v: 'quiet',    label: t('ความเงียบ', 'Quiet') },
-          { v: 'tea',      label: t('จิบชา', 'A cup of tea') },
-          { v: 'aroma',    label: t('กลิ่นหอม', 'Scent') },
-          { v: 'sound',    label: t('เสียงและดนตรี', 'Sound and music') },
-          { v: 'movement', label: t('ขยับร่างกาย ออกไปหาธรรมชาติ', 'Moving, or getting outdoors') }
+          { v: 'quiet',    label: t('อยู่เงียบ ๆ พักผ่อนกับตัวเอง', 'Quiet time on my own') },
+          { v: 'tea',      label: t('จิบชาหรือเครื่องดื่มอุ่น ๆ', 'A cup of tea or something warm') },
+          { v: 'aroma',    label: t('อยู่กับกลิ่นหอมที่ช่วยผ่อนคลาย', 'A calming scent around me') },
+          { v: 'sound',    label: t('ฟังเพลงหรือเสียงที่ช่วยให้ผ่อนคลาย', 'Music or soothing sound') },
+          { v: 'movement', label: t('ออกกำลังกาย หรือออกไปเดินรับธรรมชาติ', 'Exercise, or a walk outdoors') }
         ]
       },
+      // Broad kinds of activity rather than product names: most readers do
+      // not know what Sound Healing is yet, but they know whether they want
+      // to make something with their hands. wellness-content.js BY_INTEREST
+      // turns each into a real workshop.
       interest: {
-        q: t('สนใจ Wellness แบบไหน', 'Which kind of wellness interests you?'),
+        q: t('อยากดูแลตัวเองด้วยกิจกรรมแบบไหน', 'What kind of wellness activity appeals to you?'),
         options: [
-          { v: 'tea',       label: t('ชาสมุนไพร', 'Herbal tea') },
-          { v: 'aroma',     label: t('น้ำมันหอมระเหย', 'Aromatherapy') },
-          { v: 'sound',     label: t('Sound Healing') },
-          { v: 'yoga',      label: t('โยคะ และสมาธิ', 'Yoga and meditation') },
-          { v: 'recommend', label: t('ให้ B-Healthy แนะนำให้', 'Let B-Healthy suggest') }
+          { v: 'mind',       label: t('ด้านจิตใจ ได้สำรวจและเข้าใจตัวเอง', 'The mind — exploring and understanding myself') },
+          { v: 'meditation', label: t('ฝึกสมาธิ ให้ใจนิ่งขึ้น', 'Meditation — a steadier mind') },
+          { v: 'handson',    label: t('ลงมือปฏิบัติ ได้ของที่ทำเองกลับไป', 'Hands-on — making something to take home') },
+          { v: 'relax',      label: t('ผ่อนคลาย ปล่อยความตึงเครียด', 'Relaxation — letting the tension go') },
+          { v: 'knowledge',  label: t('ได้ความรู้ (Knowledge) ไปดูแลตัวเอง', 'Knowledge — learning to look after myself') },
+          { v: 'recommend',  label: t('ให้ B-Healthy แนะนำให้', 'Let B-Healthy suggest') }
+        ],
+        // Answers sent before October 2026 named a product. Kept so the admin
+        // still shows what those people read; never offered on the form.
+        legacy: [
+          { v: 'tea',   label: t('ชาสมุนไพร', 'Herbal tea') },
+          { v: 'aroma', label: t('น้ำมันหอมระเหย', 'Aromatherapy') },
+          { v: 'sound', label: t('Sound Healing') },
+          { v: 'yoga',  label: t('โยคะ และสมาธิ', 'Yoga and meditation') }
         ]
       }
     }

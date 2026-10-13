@@ -26,7 +26,7 @@
   function label(qid, value) {
     const q = (D().QUESTIONS || {})[qid];
     if (!q) return value || '';
-    const o = (q.options || []).find(x => x.v === value);
+    const o = (q.options || []).concat(q.legacy || []).find(x => x.v === value);
     return o ? (o.label.th || o.label.en) : (value || '');
   }
   function question(qid) {
