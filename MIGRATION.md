@@ -157,7 +157,7 @@ No code changes are required for any of the above.
 
 ## SQL to run in Supabase (in order)
 
-All seven are idempotent, and safe to re-run in any order: no two files define
+All eight are idempotent, and safe to re-run in any order: no two files define
 the same function, so running one cannot undo another. `sql-test.mjs` runs
 every file twice and checks that the second pass changes nothing.
 
@@ -380,6 +380,69 @@ an anonymous visitor can do and nothing more. That is also what makes member
 accounts possible later: the next step is a `profiles` table and letting a
 member read their own `submissions` rows, which cannot be built until
 "logged in" and "works here" are different things.
+
+## Member accounts
+
+`/account` — sign up, sign in, forgotten password, new password, and the
+member's own page. `supabase-members.sql` runs after the staff and harden files.
+
+**Four dashboard settings this depends on** (Authentication → Sign In /
+Providers → Email). They are not preferences; each one breaks a flow if wrong:
+
+| Setting | Must be | Otherwise |
+|---|---|---|
+| Confirm email | **off** | nobody can ever sign in — see below |
+| Allow new users to sign up | on | the sign-up form answers "closed for the moment" |
+| Minimum password length | 8 | the form says 8 and the server would accept less |
+| Secure password change | **off** | it e-mails a code before a change, so nobody could change a password |
+
+**Why "Confirm email" has to be off.** Supabase's built-in mail service
+"will refuse to deliver messages to addresses that are not part of the
+project's team" unless a custom SMTP server is configured (their docs, checked
+2026-10-13). With confirmation on, every member signs up and then waits for a
+mail that is never sent. The sign-up page detects this and says the system is
+not set up, rather than leaving people waiting.
+
+**What an unconfirmed e-mail costs, and the rule that follows.** Anyone can
+register with somebody else's address. So nothing is ever attached to an
+account because an e-mail matches — otherwise a stranger who signed up as you
+would be shown your wellness answers. Ownership is by `user_id` only: what you
+submit while signed in is yours, what you sent before is not on your account
+(staff can attach it after confirming identity by phone).
+
+**Forgotten passwords, without e-mail.** The member asks at `#forgot`; the
+request lands in admin → **Members**. Staff call the number **on the account**
+— the screen shows it large, and flags in red when the number typed into the
+request does not match it — confirm who they are speaking to, then press
+**Issue temporary password**. It is shown once, read out over the phone, the
+member is signed out everywhere, and the moment they sign in with it they are
+made to choose their own. The reply to the request is the same whether or not
+the address has an account, so the form cannot be used to find out who is a
+member.
+
+The temporary password is written straight into `auth.users` with pgcrypto's
+bcrypt at cost 10 — the same format Supabase Auth stores. This is widely done
+but not an interface Supabase documents; the supported alternative is a
+serverless function holding the service-role key.
+
+**What a member gets.** Gated articles open in full without the e-mail card.
+The wellness check fills in their name, phone and e-mail (the e-mail fixed, so
+the result lands on the right account). Their guide and workshop codes are on
+`/account`. They can edit name, phone and company — not the e-mail, which
+would need a confirmation mail — change the password, and **delete the account
+themselves**, which takes everything submitted while signed in with it.
+
+**No supabase-js on the public site.** `js/auth.js` is a ~200-line client for
+the six Auth calls a member needs, storing its session under `bh-session`.
+Loading the 120 KB library on every marketing page to make those calls was
+not worth it. The admin still uses supabase-js; staff and member sessions are
+separate.
+
+**Database changes worth knowing:** `profiles` (created by a trigger on sign-up
+that cannot fail sign-up — it truncates and swallows rather than raise),
+`submissions.user_id` (cascade-deleted with the account), and two policies
+that had to exist because the originals said `to anon`: a signed-in member
+could otherwise not see a single retreat, nor submit a contact form.
 
 ## Testing the SQL before it touches the live database
 

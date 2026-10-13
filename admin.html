@@ -119,6 +119,27 @@
     .tag--dir{background:#e3f7f8;color:#0f9ba3}
     .tag--dir2{background:#eef1f7;color:var(--muted)}
     .fm-noconsent{color:var(--danger);font-weight:600}
+    .mem-h{font-size:1rem;color:var(--navy);margin:6px 0 10px;display:flex;align-items:center;gap:8px}
+    .mem-req{border-left:4px solid var(--warn);margin-bottom:10px}
+    .mem-call{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:11px;padding:11px 14px;background:#e7f6ef;border-radius:11px}
+    .mem-call__k{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#13754d}
+    .mem-call__n{font-size:1.15rem;font-weight:800;color:#0d5e3d;text-decoration:none;letter-spacing:.02em}
+    .mem-call__who{color:#1c6647;font-size:.85rem}
+    .mem-warn{font-size:.82rem;color:var(--muted);margin-top:8px}
+    .mem-ok{color:var(--ok);font-weight:700;margin-left:6px}
+    .mem-bad{color:var(--danger);font-weight:700;margin-left:6px}
+    .mem-table{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:18px}
+    .mem-row{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);font-size:.85rem}
+    .mem-row:first-child{border-top:0}
+    .mem-row--h{background:#fafbfd;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+    .mem-row small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+    .mem-row .tag{margin-left:6px}
+    .mem-overlay{position:fixed;inset:0;background:rgba(18,40,76,.55);display:grid;place-items:center;z-index:50;padding:20px}
+    .mem-overlay[hidden]{display:none}
+    .mem-modal{background:#fff;border-radius:18px;padding:26px;max-width:440px;width:100%;box-shadow:0 30px 60px -20px rgba(0,0,0,.45)}
+    .mem-modal h3{color:var(--navy);font-size:1.05rem;margin-bottom:14px}
+    .mem-pw{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.7rem;font-weight:800;letter-spacing:.14em;text-align:center;color:var(--navy);background:#f4f7fb;border:2px dashed var(--teal);border-radius:12px;padding:16px;margin-bottom:12px;user-select:all}
+    @media(max-width:760px){.mem-row{grid-template-columns:1fr 1fr}.mem-row--h{display:none}}
     .fm-claim{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:11px;padding:9px 13px;border-radius:11px;background:#e7f6ef;border:1px solid #b9e3cd;font-size:.82rem}
     .fm-claim__code{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;letter-spacing:.08em;color:#13754d;background:#fff;border:1px dashed #6cc49a;border-radius:7px;padding:3px 10px}
     .fm-claim__what{color:#1c6647}
@@ -281,6 +302,7 @@
         <button class="tab" data-tab="blog" type="button">Blog</button>
         <button class="tab" data-tab="customers" type="button">Customers</button>
         <button class="tab" data-tab="forms" type="button">Form</button>
+        <button class="tab" data-tab="members" type="button">Members</button>
         <button class="tab" data-tab="analytics" type="button">Analytics</button>
       </div>
 
@@ -318,6 +340,19 @@
         </div>
         <div class="msg" id="formMsg"></div>
         <div id="forms"></div>
+      </div>
+
+      <!-- ============ TAB: MEMBERS ============ -->
+      <div id="tab-members" class="hide">
+        <div class="bar">
+          <h2>Members <span class="group__count" id="memCount"></span></h2>
+          <div class="sp"></div>
+          <button class="btn btn--soft btn--sm" id="memRefresh">&#8635; Refresh</button>
+        </div>
+        <div class="msg" id="memMsg"></div>
+        <div id="memReq"></div>
+        <div id="memList"></div>
+        <div id="memTemp" class="mem-overlay" hidden></div>
       </div>
 
       <!-- ============ TAB: ANALYTICS ============ -->
@@ -557,14 +592,15 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260718g"></script>
+  <script src="js/config.js?v=20261013a"></script>
   <script src="js/core.js?v=20261007a"></script>
   <script src="js/packages.js?v=20260728a"></script>
   <script src="js/workshops-data.js?v=20260731i"></script>
   <script src="js/blog-index.js?v=20260731k"></script>
   <script src="js/wellness-data.js?v=20261010a"></script>
   <script src="js/admin-forms.js?v=20261010b"></script>
+  <script src="js/admin-members.js?v=20261013a"></script>
   <script src="js/admin-stats.js?v=20261008a"></script>
-  <script src="js/admin.js?v=20261010a"></script>
+  <script src="js/admin.js?v=20261013a"></script>
 </body>
 </html>

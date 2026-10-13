@@ -114,17 +114,32 @@ async function saveToSupabase(type, data) {
     payload: data,
   };
 
+  const url = cfg.SUPABASE_URL.replace(/\/+$/, "") + "/rest/v1/submissions";
+  const post = (token, body) => fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": cfg.SUPABASE_ANON_KEY,
+      "Authorization": "Bearer " + token,
+      "Prefer": "return=minimal",
+    },
+    body: JSON.stringify(body),
+  });
+
+  // Signed in: submit as the member, so the row is theirs — it shows up on
+  // their account page and goes when they delete the account. The database
+  // only accepts a user_id equal to the caller's own.
+  let member = null;
+  try { member = window.bhAuth ? await window.bhAuth.session() : null; } catch (e) { member = null; }
+
   try {
-    const res = await fetch(cfg.SUPABASE_URL.replace(/\/+$/, "") + "/rest/v1/submissions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": cfg.SUPABASE_ANON_KEY,
-        "Authorization": "Bearer " + cfg.SUPABASE_ANON_KEY,
-        "Prefer": "return=minimal",
-      },
-      body: JSON.stringify(row),
-    });
+    if (member && member.access_token && member.user && member.user.id) {
+      const res = await post(member.access_token, Object.assign({}, row, { user_id: member.user.id }));
+      if (res.ok) return { ok: true, status: res.status, member: true };
+      // A session that died between the check and the request must not cost
+      // the lead: fall through and send it anonymously instead.
+    }
+    const res = await post(cfg.SUPABASE_ANON_KEY, row);
     return { ok: res.ok, status: res.status };
   } catch (e) {
     return { ok: false, error: String(e) };

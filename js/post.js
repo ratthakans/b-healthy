@@ -68,6 +68,23 @@
     // Paint the teaser without it while the token is checked, then swap the
     // real body in — a stale token falls back to the card rather than leaving
     // a half article with no way forward.
+    // A signed-in member has already given us who they are; the card would be
+    // asking for an email we have. Read the article as them instead.
+    if (found.gated && window.bhAuth && window.bhAuth.user()) {
+      paint(found, false, { pending: true });
+      window.bhAuth.rpc('bh_member_article_body', { p_slug: found.id })
+        .then(body => (Array.isArray(body) && body.length ? body : null), () => null)
+        .then(body => {
+          if (body) return paint(found, false, { unlocked: body });
+          // Session gone stale: fall back to the e-mail token, then to the card.
+          if (window.bhGateToken && window.bhGateToken()) {
+            return window.bhGateBody(found.id).then(b => b ? paint(found, false, { unlocked: b }) : paint(found, false));
+          }
+          paint(found, false);
+        });
+      return;
+    }
+
     if (found.gated && window.bhGateToken && window.bhGateToken()) {
       paint(found, false, { pending: true });
       window.bhGateBody(found.id).then(body => {
@@ -130,6 +147,8 @@
           <button class="btn btn--primary" type="submit" id="gateBtn" data-en="Read the full article">อ่านบทความเต็ม</button>
         </form>
         <p class="post-gate__msg" id="gateMsg" role="status"></p>
+        <p class="post-gate__member"><span data-en="Already a member?">มีบัญชีอยู่แล้ว?</span>
+          <a href="account.html?next=${encodeURIComponent('/blog/' + p.id)}#login" data-en="Sign in to read">เข้าสู่ระบบเพื่ออ่าน</a></p>
         <p class="post-gate__fine" data-en="By entering your email you agree that B-Healthy may keep it in order to contact you about workplace wellbeing. Ask us to delete it at any time at b-healthy@pzentsmart.com or on LINE @bhealthyme.">การกรอกอีเมลถือว่าคุณยินยอมให้ B-Healthy เก็บอีเมลไว้ติดต่อเรื่องสุขภาวะองค์กร ขอให้ลบออกได้ทุกเมื่อที่ b-healthy@pzentsmart.com หรือ LINE @bhealthyme</p>
       </div>`;
   }

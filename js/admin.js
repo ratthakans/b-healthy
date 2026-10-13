@@ -24,6 +24,7 @@
   // The Analytics tab (js/admin-stats.js) reads through the same session.
   if (window.bhStatsInit) window.bhStatsInit(sb);
   if (window.bhFormsInit) window.bhFormsInit(sb);
+  if (window.bhMembersInit) window.bhMembersInit(sb);
   let rowsCache = [];
 
   // ---------- helpers ----------
@@ -115,6 +116,7 @@
     $('tab-customers').classList.toggle('hide', name !== 'customers');
     $('tab-analytics').classList.toggle('hide', name !== 'analytics');
     $('tab-forms').classList.toggle('hide', name !== 'forms');
+    $('tab-members').classList.toggle('hide', name !== 'members');
 
     if (cfg) {
       $('listHeading').textContent = cfg.heading;
@@ -127,6 +129,7 @@
       $('editorView').classList.add('hide');
       if (name === 'analytics') { if (window.bhStatsLoad) window.bhStatsLoad(); }
       else if (name === 'forms') { if (window.bhFormsLoad) window.bhFormsLoad(); }
+      else if (name === 'members') { if (window.bhMembersLoad) window.bhMembersLoad(); }
       else loadLeads();
     }
   }
@@ -160,8 +163,12 @@
   async function loadLeads() {
     clearMsg('leadMsg');
     $('leads').innerHTML = '<div class="empty">Loading…</div>';
+    // Forgotten-password requests are account support, not sales leads; they
+    // live in the Members tab, next to the account they belong to.
     const { data, error } = await sb.from('submissions')
       .select('id,created_at,type,name,company,phone,email,subject,package,pax,pref_date,message,status')
+      // neq alone would also drop rows with no type at all (NULL <> x is NULL).
+      .or('type.is.null,type.neq.password-reset')
       .order('created_at', { ascending: false });
     if (error) {
       $('leads').innerHTML = '';

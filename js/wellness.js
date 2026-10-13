@@ -212,6 +212,27 @@
 
     document.getElementById('wcBack').addEventListener('click', () => { step--; save(); render(); });
     document.getElementById('wcLead').addEventListener('submit', submit);
+    prefillFromAccount();
+  }
+
+  // A signed-in member is not asked for what we already hold. The email is
+  // the account's and stays fixed, so the result lands on the account it
+  // belongs to; name and phone stay editable.
+  async function prefillFromAccount() {
+    const A = window.bhAuth;
+    const u = A && A.user();
+    if (!u) return;
+    const email = document.getElementById('wcEmail');
+    if (email) { email.value = u.email || ''; email.readOnly = true; email.setAttribute('aria-readonly', 'true'); }
+    const name = document.getElementById('wcName');
+    if (name && !name.value && u.name) name.value = u.name;
+    try {
+      const rows = await A.rest('profiles?select=full_name,phone&id=eq.' + encodeURIComponent(u.id));
+      const p = (rows && rows[0]) || {};
+      if (name && !name.value && p.full_name) name.value = p.full_name;
+      const phone = document.getElementById('wcPhone');
+      if (phone && !phone.value && p.phone) phone.value = p.phone;
+    } catch (_) { /* prefill is a courtesy; the form still works blank */ }
   }
 
   async function submit(e) {

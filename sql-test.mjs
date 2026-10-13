@@ -62,7 +62,13 @@ await db.exec(`
   alter default privileges in schema public grant all on tables to anon, authenticated;
 
   create schema if not exists auth;
-  create table auth.users (id uuid primary key, email text);
+  create table auth.users (
+    id uuid primary key, email text, encrypted_password text,
+    raw_user_meta_data jsonb default '{}'::jsonb,
+    created_at timestamptz default now(), updated_at timestamptz,
+    last_sign_in_at timestamptz);
+  create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid);
+  create table auth.refresh_tokens (id bigserial primary key, user_id varchar(255), revoked boolean default false);
   insert into auth.users (id, email) values
     ('${STAFF_ID}', '${STAFF_EMAIL}'),
     ('${MEMBER_ID}', 'member@example.com');
@@ -90,12 +96,15 @@ const asStaff = async (sql, params) => {
 
 const files = ['supabase-staff.sql', 'supabase-packages.sql', 'supabase-blog.sql',
                'supabase-submissions.sql', 'supabase-analytics.sql',
-               'supabase-article-gate.sql', 'supabase-harden-rls.sql'];
+               'supabase-article-gate.sql', 'supabase-harden-rls.sql',
+               'supabase-members.sql'];
 for (const f of files) {
   try {
     await db.exec(readFileSync(DIR + f, 'utf8'));
-    // mirror Supabase's default grants onto whatever that file just created
-    await db.exec('grant all on all tables in schema public to anon, authenticated;');
+    // No blanket re-grant here. Supabase's default privileges apply once, when
+    // a table is created — `alter default privileges` above does exactly that.
+    // Re-granting after every file used to undo any column-level REVOKE a file
+    // made, and hid the one test that exists to check it.
     console.log('ran  ' + f);
   } catch (e) {
     console.log('FAILED while running ' + f + '\n  ' + e.message);
@@ -292,6 +301,112 @@ const viewIns = await anonThrows(
 ok('anon can still log a page view', viewIns === null, viewIns || '');
 // ...and takes it back out, so the counts below stay about the counts below.
 await db.query(`delete from public.page_views where visitor_id = 'vqqqqqqq'`);
+
+// ---- member accounts ------------------------------------------------------
+// What an open sign-up hands a stranger after supabase-members.sql: their own
+// profile, their own submissions, the public catalogue, and nothing else.
+const asUser = async (uid, sql, params) => {
+  await db.exec(`set role authenticated; set request.jwt.claim.sub = '${uid}';`);
+  try { return await db.query(sql, params); }
+  finally { await db.exec(`reset role; set request.jwt.claim.sub = '';`); }
+};
+const userThrows = async (uid, sql, params) => {
+  try { await asUser(uid, sql, params); return null; } catch (e) { return e.message; }
+};
+
+const NEW_ID = '33333333-3333-3333-3333-333333333333';
+await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, 'newbie@example.com',
+  '{"full_name":"  คุณสมัครใหม่  ","phone":"0812345678","company":"ACME","consent":"true"}'::jsonb)`, [NEW_ID]);
+const prof = (await db.query('select * from public.profiles where id = $1', [NEW_ID])).rows[0];
+ok('sign-up creates a profile from the form', prof && prof.full_name === 'คุณสมัครใหม่' && prof.phone === '0812345678' && prof.company === 'ACME',
+   JSON.stringify(prof));
+ok('consent is timestamped at sign-up', prof && prof.consent_at !== null);
+
+const HUGE_ID = '44444444-4444-4444-4444-444444444444';
+const huge = await db.query(`insert into auth.users (id, email, raw_user_meta_data) values ($1, 'huge@example.com',
+  jsonb_build_object('full_name', repeat('ก', 900), 'phone', repeat('9', 300)))`, [HUGE_ID]).then(() => null, e => e.message);
+ok('absurd sign-up metadata never blocks sign-up', huge === null, huge || '');
+ok('...it is cut to fit instead',
+   (await db.query('select char_length(full_name) n from public.profiles where id = $1', [HUGE_ID])).rows[0].n === 120);
+
+ok('existing accounts got a profile too',
+   (await db.query('select count(*)::int c from public.profiles where id in ($1, $2)', [STAFF_ID, MEMBER_ID])).rows[0].c === 2);
+
+const ownProf = await asUser(NEW_ID, 'select id from public.profiles');
+ok('a member sees only their own profile', ownProf.rows.length === 1 && ownProf.rows[0].id === NEW_ID,
+   `${ownProf.rows.length} rows`);
+await asUser(NEW_ID, `update public.profiles set full_name = 'ชื่อใหม่' where id = $1`, [NEW_ID]);
+ok('a member can edit their own name',
+   (await db.query('select full_name from public.profiles where id = $1', [NEW_ID])).rows[0].full_name === 'ชื่อใหม่');
+ok('a member cannot clear their own must-change flag directly',
+   (await userThrows(NEW_ID, `update public.profiles set must_change_password = false where id = $1`, [NEW_ID])) !== null);
+await asUser(NEW_ID, `update public.profiles set full_name = 'hijacked' where id = $1`, [MEMBER_ID]).catch(() => {});
+ok("a member cannot edit someone else's profile",
+   (await db.query('select full_name from public.profiles where id = $1', [MEMBER_ID])).rows[0].full_name !== 'hijacked');
+
+ok('a member can see the published catalogue',
+   (await asUser(NEW_ID, `select id from public.packages where type = 'retreat'`)).rows.length > 0);
+ok('a member still cannot read articles out of packages',
+   (await asUser(NEW_ID, `select id from public.packages where type = 'post'`)).rows.length === 0);
+
+ok('anon cannot pin a submission onto an account',
+   (await anonThrows(`insert into public.submissions (type, email, status, user_id) values ('contact', 'x@y.co', 'new', '${NEW_ID}')`)) !== null);
+const ownIns = await userThrows(NEW_ID,
+  `insert into public.submissions (type, email, status, user_id) values ('wellness', 'newbie@example.com', 'new', '${NEW_ID}')`);
+ok('a member can submit as themselves', ownIns === null, ownIns || '');
+ok("a member cannot submit as someone else",
+   (await userThrows(NEW_ID, `insert into public.submissions (type, email, status, user_id) values ('wellness', 'z@z.co', 'new', '${MEMBER_ID}')`)) !== null);
+// The same e-mail, submitted before signing in: must NOT surface in the account.
+await db.query(`insert into public.submissions (type, email, status) values ('wellness', 'newbie@example.com', 'new')`);
+const mine = await asUser(NEW_ID, 'select id, user_id from public.submissions');
+ok('a member reads back only what they submitted signed in',
+   mine.rows.length === 1 && mine.rows[0].user_id === NEW_ID, `${mine.rows.length} rows`);
+
+const memberBody = (await asUser(NEW_ID, 'select public.bh_member_article_body($1) as b', [GATED])).rows[0].b;
+ok('a signed-in member reads a gated article in full',
+   Array.isArray(memberBody) && memberBody.length === (rows.find(r => r.id === GATED).data.body || []).length);
+ok('anon cannot use the member reader', (await anonThrows('select public.bh_member_article_body($1)', [GATED])) !== null);
+
+ok('staff can list members', (await asStaff('select * from public.bh_staff_members()')).rows.length >= 3);
+ok('a member cannot list members', (await userThrows(NEW_ID, 'select * from public.bh_staff_members()')) !== null);
+
+// the forgotten-password path
+await db.query(`insert into auth.sessions (user_id) values ($1)`, [NEW_ID]);
+await db.query(`insert into auth.refresh_tokens (user_id) values ($1)`, [NEW_ID]);
+const temp = (await asStaff('select public.bh_issue_temp_password($1) as p', [NEW_ID])).rows[0].p;
+ok('staff can issue a temporary password', typeof temp === 'string' && temp.length === 10);
+ok('...made of characters you can read over the phone', /^[a-km-np-zA-HJ-NP-Z2-9]{10}$/.test(temp), temp);
+ok('...stored as bcrypt that verifies',
+   (await db.query(`select encrypted_password = crypt($1, encrypted_password) as ok, left(encrypted_password, 7) as h
+                    from auth.users where id = $2`, [temp, NEW_ID])).rows[0].ok === true);
+ok('...at cost 10, like Supabase',
+   (await db.query(`select left(encrypted_password, 7) h from auth.users where id = $1`, [NEW_ID])).rows[0].h === '$2a$10$');
+ok('...and forces a new password at next sign-in',
+   (await db.query('select must_change_password m from public.profiles where id = $1', [NEW_ID])).rows[0].m === true);
+ok('...and signs them out everywhere',
+   (await db.query('select count(*)::int c from auth.sessions where user_id = $1', [NEW_ID])).rows[0].c === 0 &&
+   (await db.query('select bool_and(revoked) r from auth.refresh_tokens where user_id = $1', [NEW_ID])).rows[0].r === true);
+ok('a member cannot issue temporary passwords',
+   (await userThrows(NEW_ID, 'select public.bh_issue_temp_password($1)', [MEMBER_ID])) !== null);
+ok('staff passwords cannot be reset from the website',
+   (await userThrows(STAFF_ID, 'select public.bh_issue_temp_password($1)', [STAFF_ID])) !== null);
+
+await asUser(NEW_ID, 'select public.bh_password_changed()');
+ok('changing the password clears the flag',
+   (await db.query('select must_change_password m from public.profiles where id = $1', [NEW_ID])).rows[0].m === false);
+
+// delete account
+ok('staff cannot delete themselves from the website',
+   (await userThrows(STAFF_ID, 'select public.bh_delete_my_account()')) !== null);
+await asUser(NEW_ID, 'select public.bh_delete_my_account()');
+ok('a member can delete their own account',
+   (await db.query('select count(*)::int c from auth.users where id = $1', [NEW_ID])).rows[0].c === 0);
+ok('...which takes their profile and signed-in submissions with it',
+   (await db.query('select count(*)::int c from public.profiles where id = $1', [NEW_ID])).rows[0].c === 0 &&
+   (await db.query('select count(*)::int c from public.submissions where user_id = $1', [NEW_ID])).rows[0].c === 0);
+ok('...but not anything sent before signing in under the same e-mail',
+   (await db.query(`select count(*)::int c from public.submissions where email = 'newbie@example.com' and user_id is null`)).rows[0].c === 1);
+ok('anon cannot call delete', (await anonThrows('select public.bh_delete_my_account()')) !== null);
 
 // ---- analytics still adds up ---------------------------------------------
 await db.exec(`insert into public.page_views (path, kind, visitor_id, session_id)
