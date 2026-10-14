@@ -64,33 +64,15 @@
     // article once the data is in, and the preview branch above must not count.
     if (window.bhTrackView) window.bhTrackView({ kind: 'post', refId: found.id });
 
-    // Someone who unlocked an article before should not meet the card again.
-    // Paint the teaser without it while the token is checked, then swap the
-    // real body in — a stale token falls back to the card rather than leaving
-    // a half article with no way forward.
-    // A signed-in member has already given us who they are; the card would be
-    // asking for an email we have. Read the article as them instead.
+    // Gated articles are for members only. A signed-in member gets the teaser
+    // without the card while the body is fetched, then the real body swapped
+    // in — a stale session falls back to the card rather than leaving a half
+    // article with no way forward.
     if (found.gated && window.bhAuth && window.bhAuth.user()) {
       paint(found, false, { pending: true });
       window.bhAuth.rpc('bh_member_article_body', { p_slug: found.id })
         .then(body => (Array.isArray(body) && body.length ? body : null), () => null)
-        .then(body => {
-          if (body) return paint(found, false, { unlocked: body });
-          // Session gone stale: fall back to the e-mail token, then to the card.
-          if (window.bhGateToken && window.bhGateToken()) {
-            return window.bhGateBody(found.id).then(b => b ? paint(found, false, { unlocked: b }) : paint(found, false));
-          }
-          paint(found, false);
-        });
-      return;
-    }
-
-    if (found.gated && window.bhGateToken && window.bhGateToken()) {
-      paint(found, false, { pending: true });
-      window.bhGateBody(found.id).then(body => {
-        if (body) paint(found, false, { unlocked: body });
-        else { window.bhGateForget(); paint(found, false); }
-      });
+        .then(body => body ? paint(found, false, { unlocked: body }) : paint(found, false));
       return;
     }
 
@@ -137,23 +119,15 @@
   // the sentence it interrupts; with no sentence there it would just smear the
   // cover photo.
   function gateCard(p, bare) {
+    const next = encodeURIComponent('/blog/' + p.id);
     return `
       <div class="post-gate${bare ? ' post-gate--bare' : ''}" id="postGate">
-        <h3 class="post-gate__h" data-en="Keep reading — just leave your email">อ่านต่อฟรี เพียงทิ้งอีเมลไว้</h3>
-        <p class="post-gate__sub" data-en="The rest of this article is open to readers on our list. No cost, no password.">ส่วนที่เหลือของบทความนี้เปิดให้ผู้ที่อยู่ในรายชื่อผู้อ่านของเรา ไม่มีค่าใช้จ่าย ไม่ต้องตั้งรหัสผ่าน</p>
-        <form class="post-gate__form" id="gateForm" novalidate>
-          <input type="email" id="gateEmail" required autocomplete="email"
-                 placeholder="you@company.com" aria-label="Email" />
-          <button class="btn btn--primary" type="submit" id="gateBtn" data-en="Read the full article">อ่านบทความเต็ม</button>
-        </form>
-        <p class="post-gate__msg" id="gateMsg" role="status"></p>
-        ${(window.BH_CONFIG || {}).MEMBERS ? `
-        <p class="post-gate__or" aria-hidden="true"><span data-en="or">หรือ</span></p>
-        <a class="btn btn--ghost post-gate__join" href="account.html?next=${encodeURIComponent('/blog/' + p.id)}#signup"
-           data-en="Create a free account — read every article">สมัครสมาชิกฟรี อ่านได้ทุกบทความ</a>` : ''}
+        <h3 class="post-gate__h" data-en="Keep reading — free for members">อ่านต่อฟรี สำหรับสมาชิก</h3>
+        <p class="post-gate__sub" data-en="Create a free account to read the rest of this article and every other one.">สมัครสมาชิกฟรีเพื่ออ่านบทความนี้ต่อ และอ่านได้ทุกบทความบนเว็บไซต์</p>
+        <a class="btn btn--primary post-gate__join" href="account.html?next=${next}#signup"
+           data-en="Create a free account">สมัครสมาชิกฟรี</a>
         <p class="post-gate__member"><span data-en="Already a member?">มีบัญชีอยู่แล้ว?</span>
-          <a href="account.html?next=${encodeURIComponent('/blog/' + p.id)}#login" data-en="Sign in to read">เข้าสู่ระบบเพื่ออ่าน</a></p>
-        <p class="post-gate__fine" data-en="By entering your email you agree that B-Healthy may keep it in order to contact you about workplace wellbeing. Ask us to delete it at any time at b-healthy@pzentsmart.com or on LINE @bhealthyme.">การกรอกอีเมลถือว่าคุณยินยอมให้ B-Healthy เก็บอีเมลไว้ติดต่อเรื่องสุขภาวะองค์กร ขอให้ลบออกได้ทุกเมื่อที่ b-healthy@pzentsmart.com หรือ LINE @bhealthyme</p>
+          <a href="account.html?next=${next}#login" data-en="Sign in to read">เข้าสู่ระบบเพื่ออ่าน</a></p>
       </div>`;
   }
 
@@ -177,7 +151,7 @@
   }
   document.getElementById('navLang')?.addEventListener('click', () => setTimeout(applyMeta, 0));
 
-  // opts: { unlocked: <full body blocks>, pending: <token in hand, asking> }
+  // opts: { unlocked: <full body blocks>, pending: <signed in, asking> }
   function paint(p, isPreview, opts) {
     const state = opts || {};
   shown = { post: p, isPreview: isPreview };
@@ -201,13 +175,13 @@
     : { th: p.date, en: p.date };
 
   // A gated article arrives already cut short. `unlocked` is the full body the
-  // database handed back against a valid token — when it is here the card goes
+  // database handed back to a signed-in member — when it is here the card goes
   // away, when it is not the reader sees the teaser and the card.
   // (There is no bundled fallback any more: shipping every article body as a
   // static .js file would have handed out the gated ones for free.)
   const bodyBlocks = state.unlocked || (Array.isArray(p.body) ? p.body : []);
-  // `pending` keeps the card away from a returning reader whose token is about
-  // to come back good — otherwise the article flashes a form they already filled.
+  // `pending` keeps the card away from a signed-in member whose body is on its
+  // way — otherwise the article flashes a sign-up card at someone already in.
   const locked = !!p.gated && !state.unlocked && !state.pending && !isPreview;
 
   // --- Body blocks ---
@@ -298,67 +272,7 @@
 
   if (window.bhApplyLang) window.bhApplyLang();
 
-  if (locked) {
-    if (window.bhTrackView) window.bhTrackView({ kind: 'gate', refId: p.id });
-    bindGate(p);
-  }
-  }
-
-  function bindGate(p) {
-    const form = document.getElementById('gateForm');
-    if (!form) return;
-    const input = document.getElementById('gateEmail');
-    const btn = document.getElementById('gateBtn');
-    const msg = document.getElementById('gateMsg');
-
-    // i18n rewrites data-en elements wholesale on a language toggle, so a
-    // message has to be set in both languages or it vanishes mid-read.
-    const say = (kind, th, en) => {
-      msg.className = 'post-gate__msg post-gate__msg--' + kind + ' show';
-      msg.textContent = th;
-      msg.setAttribute('data-en', en);
-      delete msg.__th;
-      if (window.bhApplyLang) window.bhApplyLang();
-    };
-
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const email = (input.value || '').trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        say('err', 'อีเมลยังไม่ถูกต้อง ลองตรวจอีกครั้ง', 'That email does not look right — please check it.');
-        input.focus();
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'กำลังเปิด…';
-      btn.setAttribute('data-en', 'Opening…');
-      delete btn.__th;
-      if (window.bhApplyLang) window.bhApplyLang();
-
-      try {
-        await window.bhGateUnlock(email, p.id);
-        if (window.bhTrackView) window.bhTrackView({ kind: 'unlock', refId: p.id });
-        const body = await window.bhGateBody(p.id);
-        if (!body) throw new Error('unlocked but no body');
-        paint(p, false, { unlocked: body });
-        document.getElementById('postBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (err) {
-        btn.disabled = false;
-        // The Thai label is written out rather than replayed from what was on
-        // screen: deleting __th makes i18n re-cache whatever is in the element
-        // as its Thai text, so restoring an English string here left the
-        // button stuck in English after the reader switched back to TH.
-        btn.textContent = 'อ่านบทความเต็ม';
-        btn.setAttribute('data-en', 'Read the full article');
-        delete btn.__th;
-        const code = err && err.code;
-        if (code === '22023') say('err', 'อีเมลยังไม่ถูกต้อง ลองตรวจอีกครั้ง', 'That email does not look right — please check it.');
-        else if (code === '53400') say('err', 'ตอนนี้มีคนลงทะเบียนพร้อมกันมาก ลองอีกครั้งในอีกสักครู่', 'Too many signups at once — please try again shortly.');
-        else say('err', 'เปิดบทความไม่สำเร็จ ลองใหม่อีกครั้ง', 'Could not open the article — please try again.');
-        if (window.bhApplyLang) window.bhApplyLang();
-      }
-    });
+  if (locked && window.bhTrackView) window.bhTrackView({ kind: 'gate', refId: p.id });
   }
 
   render();

@@ -233,8 +233,11 @@ end $$;
 
 revoke all on function public.bh_unlock(text, text)       from public;
 revoke all on function public.bh_article_body(text, text) from public;
-grant execute on function public.bh_unlock(text, text)       to anon, authenticated;
-grant execute on function public.bh_article_body(text, text) to anon, authenticated;
+-- Retired 2026-10-14 — gated articles are members-only now (see
+-- supabase-gate-members-only.sql). Left ungranted so re-running this file
+-- does not reopen the e-mail door.
+-- grant execute on function public.bh_unlock(text, text)       to anon, authenticated;
+-- grant execute on function public.bh_article_body(text, text) to anon, authenticated;
 
 -- --------------------------------------------------------------- measurement
 -- The Analytics tab already counts page views; let it count the two steps of
