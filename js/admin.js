@@ -916,6 +916,7 @@
     $('f_priceOld').value = d.priceOld || '';
     $('f_priceUnit').value = d.priceUnit || '';
     $('f_priceNote').value = d.priceNote || '';
+    $('f_promo').value = d.promo || '';
     $('f_hero').value = d.hero || '';
     setHeroPreview(d.hero || '');
     galleryImgs = Array.isArray(d.gallery) ? d.gallery.slice() : [];
@@ -1085,6 +1086,7 @@
       priceOld: $('f_priceOld').value.trim(),
       priceUnit: $('f_priceUnit').value.trim(),
       priceNote: $('f_priceNote').value.trim() || undefined,
+      promo: $('f_promo').value.trim() || undefined,
       theme: { primary: $('f_theme_primary').value, accent: $('f_theme_accent').value, tint: $('f_theme_tint').value },
       hero: $('f_hero').value.trim(),
       intro: $('f_intro').value.trim(),

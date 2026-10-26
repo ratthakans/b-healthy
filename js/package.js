@@ -59,11 +59,14 @@
       'https://www.b-healthy.co/package?id=' + encodeURIComponent(p.id));
   }
 
-  const price = p.priceNow === 'ติดต่อสอบถาม'
+  const promo = p.promo
+    ? `<div class="pkg-price__promo" data-en="${escAttr(en.promo || p.promo)}">${esc(p.promo)}</div>` : '';
+
+  const price = (p.priceNow === 'ติดต่อสอบถาม'
     ? `<div class="pkg-price__now" data-en="${escAttr(en.priceNow || 'Contact us')}">ติดต่อสอบถาม</div>`
     : `${p.priceOld ? `<div class="pkg-price__old" data-en="Regular ${escAttr(p.priceOld)} THB">ราคาปกติ ${esc(p.priceOld)} บาท</div>` : ''}
        <div class="pkg-price__now">${esc(p.priceNow)}<span data-en=" ${escAttr(en.priceUnit || p.priceUnit)}"> ${esc(p.priceUnit)}</span></div>
-       ${p.priceNote ? `<div class="pkg-price__note" data-en="${escAttr(en.priceNote || p.priceNote)}">${esc(p.priceNote)}</div>` : ''}`;
+       ${p.priceNote ? `<div class="pkg-price__note" data-en="${escAttr(en.priceNote || p.priceNote)}">${esc(p.priceNote)}</div>` : ''}`) + promo;
 
   const exp = p.experiences.map((e, i) => `
     <article class="pxp">
