@@ -591,8 +591,7 @@ video.feature-hero__bg { background: var(--navy); }
 .pcard__loc { display: flex; align-items: flex-start; gap: 6px; color: var(--muted); font-size: .82rem; line-height: 1.4; margin-bottom: 5px; }
 .pcard__loc svg { flex-shrink: 0; margin-top: 3px; color: var(--pc); }
 .pcard__group { color: var(--muted); font-size: .8rem; font-weight: 300; margin-bottom: 18px; }
-.pcard__group:has(+ .pcard__promo) { margin-bottom: 8px; }
-.pcard__promo { align-self: flex-start; display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--pc), var(--pa)); color: #fff; font-weight: 700; font-size: .95rem; line-height: 1.35; padding: 8px 16px; border-radius: 999px; margin: 4px 0 18px; box-shadow: 0 6px 16px -6px var(--pa); text-shadow: 0 1px 2px rgba(18,40,76,.35); }
+.pcard__promo { position: absolute; right: 12px; bottom: 12px; max-width: calc(100% - 24px); display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--pc), var(--pa)); color: #fff; font-weight: 700; font-size: .9rem; line-height: 1.3; padding: 8px 16px; border-radius: 999px; box-shadow: 0 6px 18px -4px rgba(18,40,76,.45); text-shadow: 0 1px 2px rgba(18,40,76,.35); }
 .pcard__promo::before { content: ""; flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
 .pcard__foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--line); }
 .pcard__cta { white-space: nowrap; }
