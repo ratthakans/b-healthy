@@ -594,7 +594,7 @@ video.feature-hero__bg { background: var(--navy); }
 .pcard__group:has(+ .pcard__promo) { margin-bottom: 8px; }
 .pcard__promo { align-self: flex-start; max-width: 100%; display: flex; align-items: center; gap: 8px; white-space: nowrap; background: var(--btn-grad); color: #fff; font-weight: 700; font-size: min(.92rem, 6.2cqi); line-height: 1.3; padding: 8px min(16px, 4cqi); border-radius: 999px; margin: 4px 0 18px; box-shadow: 0 8px 18px -10px rgba(66,92,199,.8); }
 .pcard__promo::before { content: ""; flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
-.pcard__ribbon { position: absolute; top: 40px; right: -62px; width: 240px; transform: rotate(45deg); display: flex; flex-direction: column; align-items: center; padding: 6px 0 5px; background: var(--pill-grad); color: #fff; font-family: var(--font-en); text-transform: uppercase; text-shadow: 0 1px 2px rgba(18,40,76,.35); box-shadow: 0 4px 10px rgba(18,40,76,.25); pointer-events: none; }
+.pcard__ribbon { position: absolute; top: 40px; right: -62px; width: 240px; transform: rotate(45deg); display: flex; flex-direction: column; align-items: center; padding: 6px 0 5px; background: linear-gradient(90deg, #A8844C, #E3CD9B 50%, #A8844C); color: #fff; font-family: var(--font-en); text-transform: uppercase; text-shadow: 0 1px 2px rgba(70,50,15,.45); box-shadow: 0 4px 10px rgba(18,40,76,.25); pointer-events: none; }
 .pcard__ribbon b { font-weight: 700; font-size: .8rem; letter-spacing: .1em; line-height: 1.2; }
 .pcard__ribbon small { font-weight: 600; font-size: .66rem; letter-spacing: .08em; line-height: 1.2; }
 .pcard--sale .pcard__price-now { color: var(--navy); }
