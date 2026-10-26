@@ -917,6 +917,8 @@
     $('f_priceUnit').value = d.priceUnit || '';
     $('f_priceNote').value = d.priceNote || '';
     $('f_promo').value = d.promo || '';
+    $('f_ribbon').value = d.ribbon || '';
+    $('f_ribbonSub').value = d.ribbonSub || '';
     $('f_hero').value = d.hero || '';
     setHeroPreview(d.hero || '');
     galleryImgs = Array.isArray(d.gallery) ? d.gallery.slice() : [];
@@ -1087,6 +1089,8 @@
       priceUnit: $('f_priceUnit').value.trim(),
       priceNote: $('f_priceNote').value.trim() || undefined,
       promo: $('f_promo').value.trim() || undefined,
+      ribbon: $('f_ribbon').value.trim() || undefined,
+      ribbonSub: $('f_ribbonSub').value.trim() || undefined,
       theme: { primary: $('f_theme_primary').value, accent: $('f_theme_accent').value, tint: $('f_theme_tint').value },
       hero: $('f_hero').value.trim(),
       intro: $('f_intro').value.trim(),

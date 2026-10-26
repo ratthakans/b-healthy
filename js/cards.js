@@ -26,19 +26,20 @@
          <span class="pcard__price-unit" data-en="${escAttr(en.priceUnit || p.priceUnit)}">${esc(p.priceUnit)}</span>`;
 
     return `
-      <a class="pcard" href="package.html?id=${encodeURIComponent(p.id)}"
+      <a class="pcard${p.promo || p.ribbon ? ' pcard--sale' : ''}" href="package.html?id=${encodeURIComponent(p.id)}"
          data-province="${esc(p.province || '')}" data-category="${esc(p.category || '')}"
          style="--pc:${esc(theme.primary || '#1ECAD3')};--pa:${esc(theme.accent || '#425CC7')}">
         <div class="pcard__media">
           <img src="${esc(p.hero)}" alt="${esc(p.name)}" loading="lazy" />
           <span class="pcard__badge" data-en="${escAttr(en.duration || p.duration)}">${esc(p.duration)}</span>
-          ${p.promo ? `<span class="pcard__promo" data-en="${escAttr(en.promo || p.promo)}">${esc(p.promo)}</span>` : ''}
+          ${p.ribbon ? `<span class="pcard__ribbon"><b data-en="${escAttr(en.ribbon || p.ribbon)}">${esc(p.ribbon)}</b>${p.ribbonSub ? `<small data-en="${escAttr(en.ribbonSub || p.ribbonSub)}">${esc(p.ribbonSub)}</small>` : ''}</span>` : ''}
         </div>
         <div class="pcard__body">
           <p class="pcard__kicker">${esc(tagline.join(' · '))}</p>
           <h3 class="pcard__name">${esc(p.name)}</h3>
           <p class="pcard__loc"><svg viewBox="0 0 24 24" width="13" height="13"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg> <span data-en="${escAttr(en.location || p.location)}">${esc(p.location)}</span></p>
           <p class="pcard__group" data-en="${escAttr(en.group || p.group)}">${esc(p.group)}</p>
+          ${p.promo ? `<p class="pcard__promo" data-en="${escAttr(en.promo || p.promo)}">${esc(p.promo)}</p>` : ''}
           <div class="pcard__foot">
             <div class="pcard__price">${price}</div>
             <span class="pcard__cta" data-en="View details &amp; book →">ดูรายละเอียด &amp; จอง →</span>
