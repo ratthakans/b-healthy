@@ -19,7 +19,7 @@
         <div class="bcard__media">
           <img src="${esc(p.cover)}" alt="${esc(p.coverAlt)}" ${i > 2 ? 'loading="lazy"' : ''} />
           <span class="bcard__cat" data-en="${escAttr(p.categoryEn)}">${esc(p.category)}</span>
-          ${p.gated ? `<span class="bcard__lock" data-en="Email to read">กรอกอีเมลเพื่ออ่าน</span>` : ''}
+          ${p.gated ? `<span class="bcard__lock" data-en="Free account to read">สมัครฟรีเพื่ออ่าน</span>` : ''}
         </div>
         <div class="bcard__body">
           <p class="bcard__meta">
@@ -55,7 +55,7 @@
   if (window.bhApplyLang) window.bhApplyLang();
   }
 
-  // Some cards say "Email to read". Say, once, above all of them, what the
+  // Some cards say "Free account to read". Say, once, above all of them, what the
   // easier way is — and say nothing to someone already signed in. In English
   // it says "account", never "membership": Membership is the corporate
   // product two items along in the menu, and "Membership is free" read as if
